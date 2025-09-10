@@ -21,5 +21,11 @@ $routes->post('/register', 'Auth::store');
 $routes->get('/admin/dashboard', 'AdminController::dashboard');
 $routes->get('/admin/jaminan', 'JaminanController::index');
 $routes->get('/admin/bubm', 'BubmController::index');
+$routes->get('/admin/peserta', 'BubmController::coba');
+
+$routes->get('/admin/jaminan', 'JaminanController::index');
+$routes->get('/admin/jaminan/create', 'JaminanController::create');
+$routes->post('/admin/jaminan/store', 'JaminanController::store');
+
 
 $routes->get('/super/dashboard', 'Super::dashboard');
