@@ -5,15 +5,18 @@ use CodeIgniter\Router\RouteCollection;
 /**
  * @var RouteCollection $routes
  */
+
+// Auth routes
 $routes->get('/', 'Auth::login');
-$routes->get('/register', 'Auth::register');
-$routes->post('/register', 'Auth::store');
-$routes->post('/login', 'Auth::auth');
+$routes->post('/auth', 'Auth::auth');
+
+$routes->get('/login', 'Auth::login');
 $routes->get('/logout', 'Auth::logout');
 
+// (optional) register kalau dipakai
+$routes->get('/register', 'Auth::register');
+$routes->post('/register', 'Auth::store');
 
-
-
-// dashboard
-$routes->get('/admin/dashboard', 'Admin::index', ['filter' => 'auth']);
-$routes->get('/superadmin/dashboard', 'SuperAdmin::index', ['filter' => 'auth']);
+// Dashboard routes
+$routes->get('/admin/dashboard', 'Admin::dashboard');
+$routes->get('/super/dashboard', 'Super::dashboard');
