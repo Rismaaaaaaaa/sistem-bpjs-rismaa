@@ -19,4 +19,5 @@ $routes->post('/register', 'Auth::store');
 
 // Dashboard routes
 $routes->get('/admin/dashboard', 'Admin::dashboard');
+$routes->get('/admin/jaminan', 'Jaminan::index');
 $routes->get('/super/dashboard', 'Super::dashboard');
