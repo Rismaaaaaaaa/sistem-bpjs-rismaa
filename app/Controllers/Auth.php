@@ -6,54 +6,91 @@ use App\Models\UserModel;
 
 class Auth extends BaseController
 {
-    public function register()
-    {
-        return view('auth/register');
-    }
+    protected $userModel;
 
-    public function store()
+    public function __construct()
     {
-        $userModel = new UserModel();
-        $data = [
-            'username' => $this->request->getVar('username'),
-            'email'    => $this->request->getVar('email'),
-            'password' => password_hash($this->request->getVar('password'), PASSWORD_DEFAULT),
-            'role'     => $this->request->getVar('role') ?? 'admin',
-        ];
-        $userModel->save($data);
-        return redirect()->to('/login')->with('success', 'Register success!');
+        // Inisialisasi model di constructor biar reusable
+        $this->userModel = new UserModel();
     }
 
     public function login()
     {
+        // Cek kalau udah login, redirect sesuai role
+        if (session()->get('logged_in')) {
+            return $this->redirectByRole(session()->get('role'));
+        }
+
         return view('auth/login');
     }
 
     public function auth()
     {
-        $userModel = new UserModel();
-        $user = $userModel->where('email', $this->request->getVar('email'))->first();
+        // Validasi input
+        $validationRules = [
+            'email'    => 'required|valid_email',
+            'password' => 'required|min_length[6]' // Minimal 6 karakter, sesuaikan kebutuhan
+        ];
 
-        if ($user && password_verify($this->request->getVar('password'), $user['password'])) {
+        if (!$this->validate($validationRules)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Email atau password tidak valid.');
+        }
+
+        // Ambil data dari form
+        $email = $this->request->getVar('email', FILTER_SANITIZE_EMAIL);
+        $password = $this->request->getVar('password');
+
+        // Cari user berdasarkan email
+        $user = $this->userModel->where('email', $email)->first();
+
+        // Cek user ada dan password cocok
+        if ($user && password_verify($password, $user['password'])) {
+            // Regenerate session untuk keamanan
+            session()->regenerate();
+
+            // Set session data
             session()->set([
-                'user_id' => $user['id'],
-                'username'=> $user['username'],
-                'role'    => $user['role'],
+                'user_id'   => $user['id'],
+                'username'  => $user['username'],
+                'role'      => $user['role'],
                 'logged_in' => true
             ]);
 
-            if ($user['role'] === 'superadmin') {
-                return redirect()->to('/superadmin/dashboard');
-            }
-            return redirect()->to('/admin/dashboard');
+            // Redirect berdasarkan role
+            return $this->redirectByRole($user['role']);
         }
 
-        return redirect()->back()->with('error', 'Email atau Password salah');
+        // Kalau gagal login
+        return redirect()->back()
+            ->withInput()
+            ->with('error', 'Email atau password salah.');
     }
 
     public function logout()
     {
         session()->destroy();
-        return redirect()->to('/login');
+        return redirect()->to('/login')->with('success', 'Berhasil logout.');
+    }
+
+    /**
+     * Helper method untuk redirect berdasarkan role
+     */
+    private function redirectByRole($role)
+    {
+        $routes = [
+            'admin'      => '/admin/dashboard',
+            'superadmin' => '/superadmin/dashboard'
+        ];
+
+        // Cek kalau role valid
+        if (array_key_exists($role, $routes)) {
+            return redirect()->to($routes[$role]);
+        }
+
+        // Kalau role ga dikenali, logout dan kasih error
+        session()->destroy();
+        return redirect()->to('/login')->with('error', 'Role tidak dikenali.');
     }
 }
