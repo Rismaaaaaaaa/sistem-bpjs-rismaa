@@ -18,6 +18,8 @@ $routes->get('/register', 'Auth::register');
 $routes->post('/register', 'Auth::store');
 
 // Dashboard routes
-$routes->get('/admin/dashboard', 'Admin::dashboard');
-$routes->get('/admin/jaminan', 'Jaminan::index');
+$routes->get('/admin/dashboard', 'AdminController::dashboard');
+$routes->get('/admin/jaminan', 'JaminanController::index');
+$routes->get('/admin/bubm', 'BubmController::index');
+
 $routes->get('/super/dashboard', 'Super::dashboard');

@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-class Jaminan extends BaseController
+class JaminanController extends BaseController
 {
     public function index()
     {
