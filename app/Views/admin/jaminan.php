@@ -13,10 +13,14 @@
             </h1>
             <p class="text-gray-600 mt-2 ml-11">Kelola data jaminan peserta BPJS Kesehatan</p>
         </div>
-        <a href="#" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-bpjs-accent to-orange-500 text-white font-semibold hover:opacity-90 shadow-lg transition">
+       <a 
+            href="<?= site_url('admin/tambah_jaminan') ?>" 
+            class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-bpjs-accent to-orange-500 text-white font-semibold hover:opacity-90 shadow-lg transition"
+        >
             <i class="fas fa-plus"></i>
             Tambah Data
         </a>
+
     </div>
 
     <!-- Search and Filter Section -->
@@ -92,11 +96,11 @@
                     Terapkan Filter
                 </button>
                 <a 
-                    href="<?= site_url('admin/jaminan') ?>" 
-                    class="ml-2 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition font-medium"
-                >
-                    Reset
-                </a>
+                href="<?= site_url('admin/jaminan') ?>" 
+                class="ml-2 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition font-medium"
+            >
+                Reset
+            </a>
 
             </div>
         </form>
@@ -265,85 +269,68 @@
         </div>
     </div>
 
-    <!-- Pagination -->
-    <div class="flex justify-between items-center mt-6">
-        <div class="text-sm text-gray-600">
-            Menampilkan 1 sampai 10 dari 142 entri
-        </div>
-        <div class="flex space-x-2">
-            <button class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="px-4 py-2 rounded-lg bg-bpjs-primary text-white">1</button>
-            <button class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition">2</button>
-            <button class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition">3</button>
-            <button class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
-    </div>
+   
 
 
     <!-- Modal -->
-     <!-- Modal Edit -->
-<div id="modalEdit" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
-    <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl p-6">
-        <h2 class="text-xl font-semibold mb-4">Edit Data Jaminan</h2>
+    <div id="modalEdit" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl p-6">
+            <h2 class="text-xl font-semibold mb-4">Edit Data Jaminan</h2>
 
-        <form id="formEdit" action="<?= base_url('admin/jaminan/update') ?>" method="post" enctype="multipart/form-data">
-            <?= csrf_field() ?>
-            <input type="hidden" name="id" id="edit_id">
+            <form id="formEdit" action="<?= base_url('admin/jaminan/update') ?>" method="post" enctype="multipart/form-data">
+                <?= csrf_field() ?>
+                <input type="hidden" name="id" id="edit_id">
 
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium">No. Penetapan</label>
-                    <input type="text" name="nomor_penetapan" id="edit_nomor_penetapan" class="w-full border rounded-lg p-2">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium">No. Penetapan</label>
+                        <input type="text" name="nomor_penetapan" id="edit_nomor_penetapan" class="w-full border rounded-lg p-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Tanggal</label>
+                        <input type="date" name="tanggal_transaksi" id="edit_tanggal_transaksi" class="w-full border rounded-lg p-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Kode Transaksi</label>
+                        <input type="text" name="kode_transaksi" id="edit_kode_transaksi" class="w-full border rounded-lg p-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">No. KPJ</label>
+                        <input type="text" name="nomor_kpj" id="edit_nomor_kpj" class="w-full border rounded-lg p-2">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium">Perusahaan</label>
+                        <input type="text" name="nama_perusahaan" id="edit_nama_perusahaan" class="w-full border rounded-lg p-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">PPH 21</label>
+                        <input type="number" step="0.01" name="pph21" id="edit_pph21" class="w-full border rounded-lg p-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Jumlah Bayar</label>
+                        <input type="number" step="0.01" name="jumlah_bayar" id="edit_jumlah_bayar" class="w-full border rounded-lg p-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Rekening</label>
+                        <input type="text" name="no_rekening" id="edit_no_rekening" class="w-full border rounded-lg p-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">Atas Nama</label>
+                        <input type="text" name="atas_nama" id="edit_atas_nama" class="w-full border rounded-lg p-2">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium">Dokumen (opsional)</label>
+                        <input type="file" name="dokumen" class="w-full border rounded-lg p-2">
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium">Tanggal</label>
-                    <input type="date" name="tanggal_transaksi" id="edit_tanggal_transaksi" class="w-full border rounded-lg p-2">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium">Kode Transaksi</label>
-                    <input type="text" name="kode_transaksi" id="edit_kode_transaksi" class="w-full border rounded-lg p-2">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium">No. KPJ</label>
-                    <input type="text" name="nomor_kpj" id="edit_nomor_kpj" class="w-full border rounded-lg p-2">
-                </div>
-                <div class="col-span-2">
-                    <label class="block text-sm font-medium">Perusahaan</label>
-                    <input type="text" name="nama_perusahaan" id="edit_nama_perusahaan" class="w-full border rounded-lg p-2">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium">PPH 21</label>
-                    <input type="number" step="0.01" name="pph21" id="edit_pph21" class="w-full border rounded-lg p-2">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium">Jumlah Bayar</label>
-                    <input type="number" step="0.01" name="jumlah_bayar" id="edit_jumlah_bayar" class="w-full border rounded-lg p-2">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium">Rekening</label>
-                    <input type="text" name="no_rekening" id="edit_no_rekening" class="w-full border rounded-lg p-2">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium">Atas Nama</label>
-                    <input type="text" name="atas_nama" id="edit_atas_nama" class="w-full border rounded-lg p-2">
-                </div>
-                <div class="col-span-2">
-                    <label class="block text-sm font-medium">Dokumen (opsional)</label>
-                    <input type="file" name="dokumen" class="w-full border rounded-lg p-2">
-                </div>
-            </div>
 
-            <div class="flex justify-end mt-6 space-x-2">
-                <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">Batal</button>
-                <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Simpan</button>
-            </div>
-        </form>
+                <div class="flex justify-end mt-6 space-x-2">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Simpan</button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
 </div>
 
