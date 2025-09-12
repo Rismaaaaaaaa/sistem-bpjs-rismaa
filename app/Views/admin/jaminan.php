@@ -96,14 +96,47 @@
                     Terapkan Filter
                 </button>
                 <a 
-                href="<?= site_url('admin/jaminan') ?>" 
-                class="ml-2 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition font-medium"
-            >
-                Reset
-            </a>
-
+                    href="<?= site_url('admin/jaminan') ?>" 
+                    class="ml-2 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition font-medium"
+                >
+                    Reset
+                </a>
             </div>
         </form>
+        
+        <!-- Import Excel/CSV - Revisi -->
+        <div class="mt-6 pt-6 border-t border-gray-200">
+            <h3 class="text-lg font-medium text-gray-700 mb-3">
+                <i class="fas fa-file-import text-bpjs-primary mr-2"></i>
+                Import Data Excel
+            </h3>
+            <form action="<?= site_url('admin/jaminan/import_jaminan') ?>" method="post" enctype="multipart/form-data" class="flex flex-col md:flex-row items-start md:items-center gap-4">
+                <div class="relative flex-grow">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Pilih File Excel/CSV
+                    </label>
+                    <div class="relative">
+                        <input 
+                            type="file" 
+                            name="file_excel" 
+                            id="file_excel"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                            accept=".xls,.xlsx,.csv"
+                            required
+                        >
+                    </div>
+                </div>
+                <div class="flex-shrink-0 mt-5 md:mt-0">
+                    <button 
+                        type="submit"
+                        class="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition font-medium flex items-center gap-2"
+                    >
+                        <i class="fas fa-file-excel"></i> Import Data
+                    </button>
+                </div>
+            </form>
+           
+        </div>
     </div>
 
 

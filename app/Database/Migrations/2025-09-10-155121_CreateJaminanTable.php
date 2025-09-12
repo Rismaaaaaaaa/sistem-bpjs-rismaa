@@ -54,7 +54,7 @@ class CreateJaminanTable extends Migration
             'dokumen'           => [
                 'type'       => 'VARCHAR',
                 'constraint' => 255,
-                'null'       => true, // biar boleh kosong kalau belum upload
+                'null'       => true, 
             ],
             'created_at'        => [
                 'type' => 'DATETIME',

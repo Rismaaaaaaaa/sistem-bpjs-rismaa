@@ -29,9 +29,28 @@ $routes->post('/admin/jaminan/store', 'JaminanController::store');
 $routes->post('/admin/jaminan/update', 'JaminanController::update');
 $routes->get('/admin/jaminan/filter', 'JaminanController::filter');
 $routes->get('/admin/tambah_jaminan', 'JaminanController::create');
+$routes->post('admin/jaminan/import_jaminan', 'JaminanController::import');
+
 
 
 $routes->post('/admin/jaminan/delete/(:num)', 'JaminanController::delete/$1');
 
 
 $routes->get('/super/dashboard', 'Super::dashboard');
+
+
+
+
+
+// Tambah data
+$routes->get('admin/bubm/create', 'BubmController::create');
+$routes->post('admin/bubm/store', 'BubmController::store');
+
+// Update data
+$routes->post('admin/bubm/update', 'BubmController::update');
+
+// Delete data
+$routes->post('admin/bubm/delete/(:num)', 'BubmController::delete/$1');
+
+// Filter/search (opsional)
+$routes->get('admin/bubm/filter', 'BubmController::filter');

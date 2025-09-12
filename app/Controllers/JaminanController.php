@@ -3,6 +3,9 @@
 namespace App\Controllers;
 
 use App\Models\JaminanModel;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use PhpOffice\PhpSpreadsheet\Reader\Csv;
+
 
 class JaminanController extends BaseController
 {
@@ -48,11 +51,6 @@ class JaminanController extends BaseController
 
     return view('admin/jaminan', $data);
 }
-
-
-
-
-
 
     public function create()
     {
@@ -233,7 +231,49 @@ class JaminanController extends BaseController
         return view('admin/jaminan', $data);
     }
 
+   public function import()
+    {
+        $file = $this->request->getFile('file_excel');
 
+        if (!$file->isValid()) {
+            return redirect()->back()->with('error', 'File tidak valid');
+        }
 
+        $ext = $file->getClientExtension();
+        if ($ext === 'csv') {
+            $reader = new Csv();
+        } else {
+            $reader = new Xlsx();
+        }
+
+        $spreadsheet = $reader->load($file->getTempName());
+        $sheetData   = $spreadsheet->getActiveSheet()->toArray();
+
+        $dataInsert = [];
+        foreach ($sheetData as $index => $row) {
+            if ($index == 0) continue; // skip header
+
+            $dataInsert[] = [
+                'nomor_penetapan'   => $row[0] ?? null,
+                'tanggal_transaksi' => !empty($row[1]) ? date('Y-m-d', strtotime($row[1])) : null,
+                'kode_transaksi'    => $row[2] ?? null,
+                'nomor_kpj'         => $row[3] ?? null,
+                'nama_perusahaan'   => $row[4] ?? null,
+                'pph21'             => !empty($row[5]) ? (float) $row[5] : 0,
+                'jumlah_bayar'      => !empty($row[6]) ? (float) $row[6] : 0,
+                'no_rekening'       => $row[7] ?? null,
+                'atas_nama'         => $row[8] ?? null,
+                'dokumen'           => $row[9] ?? null,
+                'created_at'        => date('Y-m-d H:i:s'),
+                'updated_at'        => date('Y-m-d H:i:s'),
+            ];
+        }
+
+        if (!empty($dataInsert)) {
+            $this->jaminanModel->insertBatch($dataInsert);
+        }
+
+        return redirect()->to('/admin/jaminan')->with('success', 'Data berhasil diimport!');
+    }
 
 }
