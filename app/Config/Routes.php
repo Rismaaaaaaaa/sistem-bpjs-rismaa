@@ -26,6 +26,11 @@ $routes->get('/admin/peserta', 'BubmController::coba');
 $routes->get('/admin/jaminan', 'JaminanController::index');
 $routes->get('/admin/jaminan/create', 'JaminanController::create');
 $routes->post('/admin/jaminan/store', 'JaminanController::store');
+$routes->post('/admin/jaminan/update', 'JaminanController::update');
+// $routes->post('/admin/jaminan/filter', 'JaminanController::filter');
+$routes->get('/admin/jaminan/filter', 'JaminanController::filter');
+
+$routes->post('/admin/jaminan/delete/(:num)', 'JaminanController::delete/$1');
 
 
 $routes->get('/super/dashboard', 'Super::dashboard');

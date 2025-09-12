@@ -1,329 +1,504 @@
 <?= $this->extend('layouts/main') ?>
-
 <?= $this->section('content') ?>
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Input Jaminan - BPJS</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        bpjs: {
-                            primary: '#1c5ca4',
-                            secondary: '#2c343c',
-                            accent: '#e4943c',
-                            light: '#93b0ca',
-                            darkblue: '#0a1e3c'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-       
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            min-height: 100vh;
-        }
-       
-        .form-input:focus {
-            box-shadow: 0 0 0 3px rgba(228, 148, 60, 0.2);
-            border-color: #e4943c;
-        }
-       
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(228, 148, 60, 0.4);
-        }
-       
-        .file-upload:hover {
-            border-color: #1c5ca4;
-            background-color: #f0f7ff;
-        }
-    </style>
-</head>
-<body class="p-6">
-    <div class="max-w-5xl mx-auto">
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-8">
+
+<div class="p-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-bpjs-primary flex items-center gap-3">
+                <div class="p-2 rounded-lg bg-bpjs-accent/10">
+                    <i class="fas fa-file-medical text-bpjs-accent text-xl"></i>
+                </div>
+                Data Jaminan BPJS
+            </h1>
+            <p class="text-gray-600 mt-2 ml-11">Kelola data jaminan peserta BPJS Kesehatan</p>
+        </div>
+        <a href="#" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-bpjs-accent to-orange-500 text-white font-semibold hover:opacity-90 shadow-lg transition">
+            <i class="fas fa-plus"></i>
+            Tambah Data
+        </a>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="bg-white rounded-2xl shadow-sm p-5 mb-6 border border-gray-200">
+        <form method="get" action="<?= site_url('/admin/jaminan/filter') ?>" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Search Input -->
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-search text-bpjs-primary mr-1"></i>
+                    Cari Data
+                </label>
+                <div class="relative">
+                    <i class="fas fa-search absolute left-3 top-3.5 text-gray-400"></i>
+                    <input 
+                        type="text" 
+                        name="search" 
+                        placeholder="Cari berdasarkan no. penetapan atau no. KPJ..." 
+                        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition"
+                        value="<?= esc($search) ?>"
+                    >
+                </div>
+            </div>
+
+            <!-- Filter by Date -->
             <div>
-                <h1 class="text-2xl font-bold text-bpjs-primary flex items-center gap-3">
-                    <div class="p-2 rounded-lg bg-bpjs-accent/10">
-                        <i class="fas fa-file-medical text-bpjs-accent text-xl"></i>
-                    </div>
-                    Input Data Jaminan Baru
-                </h1>
-                <p class="text-gray-600 mt-2 ml-11">Tambahkan data jaminan BPJS terbaru ke dalam sistem</p>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-filter text-bpjs-primary mr-1"></i>
+                    Filter Tanggal
+                </label>
+                <div class="relative">
+                    <i class="fas fa-calendar-alt absolute left-3 top-3.5 text-gray-400"></i>
+                    <select 
+                        name="date" 
+                        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition appearance-none"
+                    >
+                        <option value="all"   <?= ($date=='all')?'selected':'' ?>>Semua Tanggal</option>
+                        <option value="today" <?= ($date=='today')?'selected':'' ?>>Hari Ini</option>
+                        <option value="week"  <?= ($date=='week')?'selected':'' ?>>Minggu Ini</option>
+                        <option value="month" <?= ($date=='month')?'selected':'' ?>>Bulan Ini</option>
+                        <option value="year"  <?= ($date=='year')?'selected':'' ?>>Tahun Ini</option>
+                    </select>
+                    <i class="fas fa-chevron-down absolute right-3 top-3.5 text-gray-400 pointer-events-none"></i>
+                </div>
             </div>
-           
-        </div>
-        <!-- Form Card -->
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
-            <!-- Form Header -->
-            <div class="bg-gradient-to-r from-bpjs-primary to-bpjs-darkblue text-white p-5">
-                <div class="flex items-center gap-3">
-                    <i class="fas fa-info-circle text-bpjs-accent text-xl"></i>
-                    <h2 class="text-xl font-semibold">Formulir Input Jaminan</h2>
+
+            <!-- Sort by -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-sort text-bpjs-primary mr-1"></i>
+                    Urutkan Berdasarkan
+                </label>
+                <div class="relative">
+                    <i class="fas fa-sort-amount-down absolute left-3 top-3.5 text-gray-400"></i>
+                    <select 
+                        name="sortBy"
+                        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition appearance-none"
+                    >
+                        <option value="newest"      <?= ($sortBy=='newest')?'selected':'' ?>>Terbaru</option>
+                        <option value="oldest"      <?= ($sortBy=='oldest')?'selected':'' ?>>Terlama</option>
+                        <option value="amount_desc" <?= ($sortBy=='amount_desc')?'selected':'' ?>>Jumlah Tertinggi</option>
+                        <option value="amount_asc"  <?= ($sortBy=='amount_asc')?'selected':'' ?>>Jumlah Terendah</option>
+                    </select>
+                    <i class="fas fa-chevron-down absolute right-3 top-3.5 text-gray-400 pointer-events-none"></i>
                 </div>
-                <p class="text-blue-100 mt-2 ml-8">Lengkapi semua field yang wajib diisi (<span class="text-red-400">*</span>)</p>
             </div>
-            <!-- Form Content -->
-            <form action="/admin/jaminan/store" method="post" enctype="multipart/form-data" class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Nomor Penetapan -->
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-hashtag text-bpjs-primary mr-1"></i>
-                        Nomor Penetapan <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative group">
-                        <i class="fas fa-file-signature absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-bpjs-accent"></i>
-                        <input type="text" name="nomor_penetapan" class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white" placeholder="Masukkan nomor penetapan" required>
-                    </div>
-                </div>
-                <!-- Tanggal Transaksi -->
+
+            <!-- Action Buttons -->
+            <div class="flex items-end col-span-2 md:col-span-1">
+                <button 
+                    type="submit"
+                    class="w-full md:w-auto px-4 py-3 bg-bpjs-primary text-white rounded-xl hover:bg-blue-800 transition font-medium"
+                >
+                    Terapkan Filter
+                </button>
+                <a 
+                    href="<?= site_url('admin/jaminan') ?>" 
+                    class="ml-2 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition font-medium"
+                >
+                    Reset
+                </a>
+
+            </div>
+        </form>
+    </div>
+
+
+    <!-- Stats Cards -->
+   <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <!-- Total Data -->
+        <div class="bg-white rounded-2xl shadow-sm p-4 border border-gray-200">
+            <div class="flex items-center justify-between">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-calendar-day text-bpjs-primary mr-1"></i>
-                        Tanggal Transaksi <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative group">
-                        <i class="fas fa-calendar-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-bpjs-accent"></i>
-                        <input type="date" name="tanggal_transaksi" class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white" required>
-                    </div>
+                    <p class="text-sm text-gray-500">Total Data</p>
+                    <h3 class="text-2xl font-bold text-gray-800"><?= number_format($totalData) ?></h3>
                 </div>
-                <!-- Kode Transaksi / Voucher -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-ticket-alt text-bpjs-primary mr-1"></i>
-                        Kode Transaksi / Voucher <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative group">
-                        <i class="fas fa-barcode absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-bpjs-accent"></i>
-                        <input type="text" name="kode_transaksi" class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white" placeholder="Masukkan kode transaksi" required>
-                    </div>
+                <div class="p-3 rounded-lg bg-blue-100">
+                    <i class="fas fa-database text-blue-600 text-xl"></i>
                 </div>
-                <!-- Nomor KPJ -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-address-card text-bpjs-primary mr-1"></i>
-                        Nomor KPJ <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative group">
-                        <i class="fas fa-id-card absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-bpjs-accent"></i>
-                        <input type="text" name="nomor_kpj" class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white" placeholder="Masukkan nomor KPJ" required>
-                    </div>
-                </div>
-                <!-- Nama Perusahaan -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-building text-bpjs-primary mr-1"></i>
-                        Nama Perusahaan <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative group">
-                        <i class="fas fa-landmark absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-bpjs-accent"></i>
-                        <input type="text" name="nama_perusahaan" class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white" placeholder="Masukkan nama perusahaan" required>
-                    </div>
-                </div>
-                <!-- PPh 21 -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-money-bill-wave text-bpjs-primary mr-1"></i>
-                        PPh 21 (Rp) <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative group">
-                        <i class="fas fa-calculator absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-bpjs-accent"></i>
-                        <input type="number" name="pph21" class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white" placeholder="Masukkan nilai PPh 21" required>
-                    </div>
-                </div>
-                <!-- Jumlah Bayar -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-credit-card text-bpjs-primary mr-1"></i>
-                        Jumlah Bayar (Rp) <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative group">
-                        <i class="fas fa-money-check absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-bpjs-accent"></i>
-                        <input type="number" name="jumlah_bayar" class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white" placeholder="Masukkan jumlah bayar" required>
-                    </div>
-                </div>
-                <!-- Nomor Rekening -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-wallet text-bpjs-primary mr-1"></i>
-                        Nomor Rekening <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative group">
-                        <i class="fas fa-credit-card absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-bpjs-accent"></i>
-                        <input type="text" name="no_rekening" class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white" placeholder="Masukkan nomor rekening" required>
-                    </div>
-                </div>
-                <!-- Rekening Atas Nama -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-user-circle text-bpjs-primary mr-1"></i>
-                        Rekening Atas Nama <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative group">
-                        <i class="fas fa-user-tie absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-bpjs-accent"></i>
-                        <input type="text" name="atas_nama" class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white" placeholder="Masukkan nama pemilik rekening" required>
-                    </div>
-                </div>
-                <!-- Upload Dokumen -->
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-file-upload text-bpjs-primary mr-1"></i>
-                        Upload Dokumen (PNG/JPG) <span class="text-red-500">*</span>
-                    </label>
-                    <div class="file-upload border-2 border-dashed border-gray-300 rounded-xl p-5 text-center transition cursor-pointer hover:border-bpjs-primary hover:bg-blue-50 group">
-                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-3 group-hover:text-bpjs-accent"></i>
-                        <p class="text-sm text-gray-600 mb-1">Klik untuk upload atau drag & drop file di sini</p>
-                        <p class="text-xs text-gray-500">Format: PNG, JPG, JPEG (Maks. 5MB)</p>
-                        <input type="file" name="dokumen" accept=".png,.jpg,.jpeg" class="hidden" id="fileInput" required>
-                    </div>
-                    <div id="fileName" class="text-sm text-gray-600 mt-2 hidden"></div>
-                </div>
-                <!-- Form Actions -->
-                <div class="md:col-span-2 flex justify-end gap-4 pt-6 border-t border-gray-200 mt-4">
-                    <button type="reset" class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition flex items-center gap-2">
-                        <i class="fas fa-redo"></i>
-                        Reset Form
-                    </button>
-                    <button type="submit" class="btn-submit flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-bpjs-accent to-orange-500 text-white font-semibold hover:opacity-90 shadow-lg transition transform hover:scale-105">
-                        <i class="fas fa-save"></i>
-                        Simpan Data
-                    </button>
-                </div>
-            </form>
+            </div>
         </div>
-        <!-- Info Box -->
-        <div class="bg-blue-50 border-l-4 border-bpjs-primary p-4 rounded-r mt-6">
-            <div class="flex items-start">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-info-circle text-bpjs-primary text-lg mt-1"></i>
+
+        <!-- Total Nilai -->
+        <div class="bg-white rounded-2xl shadow-sm p-4 border border-gray-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">Total Nilai</p>
+                    <h3 class="text-2xl font-bold text-gray-800">
+                        Rp <?= number_format($totalNilai, 2, ',', '.') ?>
+                    </h3>
                 </div>
-                <div class="ml-3">
-                    <h3 class="text-sm font-medium text-bpjs-primary">Informasi Penting</h3>
-                    <div class="text-sm text-gray-600 mt-2">
-                        <ul class="list-disc list-inside space-y-1">
-                            <li>Pastikan semua data yang dimasukkan sudah benar sebelum disimpan</li>
-                            <li>Data yang sudah disimpan tidak dapat diubah langsung, harap hubungi administrator</li>
-                            <li>File upload maksimal 5MB dengan format PNG, JPG, atau JPEG</li>
-                        </ul>
-                    </div>
+                <div class="p-3 rounded-lg bg-green-100">
+                    <i class="fas fa-money-bill-wave text-green-600 text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Perusahaan -->
+        <div class="bg-white rounded-2xl shadow-sm p-4 border border-gray-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">Perusahaan</p>
+                    <h3 class="text-2xl font-bold text-gray-800"><?= number_format($totalPerusahaan) ?></h3>
+                </div>
+                <div class="p-3 rounded-lg bg-orange-100">
+                    <i class="fas fa-building text-orange-600 text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rata-rata/Bulan -->
+        <div class="bg-white rounded-2xl shadow-sm p-4 border border-gray-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">Rata-rata/Bulan</p>
+                    <h3 class="text-2xl font-bold text-gray-800">
+                        Rp <?= number_format($rataRata, 2, ',', '.') ?>
+                    </h3>
+                </div>
+                <div class="p-3 rounded-lg bg-purple-100">
+                    <i class="fas fa-chart-line text-purple-600 text-xl"></i>
                 </div>
             </div>
         </div>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // File upload interaction
-            const fileInput = document.getElementById('fileInput');
-            const fileUploadArea = document.querySelector('.file-upload');
-            const fileName = document.getElementById('fileName');
-           
-            fileUploadArea.addEventListener('click', function() {
-                fileInput.click();
-            });
-           
-            fileInput.addEventListener('change', function() {
-                if (this.files.length > 0) {
-                    fileName.textContent = 'File terpilih: ' + this.files[0].name;
-                    fileName.classList.remove('hidden');
-                    fileUploadArea.classList.add('border-green-400', 'bg-green-50');
-                    fileUploadArea.innerHTML = `
-                        <i class="fas fa-check-circle text-3xl text-green-500 mb-3"></i>
-                        <p class="text-sm text-green-600 mb-1">File berhasil dipilih</p>
-                        <p class="text-xs text-green-500">${this.files[0].name}</p>
-                    `;
-                }
-            });
-           
-            // Drag and drop for file upload
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                fileUploadArea.addEventListener(eventName, preventDefaults, false);
-            });
-           
-            function preventDefaults(e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-           
-            ['dragenter', 'dragover'].forEach(eventName => {
-                fileUploadArea.addEventListener(eventName, highlight, false);
-            });
-           
-            ['dragleave', 'drop'].forEach(eventName => {
-                fileUploadArea.addEventListener(eventName, unhighlight, false);
-            });
-           
-            function highlight() {
-                fileUploadArea.classList.add('border-bpjs-primary', 'bg-blue-100');
-            }
-           
-            function unhighlight() {
-                fileUploadArea.classList.remove('border-bpjs-primary', 'bg-blue-100');
-            }
-           
-            fileUploadArea.addEventListener('drop', handleDrop, false);
-           
-            function handleDrop(e) {
-                const dt = e.dataTransfer;
-                const files = dt.files;
-                fileInput.files = files;
-               
-                if (files.length > 0) {
-                    fileName.textContent = 'File terpilih: ' + files[0].name;
-                    fileName.classList.remove('hidden');
-                    fileUploadArea.classList.add('border-green-400', 'bg-green-50');
-                    fileUploadArea.innerHTML = `
-                        <i class="fas fa-check-circle text-3xl text-green-500 mb-3"></i>
-                        <p class="text-sm text-green-600 mb-1">File berhasil diupload</p>
-                        <p class="text-xs text-green-500">${files[0].name}</p>
-                    `;
-                }
-            }
-           
-            // Form validation
-            const form = document.querySelector('form');
-            const inputs = form.querySelectorAll('input[required]');
-           
-            form.addEventListener('submit', function(e) {
-                let valid = true;
-               
-                inputs.forEach(input => {
-                    if (!input.value.trim()) {
-                        input.classList.add('border-red-500');
-                        valid = false;
-                    } else {
-                        input.classList.remove('border-red-500');
-                    }
-                });
-               
-                if (!fileInput.files.length) {
-                    fileUploadArea.classList.add('border-red-500');
-                    valid = false;
+
+    <!-- Data Table -->
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gradient-to-r from-bpjs-primary to-bpjs-darkblue text-white">
+                    <tr>
+                        <th class="p-4 text-left font-semibold">#</th>
+                        <th class="p-4 text-left font-semibold">No. Penetapan</th>
+                        <th class="p-4 text-left font-semibold">Tanggal</th>
+                        <th class="p-4 text-left font-semibold">Kode Transaksi</th>
+                        <th class="p-4 text-left font-semibold">No. KPJ</th>
+                        <th class="p-4 text-left font-semibold">Perusahaan</th>
+                        <th class="p-4 text-left font-semibold">PPH 21</th>
+                        <th class="p-4 text-left font-semibold">Jumlah Bayar</th>
+                        <th class="p-4 text-left font-semibold">Rekening</th>
+                        <th class="p-4 text-left font-semibold">Atas Nama</th>
+                        <th class="p-4 text-left font-semibold">Dokumen</th>
+                        <th class="p-4 text-left font-semibold">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    <?php if (!empty($jaminan)): ?>
+                        <?php $no = 1; foreach ($jaminan as $row): ?>
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="p-4"><?= $no++ ?></td>
+                                <td class="p-4 font-medium text-bpjs-primary"><?= esc($row['nomor_penetapan']) ?></td>
+                                <td class="p-4"><?= date('d/m/Y', strtotime($row['tanggal_transaksi'])) ?></td>
+                                <td class="p-4"><?= esc($row['kode_transaksi']) ?></td>
+                                <td class="p-4"><?= esc($row['nomor_kpj']) ?></td>
+                                <td class="p-4">
+                                    <div class="flex items-center">
+                                        <div class="p-2 rounded-lg bg-blue-100 mr-2">
+                                            <i class="fas fa-building text-blue-600"></i>
+                                        </div>
+                                        <?= esc($row['nama_perusahaan']) ?>
+                                    </div>
+                                </td>
+                                <td class="p-4">Rp <?= number_format($row['pph21'], 2, ',', '.') ?></td>
+                                <td class="p-4">
+                                    <span class="px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium">
+                                        Rp <?= number_format($row['jumlah_bayar'], 2, ',', '.') ?>
+                                    </span>
+                                </td>
+                                <td class="p-4"><?= esc($row['no_rekening']) ?></td>
+                                <td class="p-4"><?= esc($row['atas_nama']) ?></td>
+                                <td class="p-4">
+                                    <?php if ($row['dokumen']): ?>
+                                        <a href="<?= base_url('uploads/' . $row['dokumen']) ?>" target="_blank" class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
+                                            <i class="fas fa-file-pdf mr-2"></i> Lihat
+                                        </a>
+                                    <?php else: ?>
+                                        <span class="inline-flex items-center px-3 py-2 rounded-lg bg-gray-100 text-gray-600">
+                                            <i class="fas fa-times-circle mr-2"></i> Tidak ada
+                                        </span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="p-4">
+                                    <div class="flex space-x-2">
+                                        <!-- Tombol Edit -->
+                                        <button 
+                                            class="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition btn-edit"
+                                            data-id="<?= $row['id'] ?>"
+                                            data-nomor_penetapan="<?= esc($row['nomor_penetapan']) ?>"
+                                            data-tanggal_transaksi="<?= esc($row['tanggal_transaksi']) ?>"
+                                            data-kode_transaksi="<?= esc($row['kode_transaksi']) ?>"
+                                            data-nomor_kpj="<?= esc($row['nomor_kpj']) ?>"
+                                            data-nama_perusahaan="<?= esc($row['nama_perusahaan']) ?>"
+                                            data-pph21="<?= esc($row['pph21']) ?>"
+                                            data-jumlah_bayar="<?= esc($row['jumlah_bayar']) ?>"
+                                            data-no_rekening="<?= esc($row['no_rekening']) ?>"
+                                            data-atas_nama="<?= esc($row['atas_nama']) ?>"
+                                            title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+
+                                        <!-- Tombol Hapus -->
+                                        <form action="<?= base_url('admin/jaminan/delete/'.$row['id']) ?>" method="post" onsubmit="return confirm('Yakin mau hapus data ini?')" class="inline">
+                                            <?= csrf_field() ?>
+                                            <button type="submit" class="p-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition" title="Hapus">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="12" class="p-8 text-center">
+                                <div class="flex flex-col items-center justify-center text-gray-400 py-8">
+                                    <i class="fas fa-inbox text-4xl mb-3"></i>
+                                    <p class="text-lg">Tidak ada data jaminan</p>
+                                    <p class="text-sm mt-1">Klik "Tambah Data" untuk menambahkan data baru</p>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex justify-between items-center mt-6">
+        <div class="text-sm text-gray-600">
+            Menampilkan 1 sampai 10 dari 142 entri
+        </div>
+        <div class="flex space-x-2">
+            <button class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="px-4 py-2 rounded-lg bg-bpjs-primary text-white">1</button>
+            <button class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition">2</button>
+            <button class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition">3</button>
+            <button class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+
+    <!-- Modal -->
+     <!-- Modal Edit -->
+<div id="modalEdit" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl p-6">
+        <h2 class="text-xl font-semibold mb-4">Edit Data Jaminan</h2>
+
+        <form id="formEdit" action="<?= base_url('admin/jaminan/update') ?>" method="post" enctype="multipart/form-data">
+            <?= csrf_field() ?>
+            <input type="hidden" name="id" id="edit_id">
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium">No. Penetapan</label>
+                    <input type="text" name="nomor_penetapan" id="edit_nomor_penetapan" class="w-full border rounded-lg p-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Tanggal</label>
+                    <input type="date" name="tanggal_transaksi" id="edit_tanggal_transaksi" class="w-full border rounded-lg p-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Kode Transaksi</label>
+                    <input type="text" name="kode_transaksi" id="edit_kode_transaksi" class="w-full border rounded-lg p-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">No. KPJ</label>
+                    <input type="text" name="nomor_kpj" id="edit_nomor_kpj" class="w-full border rounded-lg p-2">
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-sm font-medium">Perusahaan</label>
+                    <input type="text" name="nama_perusahaan" id="edit_nama_perusahaan" class="w-full border rounded-lg p-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">PPH 21</label>
+                    <input type="number" step="0.01" name="pph21" id="edit_pph21" class="w-full border rounded-lg p-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Jumlah Bayar</label>
+                    <input type="number" step="0.01" name="jumlah_bayar" id="edit_jumlah_bayar" class="w-full border rounded-lg p-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Rekening</label>
+                    <input type="text" name="no_rekening" id="edit_no_rekening" class="w-full border rounded-lg p-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Atas Nama</label>
+                    <input type="text" name="atas_nama" id="edit_atas_nama" class="w-full border rounded-lg p-2">
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-sm font-medium">Dokumen (opsional)</label>
+                    <input type="file" name="dokumen" class="w-full border rounded-lg p-2">
+                </div>
+            </div>
+
+            <div class="flex justify-end mt-6 space-x-2">
+                <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">Batal</button>
+                <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+</div>
+
+
+<script>
+    const modal = document.getElementById("modalEdit");
+    const btnsEdit = document.querySelectorAll(".btn-edit");
+
+    btnsEdit.forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.getElementById("edit_id").value = btn.dataset.id;
+            document.getElementById("edit_nomor_penetapan").value = btn.dataset.nomor_penetapan;
+            document.getElementById("edit_tanggal_transaksi").value = btn.dataset.tanggal_transaksi;
+            document.getElementById("edit_kode_transaksi").value = btn.dataset.kode_transaksi;
+            document.getElementById("edit_nomor_kpj").value = btn.dataset.nomor_kpj;
+            document.getElementById("edit_nama_perusahaan").value = btn.dataset.nama_perusahaan;
+            document.getElementById("edit_pph21").value = btn.dataset.pph21;
+            document.getElementById("edit_jumlah_bayar").value = btn.dataset.jumlah_bayar;
+            document.getElementById("edit_no_rekening").value = btn.dataset.no_rekening;
+            document.getElementById("edit_atas_nama").value = btn.dataset.atas_nama;
+
+            modal.classList.remove("hidden");
+        });
+    });
+
+    function closeModal() {
+        modal.classList.add("hidden");
+    }
+</script>
+
+<style>
+    table th, table td {
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    table th {
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+    
+    .btn-filter:hover {
+        background-color: #1c5ca4;
+        color: white;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const dateFilter = document.getElementById('dateFilter');
+        const companyFilter = document.getElementById('companyFilter');
+        const sortBy = document.getElementById('sortBy');
+        const applyFilters = document.getElementById('applyFilters');
+        const resetFilters = document.getElementById('resetFilters');
+        
+        // Search functionality
+        searchInput.addEventListener('keyup', function() {
+            const searchText = this.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchText)) {
+                    row.style.display = '';
                 } else {
-                    fileUploadArea.classList.remove('border-red-500');
-                }
-               
-                if (!valid) {
-                    e.preventDefault();
-                    alert('Harap lengkapi semua field yang wajib diisi!');
+                    row.style.display = 'none';
                 }
             });
         });
-    </script>
-</body>
-</html>
+        
+        // Apply filters
+        applyFilters.addEventListener('click', function() {
+            // In a real application, this would send a request to the server
+            // For demonstration, we'll just show a message
+            alert('Filter diterapkan: ' + 
+                  '\nTanggal: ' + dateFilter.options[dateFilter.selectedIndex].text +
+                  '\nPerusahaan: ' + companyFilter.options[companyFilter.selectedIndex].text +
+                  '\nUrutkan: ' + sortBy.options[sortBy.selectedIndex].text);
+        });
+        
+        // Reset filters
+        resetFilters.addEventListener('click', function() {
+            searchInput.value = '';
+            dateFilter.value = 'all';
+            companyFilter.value = 'all';
+            sortBy.value = 'newest';
+            
+            // Show all rows
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                row.style.display = '';
+            });
+        });
+    });
+</script>
+
+
+<script>
+document.getElementById("applyFilters").addEventListener("click", function() {
+    const search  = document.getElementById("searchInput").value;
+    const date    = document.getElementById("dateFilter").value;
+    const company = document.getElementById("companyFilter").value;
+    const sortBy  = document.getElementById("sortBy").value;
+
+    fetch(`/admin/jaminan/filter?search=${search}&date=${date}&company=${company}&sortBy=${sortBy}`)
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.querySelector("table tbody");
+            tbody.innerHTML = "";
+
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="12" class="p-8 text-center text-gray-500">Tidak ada data ditemukan</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            data.forEach((row, i) => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="p-4">${i+1}</td>
+                        <td class="p-4 font-medium text-bpjs-primary">${row.nomor_penetapan}</td>
+                        <td class="p-4">${new Date(row.tanggal_transaksi).toLocaleDateString('id-ID')}</td>
+                        <td class="p-4">${row.kode_transaksi}</td>
+                        <td class="p-4">${row.nomor_kpj}</td>
+                        <td class="p-4">${row.nama_perusahaan}</td>
+                        <td class="p-4">Rp ${parseFloat(row.pph21).toLocaleString('id-ID')}</td>
+                        <td class="p-4">Rp ${parseFloat(row.jumlah_bayar).toLocaleString('id-ID')}</td>
+                        <td class="p-4">${row.no_rekening}</td>
+                        <td class="p-4">${row.atas_nama}</td>
+                        <td class="p-4">${row.dokumen ? `<a href="/uploads/${row.dokumen}" target="_blank">Lihat</a>` : 'Tidak ada'}</td>
+                        <td class="p-4">
+                            <button class="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="p-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        });
+});
+
+// Reset filter
+document.getElementById("resetFilters").addEventListener("click", function() {
+    document.getElementById("searchInput").value = "";
+    document.getElementById("dateFilter").value = "all";
+    document.getElementById("companyFilter").value = "all";
+    document.getElementById("sortBy").value = "newest";
+    document.getElementById("applyFilters").click();
+});
+</script>
+
 <?= $this->endSection() ?>
