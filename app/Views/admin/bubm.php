@@ -246,16 +246,20 @@
                                         <span class="text-gray-400">-</span>
                                     <?php endif; ?>
                                 </td>
-                                <td class="p-4">
-                                    <?php if ($row['dokumen']): ?>
+                               <td class="p-4">
+                                    <?php 
+                                        $filePath = FCPATH . 'uploads/bubm/' . ($row['dokumen'] ?? '');
+                                        if (!empty($row['dokumen']) && file_exists($filePath)): 
+                                    ?>
                                         <a href="<?= base_url('uploads/bubm/' . $row['dokumen']) ?>" target="_blank"
                                         class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
-                                            <i class="fas fa-file-pdf mr-2"></i> Lihat
+                                            <i class="fas fa-image mr-2"></i> Lihat
                                         </a>
                                     <?php else: ?>
-                                        <span class="inline-flex items-center px-3 py-2 rounded-lg bg-gray-100 text-gray-600">
+                                        <button type="button" onclick="showNoFileToast()" 
+                                            class="inline-flex items-center px-3 py-2 rounded-lg bg-gray-100 text-gray-600">
                                             <i class="fas fa-times-circle mr-2"></i> Tidak ada
-                                        </span>
+                                        </button>
                                     <?php endif; ?>
                                 </td>
 
@@ -328,54 +332,61 @@
 
 
 <!-- Modal Detail BUBM -->
-<div id="modalDetailBubm" class="fixed inset-0 hidden bg-black bg-opacity-50 flex items-center justify-center z-50">
-  <div class="bg-white w-full max-w-2xl rounded-xl shadow-lg p-6 relative">
-    
-    <!-- Tombol Close -->
-    <button type="button" id="closeModalDetail" 
-            class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">
-      <i class="fas fa-times text-xl"></i>
-    </button>
+<!-- Modal Detail BUBM -->
+<div id="modalDetailBubm" 
+     class="fixed inset-0 hidden bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity duration-300">
+  
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-transform duration-300 scale-95">
+      
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-4 flex justify-between items-center">
+          <h2 class="text-xl font-bold text-white">Detail Data BUBM</h2>
+          <button type="button" id="closeModalDetailBubm" 
+                  class="text-white hover:text-blue-200 transition-colors duration-200 rounded-full p-1 hover:bg-blue-500/30">
+              <i class="fas fa-times text-lg"></i>
+          </button>
+      </div>
 
-    <h2 class="text-xl font-semibold mb-4 text-bpjs-primary">Detail Data BUBM</h2>
+      <!-- Content -->
+      <div class="p-6 max-h-[70vh] overflow-y-auto">
+          <div class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                      <p class="text-sm text-blue-600 font-medium mb-1">Kode Transaksi</p>
+                      <p id="detail_kode_transaksi" class="text-gray-800 font-semibold">-</p>
+                  </div>
+                  <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                      <p class="text-sm text-blue-600 font-medium mb-1">Voucher</p>
+                      <p id="detail_voucher" class="text-gray-800 font-semibold">-</p>
+                  </div>
+                  <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                      <p class="text-sm text-gray-600 font-medium mb-1">Program</p>
+                      <p id="detail_program" class="text-gray-800 font-semibold">-</p>
+                  </div>
+                  <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                      <p class="text-sm text-green-600 font-medium mb-1">Jumlah Rupiah</p>
+                      <p id="detail_jumlah_rupiah" class="text-green-700 font-bold text-lg">-</p>
+                  </div>
+              </div>
 
-    <div class="grid grid-cols-2 gap-4 text-sm">
-        <div>
-            <p class="font-medium text-gray-600">Kode Transaksi</p>
-            <p id="detail_kode_transaksi" class="text-gray-800"></p>
-        </div>
-        <div>
-            <p class="font-medium text-gray-600">Voucher</p>
-            <p id="detail_voucher" class="text-gray-800"></p>
-        </div>
-        <div>
-            <p class="font-medium text-gray-600">Program</p>
-            <p id="detail_program" class="text-gray-800"></p>
-        </div>
-        <div>
-            <p class="font-medium text-gray-600">Jumlah Rupiah</p>
-            <p id="detail_jumlah_rupiah" class="text-green-600 font-semibold"></p>
-        </div>
-        <div class="col-span-2">
-            <p class="font-medium text-gray-600">Keterangan</p>
-            <p id="detail_keterangan" class="text-gray-800"></p>
-        </div>
-        <div class="col-span-2">
-            <p class="font-medium text-gray-600">Tanggal Transaksi</p>
-            <p id="detail_tanggal_transaksi" class="text-gray-800"></p>
-        </div>
-        <div class="col-span-2">
-            <p class="font-medium text-gray-600">Dokumen</p>
-            <div id="detail_dokumen"></div>
-        </div>
-    </div>
+              <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <p class="text-sm text-gray-600 font-medium mb-1">Keterangan</p>
+                  <p id="detail_keterangan" class="text-gray-800 font-semibold">-</p>
+              </div>
 
-    <div class="mt-6 flex justify-end">
-        <button type="button" id="closeDetailBtn"
-                class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition">
-            Tutup
-        </button>
-    </div>
+              <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <p class="text-sm text-gray-600 font-medium mb-1">Tanggal Transaksi</p>
+                  <p id="detail_tanggal_transaksi" class="text-gray-800 font-semibold">-</p>
+              </div>
+
+              <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                  <p class="text-sm text-purple-600 font-medium mb-1">Dokumen</p>
+                  <div id="detail_dokumen" class="text-gray-800 font-semibold">-</div>
+              </div>
+          </div>
+      </div>
+
+      <!-- Footer -->
   </div>
 </div>
 
