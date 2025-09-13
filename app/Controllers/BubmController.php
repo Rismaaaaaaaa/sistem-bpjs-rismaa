@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\BubmModel;
+use CodeIgniter\I18n\Time;
 
 class BubmController extends BaseController
 {
@@ -15,11 +16,61 @@ class BubmController extends BaseController
 
     public function index()
     {
-        // Ambil semua data terbaru
-        $bubm = $this->bubmModel->orderBy('id', 'DESC')->findAll();
+        $search = $this->request->getGet('search');
+        $date   = $this->request->getGet('date') ?? 'all';
+        $sortBy = $this->request->getGet('sortBy') ?? 'newest';
+
+        $query = $this->bubmModel;
+
+        // 🔍 Search
+        if (!empty($search)) {
+            $query = $query->groupStart()
+                ->like('kode_transaksi', $search)
+                ->orLike('voucher', $search)
+                ->orLike('program', $search)
+                ->groupEnd();
+        }
+
+        // 📅 Filter Tanggal
+        if ($date !== 'all') {
+            $today = new Time('now', 'Asia/Jakarta');
+
+            switch ($date) {
+                case 'today':
+                    $query = $query->where('DATE(created_at)', $today->toDateString());
+                    break;
+                case 'week':
+                    $query = $query->where('YEARWEEK(created_at)', $today->format('oW'));
+                    break;
+                case 'month':
+                    $query = $query->where('MONTH(created_at)', $today->getMonth())
+                                   ->where('YEAR(created_at)', $today->getYear());
+                    break;
+                case 'year':
+                    $query = $query->where('YEAR(created_at)', $today->getYear());
+                    break;
+            }
+        }
+
+        // 🔄 Sorting
+        switch ($sortBy) {
+            case 'oldest':
+                $query = $query->orderBy('created_at', 'ASC');
+                break;
+            case 'amount_desc':
+                $query = $query->orderBy('jumlah_rupiah', 'DESC');
+                break;
+            case 'amount_asc':
+                $query = $query->orderBy('jumlah_rupiah', 'ASC');
+                break;
+            default: // newest
+                $query = $query->orderBy('created_at', 'DESC');
+        }
+
+        $bubm = $query->findAll();
 
         // Stats
-        $totalData = count($bubm);
+        $totalData   = count($bubm);
         $totalRupiah = array_sum(array_column($bubm, 'jumlah_rupiah'));
 
         $data = [
@@ -28,86 +79,28 @@ class BubmController extends BaseController
             'bubm'         => $bubm,
             'totalData'    => $totalData,
             'totalRupiah'  => $totalRupiah,
+            'search'       => $search,
+            'date'         => $date,
+            'sortBy'       => $sortBy,
         ];
 
         return view('admin/bubm', $data);
     }
 
-    public function create()
+    public function import_bubm()
     {
-        $data = [
-            'title'       => 'Tambah BUBM',
-            'active_menu' => 'bubm',
-        ];
-
-        return view('admin/tambah_bubm', $data);
-    }
-
-    public function store()
-    {
-        $file = $this->request->getFile('dokumen');
-        $fileName = null;
-
+        $file = $this->request->getFile('file_excel');
         if ($file && $file->isValid() && !$file->hasMoved()) {
-            $fileName = $file->getRandomName();
-            $file->move(FCPATH . 'uploads', $fileName);
+            $ext = $file->getClientExtension();
+
+            if (in_array($ext, ['xls', 'xlsx', 'csv'])) {
+                // TODO: proses import Excel pake PHPSpreadsheet
+                // buat dummy dulu
+                return redirect()->back()->with('success', 'File berhasil diupload (belum diproses)');
+            } else {
+                return redirect()->back()->with('error', 'Format file tidak didukung');
+            }
         }
-
-        $this->bubmModel->save([
-            'kode_transaksi' => $this->request->getPost('kode_transaksi'),
-            'voucher'        => $this->request->getPost('voucher'),
-            'program'        => $this->request->getPost('program'),
-            'jumlah_rupiah'  => $this->request->getPost('jumlah_rupiah'),
-            'keterangan'     => $this->request->getPost('keterangan'),
-            'dokumen'        => $fileName,
-        ]);
-
-        return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil disimpan');
-    }
-
-    public function edit($id)
-    {
-        $bubm = $this->bubmModel->find($id);
-
-        $data = [
-            'title'       => 'Edit BUBM',
-            'active_menu' => 'bubm',
-            'bubm'        => $bubm,
-        ];
-
-        return view('admin/edit_bubm', $data);
-    }
-
-    public function update($id)
-    {
-        $file = $this->request->getFile('dokumen');
-        $fileName = null;
-
-        if ($file && $file->isValid() && !$file->hasMoved()) {
-            $fileName = $file->getRandomName();
-            $file->move(FCPATH . 'uploads', $fileName);
-        }
-
-        $data = [
-            'kode_transaksi' => $this->request->getPost('kode_transaksi'),
-            'voucher'        => $this->request->getPost('voucher'),
-            'program'        => $this->request->getPost('program'),
-            'jumlah_rupiah'  => $this->request->getPost('jumlah_rupiah'),
-            'keterangan'     => $this->request->getPost('keterangan'),
-        ];
-
-        if ($fileName) {
-            $data['dokumen'] = $fileName;
-        }
-
-        $this->bubmModel->update($id, $data);
-
-        return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil diupdate');
-    }
-
-    public function delete($id)
-    {
-        $this->bubmModel->delete($id);
-        return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil dihapus');
+        return redirect()->back()->with('error', 'Upload file gagal');
     }
 }

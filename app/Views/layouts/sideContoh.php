@@ -40,11 +40,23 @@
   <aside class="w-64 h-screen fixed top-0 left-0 bg-gradient-to-b from-bpjs-primary to-bpjs-darkblue text-white flex flex-col shadow-xl z-50">
         <!-- Brand Header -->
         <div class="p-5 pb-4 border-b border-blue-700/30">
-            <div class="text-2xl font-bold tracking-tight">
-                <span class="bg-gradient-to-r from-bpjs-accent to-[#FFD37A] bg-clip-text text-transparent">BPJS</span>
-                <div class="text-sm font-medium text-gray-300 mt-1">Healthcare Administration</div>
+            <div class="flex items-center space-x-3">
+                <!-- Logo -->
+                <img src="<?= base_url('assets/images/logo-bpjs.png') ?>" 
+     alt="Logo BPJS" 
+     class="w-20 h-20 p-2 bg-white rounded-full shadow-md">
+
+
+                <!-- Text -->
+                <div>
+                    <div class="text-2xl font-bold tracking-tight">
+                        <span class="bg-gradient-to-r from-bpjs-accent to-[#FFD37A] bg-clip-text text-transparent">BPJS</span>
+                    </div>
+                    <div class="text-sm font-medium text-gray-300 mt-1">Healthcare Administration</div>
+                </div>
             </div>
         </div>
+
 
         <!-- Navigation -->
         <nav class="flex-1 px-3 py-4 space-y-1">

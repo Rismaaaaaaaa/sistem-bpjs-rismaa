@@ -83,7 +83,7 @@ class JaminanController extends BaseController
 
         if ($file && $file->isValid() && !$file->hasMoved()) {
             $fileName = $file->getRandomName();
-            $file->move(WRITEPATH . 'uploads/jaminan/', $fileName);
+            $file->move(FCPATH . 'uploads/jaminan/', $fileName); // simpan di public/uploads/jaminan/
         }
 
         $this->jaminanModel->save([
@@ -110,18 +110,19 @@ class JaminanController extends BaseController
         $fileName = null;
 
         if ($file && $file->isValid() && !$file->hasMoved()) {
-            $fileName = $file->getRandomName();
-            $file->move(WRITEPATH . 'uploads/jaminan/', $fileName);
+        $fileName = $file->getRandomName();
+        $file->move(FCPATH . 'uploads/jaminan/', $fileName);
 
-            // hapus file lama
-            $oldData = $this->jaminanModel->find($id);
-            if ($oldData && !empty($oldData['dokumen'])) {
-                $oldPath = WRITEPATH . 'uploads/jaminan/' . $oldData['dokumen'];
-                if (file_exists($oldPath)) {
-                    unlink($oldPath);
-                }
+        // hapus file lama
+        $oldData = $this->jaminanModel->find($id);
+        if ($oldData && !empty($oldData['dokumen'])) {
+            $oldPath = FCPATH . 'uploads/jaminan/' . $oldData['dokumen'];
+            if (file_exists($oldPath)) {
+                unlink($oldPath);
             }
         }
+    }
+
 
         $data = [
             'nomor_penetapan'   => $this->request->getPost('nomor_penetapan'),
@@ -142,6 +143,7 @@ class JaminanController extends BaseController
         $this->jaminanModel->update($id, $data);
 
         return redirect()->to('/admin/jaminan')->with('success', 'Data Jaminan berhasil diupdate');
+        
     }
 
     public function delete($id)

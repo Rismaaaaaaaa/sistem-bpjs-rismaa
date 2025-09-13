@@ -244,19 +244,46 @@
                                 </td>
                                 <td class="p-4"><?= esc($row['no_rekening']) ?></td>
                                 <td class="p-4"><?= esc($row['atas_nama']) ?></td>
+
                                 <td class="p-4">
-                                    <?php if ($row['dokumen']): ?>
-                                        <a href="<?= base_url('uploads/' . $row['dokumen']) ?>" target="_blank" class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
-                                            <i class="fas fa-file-pdf mr-2"></i> Lihat
+                                    <?php 
+                                        $filePath = FCPATH . 'uploads/jaminan/' . ($row['dokumen'] ?? '');
+                                        if (!empty($row['dokumen']) && file_exists($filePath)): 
+                                    ?>
+                                        <a href="<?= base_url('uploads/jaminan/' . $row['dokumen']) ?>" target="_blank"
+                                        class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
+                                            <i class="fas fa-image mr-2"></i> Lihat
                                         </a>
                                     <?php else: ?>
-                                        <span class="inline-flex items-center px-3 py-2 rounded-lg bg-gray-100 text-gray-600">
+                                        <button type="button" onclick="showNoFileToast()" 
+                                            class="inline-flex items-center px-3 py-2 rounded-lg bg-gray-100 text-gray-600">
                                             <i class="fas fa-times-circle mr-2"></i> Tidak ada
-                                        </span>
+                                        </button>
                                     <?php endif; ?>
                                 </td>
-                                <td class="p-4">
+
+
+
+                               <td class="p-4">
                                     <div class="flex space-x-2">
+                                        <!-- Tombol Detail -->
+                                        <button 
+                                            class="p-2 rounded-lg bg-green-100 text-green-600 hover:bg-green-200 transition btn-detail"
+                                            data-id="<?= $row['id'] ?>"
+                                            data-nomor_penetapan="<?= esc($row['nomor_penetapan']) ?>"
+                                            data-tanggal_transaksi="<?= esc($row['tanggal_transaksi']) ?>"
+                                            data-kode_transaksi="<?= esc($row['kode_transaksi']) ?>"
+                                            data-nomor_kpj="<?= esc($row['nomor_kpj']) ?>"
+                                            data-nama_perusahaan="<?= esc($row['nama_perusahaan']) ?>"
+                                            data-pph21="<?= esc($row['pph21']) ?>"
+                                            data-jumlah_bayar="<?= esc($row['jumlah_bayar']) ?>"
+                                            data-no_rekening="<?= esc($row['no_rekening']) ?>"
+                                            data-atas_nama="<?= esc($row['atas_nama']) ?>"
+                                            data-dokumen="<?= esc($row['dokumen']) ?>"
+                                            title="Detail">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+
                                         <!-- Tombol Edit -->
                                         <button 
                                             class="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition btn-edit"
@@ -283,6 +310,7 @@
                                         </form>
                                     </div>
                                 </td>
+
 
                             </tr>
                         <?php endforeach; ?>
@@ -365,6 +393,30 @@
         </div>
     </div>
 
+    <!-- Modal dua -->
+     <!-- Modal Detail -->
+    <div id="modalDetail" class="fixed inset-0 hidden bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative">
+            <button class="absolute top-2 right-2 text-gray-600 hover:text-gray-900" id="closeModalDetail">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="text-lg font-semibold mb-4">Detail Jaminan</h2>
+            <div class="space-y-2">
+                <p><strong>Nomor Penetapan:</strong> <span id="detailNomorPenetapan"></span></p>
+                <p><strong>Tanggal Transaksi:</strong> <span id="detailTanggal"></span></p>
+                <p><strong>Kode Transaksi:</strong> <span id="detailKode"></span></p>
+                <p><strong>Nomor KPJ:</strong> <span id="detailKpj"></span></p>
+                <p><strong>Nama Perusahaan:</strong> <span id="detailPerusahaan"></span></p>
+                <p><strong>PPH21:</strong> <span id="detailPph21"></span></p>
+                <p><strong>Jumlah Bayar:</strong> <span id="detailJumlah"></span></p>
+                <p><strong>No Rekening:</strong> <span id="detailRekening"></span></p>
+                <p><strong>Atas Nama:</strong> <span id="detailAtasNama"></span></p>
+                <p><strong>Dokumen:</strong> <span id="detailDokumen"></span></p>
+            </div>
+        </div>
+    </div>
+
+
 </div>
 
 
@@ -409,6 +461,20 @@
         color: white;
     }
 </style>
+
+<script>
+function showNoFileToast() {
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'warning',
+        title: 'Dokumen tidak tersedia',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+    });
+}
+</script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -518,6 +584,87 @@ document.getElementById("resetFilters").addEventListener("click", function() {
     document.getElementById("companyFilter").value = "all";
     document.getElementById("sortBy").value = "newest";
     document.getElementById("applyFilters").click();
+});
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    <?php if (session()->getFlashdata('success')): ?>
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: '<?= session()->getFlashdata('success') ?>',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('error')): ?>
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'error',
+            title: '<?= session()->getFlashdata('error') ?>',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+    <?php endif; ?>
+});
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const modalDetail = document.getElementById("modalDetail");
+    const closeModalDetail = document.getElementById("closeModalDetail");
+
+    document.querySelectorAll(".btn-detail").forEach(btn => {
+        btn.addEventListener("click", function() {
+            document.getElementById("detailNomorPenetapan").textContent = this.dataset.nomor_penetapan;
+            document.getElementById("detailTanggal").textContent = this.dataset.tanggal_transaksi;
+            document.getElementById("detailKode").textContent = this.dataset.kode_transaksi;
+            document.getElementById("detailKpj").textContent = this.dataset.nomor_kpj;
+            document.getElementById("detailPerusahaan").textContent = this.dataset.nama_perusahaan;
+            document.getElementById("detailPph21").textContent = this.dataset.pph21;
+            document.getElementById("detailJumlah").textContent = this.dataset.jumlah_bayar;
+            document.getElementById("detailRekening").textContent = this.dataset.no_rekening;
+            document.getElementById("detailAtasNama").textContent = this.dataset.atas_nama;
+
+           if(this.dataset.dokumen){
+                let fileUrl = "<?= base_url('uploads/jaminan/') ?>" + this.dataset.dokumen;
+                let ext = this.dataset.dokumen.split('.').pop().toLowerCase();
+
+                if(['jpg','jpeg','png','gif'].includes(ext)){
+                    document.getElementById("detailDokumen").innerHTML = `
+                        <img src="${fileUrl}" alt="Dokumen" class="max-h-64 rounded border">
+                    `;
+                } else if(ext === 'pdf') {
+                    document.getElementById("detailDokumen").innerHTML = `
+                        <iframe src="${fileUrl}" class="w-full h-64 border rounded"></iframe>
+                    `;
+                } else {
+                    document.getElementById("detailDokumen").innerHTML = `
+                        <a href="${fileUrl}" target="_blank" class="text-blue-600 hover:underline">
+                            Lihat Dokumen
+                        </a>
+                    `;
+                }
+            } else {
+                document.getElementById("detailDokumen").textContent = "Tidak ada dokumen";
+            }
+
+
+            modalDetail.classList.remove("hidden");
+        });
+    });
+
+    closeModalDetail.addEventListener("click", () => {
+        modalDetail.classList.add("hidden");
+    });
 });
 </script>
 

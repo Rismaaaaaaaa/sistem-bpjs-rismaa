@@ -181,14 +181,18 @@ $active_menu = isset($active_menu) ? $active_menu : 'dashboard';
 <div class="sidenav-modern">
     <!-- Brand Header -->
     <div class="brand-header-modern">
-        <div class="brand-logo-modern">
-            <div class="logo-icon-modern">
-                <i class="fas fa-heartbeat"></i>
+        <div class="brand-logo-modern d-flex align-items-center">
+            <div class="logo-img-modern">
+                <img src="<?= base_url('assets/images/logo-bpjs.png') ?>" alt="Logo BPJS" width="40">
+
             </div>
-            <span class="logo-text-modern">BPJS</span>
+            <div class="logo-text-wrapper ms-2">
+                <span class="logo-text-modern fw-bold fs-5">BPJS</span>
+                <div class="brand-subtitle-modern text-muted small">Healthcare Administration</div>
+            </div>
         </div>
-        <div class="brand-subtitle-modern">Healthcare Administration</div>
     </div>
+
     <!-- Navigation -->
     <nav class="nav-modern">
         <a href="<?= base_url('/admin/dashboard') ?>" class="nav-item-modern <?= $active_menu === 'dashboard' ? 'active' : '' ?>">
