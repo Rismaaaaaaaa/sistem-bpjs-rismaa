@@ -182,7 +182,7 @@
                         <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-3 group-hover:text-bpjs-accent"></i>
                         <p class="text-sm text-gray-600 mb-1">Klik untuk upload atau drag & drop file di sini</p>
                         <p class="text-xs text-gray-500">Format: PNG, JPG, JPEG (Maks. 5MB)</p>
-                        <input type="file" name="dokumen" accept=".png,.jpg,.jpeg" class="hidden" id="fileInput" required>
+                        <input type="file" name="dokumen" accept=".png,.jpg,.jpeg" class="hidden" id="fileInput" >
                     </div>
                     <div id="fileName" class="text-sm text-gray-600 mt-2 hidden"></div>
                 </div>

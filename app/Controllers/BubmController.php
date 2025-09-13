@@ -96,7 +96,43 @@ class BubmController extends BaseController
     }
 
 
-        public function update($id)
+    public function store()
+    {
+        $voucher       = $this->request->getPost('voucher');
+        $today         = date('d/m/Y');
+        $kodeTransaksi = $today . ' - ' . $voucher;
+
+        $file     = $this->request->getFile('dokumen');
+        $fileName = null;
+
+        // Pastikan folder public/uploads/bubm ada
+        $uploadPath = FCPATH . 'uploads/bubm';
+        if (!is_dir($uploadPath)) {
+            mkdir($uploadPath, 0777, true);
+        }
+
+        // Upload file
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $fileName = $file->getRandomName();
+            $file->move($uploadPath, $fileName);
+        }
+
+        // Ambil jumlah_rupiah dan bersihkan
+        $jumlahRupiah = preg_replace('/[^0-9]/', '', $this->request->getPost('jumlah_rupiah'));
+
+        $this->bubmModel->save([
+            'kode_transaksi' => $kodeTransaksi,
+            'voucher'        => $voucher,
+            'program'        => $this->request->getPost('program') ?? 'BUBM',
+            'jumlah_rupiah'  => $jumlahRupiah,
+            'keterangan'     => $this->request->getPost('keterangan'),
+            'dokumen'        => $fileName,
+        ]);
+
+        return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil disimpan');
+    }
+
+    public function update($id)
     {
         $data = $this->bubmModel->find($id);
 
@@ -104,21 +140,30 @@ class BubmController extends BaseController
             return redirect()->to('/admin/bubm')->with('error', 'Data tidak ditemukan');
         }
 
-        $file = $this->request->getFile('dokumen');
-        $fileName = $data['dokumen']; // default pakai yang lama
+        $file     = $this->request->getFile('dokumen');
+        $fileName = $data['dokumen']; // default: file lama
 
-        if ($file && $file->isValid() && !$file->hasMoved()) {
-            // hapus file lama
-            if (!empty($data['dokumen']) && file_exists(WRITEPATH . 'uploads/bubm/' . $data['dokumen'])) {
-                unlink(WRITEPATH . 'uploads/bubm/' . $data['dokumen']);
-            }
-            $fileName = $file->getRandomName();
-            $file->move(WRITEPATH . 'uploads/bubm', $fileName);
+        $uploadPath = FCPATH . 'uploads/bubm';
+        if (!is_dir($uploadPath)) {
+            mkdir($uploadPath, 0777, true);
         }
+
+        // Jika ada file baru, replace
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            // Hapus file lama
+            if (!empty($data['dokumen']) && file_exists($uploadPath . '/' . $data['dokumen'])) {
+                unlink($uploadPath . '/' . $data['dokumen']);
+            }
+
+            $fileName = $file->getRandomName();
+            $file->move($uploadPath, $fileName);
+        }
+
+        $jumlahRupiah = preg_replace('/[^0-9]/', '', $this->request->getPost('jumlah_rupiah'));
 
         $this->bubmModel->update($id, [
             'voucher'       => $this->request->getPost('voucher'),
-            'jumlah_rupiah' => $this->request->getPost('jumlah_rupiah'),
+            'jumlah_rupiah' => $jumlahRupiah,
             'keterangan'    => $this->request->getPost('keterangan'),
             'dokumen'       => $fileName,
         ]);
@@ -126,18 +171,19 @@ class BubmController extends BaseController
         return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil diperbarui');
     }
 
-        public function delete($id)
+    public function delete($id)
     {
-        // Cari data berdasarkan ID
         $data = $this->bubmModel->find($id);
 
         if (!$data) {
             return redirect()->to('/admin/bubm')->with('error', 'Data BUBM tidak ditemukan');
         }
 
+        $uploadPath = FCPATH . 'uploads/bubm';
+
         // Hapus file dokumen kalau ada
         if (!empty($data['dokumen'])) {
-            $filePath = WRITEPATH . 'uploads/bubm/' . $data['dokumen'];
+            $filePath = $uploadPath . '/' . $data['dokumen'];
             if (is_file($filePath)) {
                 unlink($filePath);
             }
@@ -148,37 +194,6 @@ class BubmController extends BaseController
 
         return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil dihapus');
     }
-
-  public function store()
-{
-    $voucher = $this->request->getPost('voucher');
-
-    $today          = date('d/m/Y');
-    $kodeTransaksi  = $today . ' - ' . $voucher;
-
-    $file     = $this->request->getFile('dokumen');
-    $fileName = null;
-
-    if ($file && $file->isValid() && !$file->hasMoved()) {
-        $fileName = $file->getRandomName();
-        $file->move(WRITEPATH . 'uploads/bubm', $fileName);
-    }
-
-    // Ambil jumlah_rupiah dan bersihkan dari titik/format ribuan
-    $jumlahRupiah = $this->request->getPost('jumlah_rupiah');
-    $jumlahRupiah = preg_replace('/[^0-9]/', '', $jumlahRupiah); // buang semua non-digit
-
-    $this->bubmModel->save([
-        'kode_transaksi' => $kodeTransaksi,
-        'voucher'        => $voucher,
-        'program'        => $this->request->getPost('program') ?? 'BUBM',
-        'jumlah_rupiah'  => $jumlahRupiah,
-        'keterangan'     => $this->request->getPost('keterangan'),
-        'dokumen'        => $fileName,
-    ]);
-
-    return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil disimpan');
-}
 
 
     public function filter()
