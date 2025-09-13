@@ -52,4 +52,17 @@ $routes->get('admin/bubm/export', 'BubmController::export_bubm'); // nanti buat 
 $routes->get('/admin/tambah_bubm', 'BubmController::create');
 $routes->post('admin/bubm/update/(:num)', 'BubmController::update/$1');
 
+// Tambah User
+$routes->get('admin/tambah_user', 'TambahUserController::index');
+$routes->post('admin/tambah_user/store', 'TambahUserController::store');
 
+// (opsional CRUD lain kalau perlu)
+$routes->get('admin/users', 'TambahUserController::list');
+$routes->get('admin/users/edit/(:num)', 'TambahUserController::edit/$1');
+$routes->post('admin/users/update/(:num)', 'TambahUserController::update/$1');
+$routes->get('admin/users/delete/(:num)', 'TambahUserController::delete/$1');
+$routes->get('admin/list_user', 'TambahUserController::list');
+$routes->get('admin/users/delete/(:num)', 'TambahUserController::delete/$1');
+
+$routes->get('admin/settings', 'SettingsController::index');
+$routes->post('admin/settings/update', 'SettingsController::update');

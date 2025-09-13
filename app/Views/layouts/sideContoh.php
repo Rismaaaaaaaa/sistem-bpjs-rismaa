@@ -79,39 +79,48 @@
     </div>
 
 
-    <!-- Navigation -->
-    <nav class="flex-1 px-3 py-4 space-y-1">
-        <a href="/admin/dashboard" class="flex items-center gap-3 p-3 rounded-xl bg-[#145188]/80 transition group">
-            <div class="p-1.5 rounded-lg bg-bpjs-accent/20">
-                <i class="fas fa-tachometer-alt w-4 h-4 text-bpjs-accent"></i>
-            </div>
-            <span>Dashboard</span>
-        </a>
-        <a href="/admin/jaminan" class="flex items-center gap-3 p-3 rounded-xl hover:bg-[#145188]/80 transition group">
+  <!-- Navigation -->
+<nav class="flex-1 px-3 py-4 space-y-1">
+    <a href="/admin/dashboard" class="flex items-center gap-3 p-3 rounded-xl bg-[#145188]/80 transition group">
+        <div class="p-1.5 rounded-lg bg-bpjs-accent/20">
+            <i class="fas fa-tachometer-alt w-4 h-4 text-bpjs-accent"></i>
+        </div>
+        <span>Dashboard</span>
+    </a>
+
+    <a href="/admin/jaminan" class="flex items-center gap-3 p-3 rounded-xl hover:bg-[#145188]/80 transition group">
+        <div class="p-1.5 rounded-lg bg-bpjs-accent/10 group-hover:bg-bpjs-accent/20">
+            <i class="fas fa-file-medical w-4 h-4 text-bpjs-accent"></i>
+        </div>
+        <span>Jaminan</span>
+    </a>
+
+    <a href="/admin/bubm" class="flex items-center gap-3 p-3 rounded-xl hover:bg-[#145188]/80 transition group">
+        <div class="p-1.5 rounded-lg bg-bpjs-accent/10 group-hover:bg-bpjs-accent/20">
+            <i class="fas fa-money-check-alt w-4 h-4 text-bpjs-accent"></i>
+        </div>
+        <span>BUBM</span>
+    </a>
+
+    <!-- Menu Settings -->
+    <a href="/admin/settings" class="flex items-center gap-3 p-3 rounded-xl hover:bg-[#145188]/80 transition group">
+        <div class="p-1.5 rounded-lg bg-bpjs-accent/10 group-hover:bg-bpjs-accent/20">
+            <i class="fas fa-cog w-4 h-4 text-bpjs-accent"></i>
+        </div>
+        <span>Settings</span>
+    </a>
+
+    <!-- Jika role superadmin -->
+    <?php if (session()->get('role') === 'superadmin') : ?>
+        <a href="/admin/list_user" class="flex items-center gap-3 p-3 rounded-xl hover:bg-[#145188]/80 transition group">
             <div class="p-1.5 rounded-lg bg-bpjs-accent/10 group-hover:bg-bpjs-accent/20">
-                <i class="fas fa-file-medical w-4 h-4 text-bpjs-accent"></i>
+                <i class="fas fa-user-plus w-4 h-4 text-bpjs-accent"></i>
             </div>
-            <span>Jaminan</span>
+            <span>Tambah Akun</span>
         </a>
-        <a href="/admin/bubm" class="flex items-center gap-3 p-3 rounded-xl hover:bg-[#145188]/80 transition group">
-            <div class="p-1.5 rounded-lg bg-bpjs-accent/10 group-hover:bg-bpjs-accent/20">
-                <i class="fas fa-money-check-alt w-4 h-4 text-bpjs-accent"></i>
-            </div>
-            <span>BUBM</span>
-        </a>
-        <a href="/admin/peserta" class="flex items-center gap-3 p-3 rounded-xl hover:bg-[#145188]/80 transition group">
-            <div class="p-1.5 rounded-lg bg-bpjs-accent/10 group-hover:bg-bpjs-accent/20">
-                <i class="fas fa-users w-4 h-4 text-bpjs-accent"></i>
-            </div>
-            <span>Data Peserta</span>
-        </a>
-        <a href="/admin/laporan" class="flex items-center gap-3 p-3 rounded-xl hover:bg-[#145188]/80 transition group">
-            <div class="p-1.5 rounded-lg bg-bpjs-accent/10 group-hover:bg-bpjs-accent/20">
-                <i class="fas fa-chart-bar w-4 h-4 text-bpjs-accent"></i>
-            </div>
-            <span>Laporan</span>
-        </a>
-    </nav>
+    <?php endif; ?>
+</nav>
+
 
     <!-- Logout -->
     <div class="px-3 py-4 border-t border-blue-700/30">

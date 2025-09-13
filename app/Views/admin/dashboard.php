@@ -1,412 +1,358 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard BPJS</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Font Awesome CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        bpjs: {
-                            primary: '#1c5ca4',
-                            secondary: '#2c343c', 
-                            accent: '#e4943c',
-                            light: '#93b0ca',
-                            darkblue: '#0a1e3c'
+<?= $this->extend('layouts/main') ?>
+<?= $this->section('content') ?>
+
+<main class="pt-16 min-h-screen p-6 bg-gray-50">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-bpjs-primary flex items-center gap-3">
+                <div class="p-2 rounded-lg bg-bpjs-accent/10">
+                    <i class="fas fa-tachometer-alt text-bpjs-accent text-xl"></i>
+                </div>
+                Dashboard BPJS Kesehatan
+            </h1>
+            <p class="text-gray-600 mt-2 ml-11">Ringkasan data BUBM dan Jaminan BPJS Kesehatan</p>
+        </div>
+        <div class="flex items-center gap-2 text-sm text-gray-500">
+            <i class="fas fa-calendar-alt"></i>
+            <span><?= date('d F Y') ?></span>
+        </div>
+    </div>
+
+    <!-- Statistik Ringkas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total Input BUBM -->
+        <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200 transition hover:shadow-md">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 mb-2 flex items-center gap-2">
+                        <div class="p-2 rounded-lg bg-blue-100">
+                            <i class="fas fa-money-check-alt text-blue-600"></i>
+                        </div>
+                        Total Data BUBM
+                    </p>
+                    <h3 class="text-2xl font-bold text-gray-800"><?= $totalBubm ?></h3>
+                </div>
+                <div class="text-green-500 text-sm font-semibold">
+                    +12% <i class="fas fa-arrow-up"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Input Jaminan -->
+        <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200 transition hover:shadow-md">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 mb-2 flex items-center gap-2">
+                        <div class="p-2 rounded-lg bg-orange-100">
+                            <i class="fas fa-file-medical text-orange-600"></i>
+                        </div>
+                        Total Data Jaminan
+                    </p>
+                    <h3 class="text-2xl font-bold text-gray-800"><?= $totalJaminan ?></h3>
+                </div>
+                <div class="text-green-500 text-sm font-semibold">
+                    +8% <i class="fas fa-arrow-up"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Dana Masuk -->
+        <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200 transition hover:shadow-md">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 mb-2 flex items-center gap-2">
+                        <div class="p-2 rounded-lg bg-green-100">
+                            <i class="fas fa-money-bill-wave text-green-600"></i>
+                        </div>
+                        Total Dana Masuk
+                    </p>
+                    <h3 class="text-2xl font-bold text-gray-800">Rp <?= number_format($totalDana, 0, ',', '.') ?></h3>
+                </div>
+                <div class="text-green-500 text-sm font-semibold">
+                    +15% <i class="fas fa-arrow-up"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaksi Bulan Ini -->
+        <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200 transition hover:shadow-md">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 mb-2 flex items-center gap-2">
+                        <div class="p-2 rounded-lg bg-purple-100">
+                            <i class="fas fa-calendar-check text-purple-600"></i>
+                        </div>
+                        Transaksi Bulan Ini
+                    </p>
+                    <h3 class="text-2xl font-bold text-gray-800"><?= $bulanIni ?></h3>
+                </div>
+                <div class="text-blue-500 text-sm font-semibold">
+                    <?= date('M Y') ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grafik dan Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Trend Chart -->
+        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-chart-line text-bpjs-primary"></i>
+                    Tren Dana Masuk per Bulan
+                </h3>
+                <div class="flex gap-2">
+                    <span class="flex items-center gap-1 text-sm">
+                        <div class="w-3 h-3 bg-orange-500 rounded"></div> BUBM
+                    </span>
+                    <span class="flex items-center gap-1 text-sm">
+                        <div class="w-3 h-3 bg-blue-500 rounded"></div> Jaminan
+                    </span>
+                </div>
+            </div>
+            <canvas id="trendChart" height="250"></canvas>
+        </div>
+
+        <!-- Program Distribution -->
+        <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
+                <i class="fas fa-chart-pie text-bpjs-primary"></i>
+                Distribusi Program
+            </h3>
+            <canvas id="programChart" height="250"></canvas>
+        </div>
+    </div>
+
+    <!-- Bottom Section -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+        <!-- Top 5 Voucher -->
+        <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-trophy text-bpjs-primary"></i>
+                    Top 5 Voucher Terbesar
+                </h3>
+                <span class="text-sm text-gray-500">Bulan <?= date('F') ?></span>
+            </div>
+            <div class="space-y-4">
+                <?php foreach ($topVoucher as $index => $row): ?>
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-bpjs-primary to-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                            <?= $index + 1 ?>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-800"><?= $row['voucher'] ?></p>
+                            <p class="text-sm text-gray-500"><?= $row['program'] ?? 'BUBM' ?></p>
+                        </div>
+                    </div>
+                    <span class="font-semibold text-green-600">Rp <?= number_format($row['total'], 0, ',', '.') ?></span>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+        <!-- Data Terbaru -->
+        <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-history text-bpjs-primary"></i>
+                    Transaksi Terbaru
+                </h3>
+                <a href="<?= base_url('admin/bubm') ?>" class="text-sm text-bpjs-primary hover:text-blue-800 transition flex items-center gap-1">
+                    Lihat Semua <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="text-left p-3 font-medium text-gray-600">Kode</th>
+                            <th class="text-left p-3 font-medium text-gray-600">Voucher</th>
+                            <th class="text-left p-3 font-medium text-gray-600">Program</th>
+                            <th class="text-right p-3 font-medium text-gray-600">Jumlah</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($recentData as $row): ?>
+                        <tr class="border-b hover:bg-gray-50 transition">
+                            <td class="p-3 font-medium text-bpjs-primary"><?= $row['kode_transaksi'] ?? '-' ?></td>
+                            <td class="p-3"><?= $row['voucher'] ?? '-' ?></td>
+                            <td class="p-3">
+                                <span class="px-2 py-1 rounded-full text-xs 
+                                    <?= ($row['program'] ?? 'Jaminan') === 'Jaminan' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800' ?>">
+                                    <?= $row['program'] ?? 'Jaminan' ?>
+                                </span>
+                            </td>
+                            <td class="p-3 text-right font-semibold text-green-600">
+                                Rp <?= number_format($row['jumlah_rupiah'] ?? $row['jumlah_bayar'] ?? 0, 0, ',', '.') ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
+            <i class="fas fa-bolt text-bpjs-primary"></i>
+            Akses Cepat
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <a href="<?= base_url('admin/tambah_bubm') ?>" class="flex flex-col items-center p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition">
+                <div class="p-3 rounded-lg bg-blue-100 mb-2">
+                    <i class="fas fa-plus text-blue-600 text-xl"></i>
+                </div>
+                <span class="text-sm font-medium text-gray-800">Tambah BUBM</span>
+            </a>
+            <a href="<?= base_url('admin/jaminan/create') ?>" class="flex flex-col items-center p-4 bg-orange-50 rounded-xl hover:bg-orange-100 transition">
+                <div class="p-3 rounded-lg bg-orange-100 mb-2">
+                    <i class="fas fa-file-medical text-orange-600 text-xl"></i>
+                </div>
+                <span class="text-sm font-medium text-gray-800">Tambah Jaminan</span>
+            </a>
+            <a href="<?= base_url('admin/bubm') ?>" class="flex flex-col items-center p-4 bg-green-50 rounded-xl hover:bg-green-100 transition">
+                <div class="p-3 rounded-lg bg-green-100 mb-2">
+                    <i class="fas fa-list text-green-600 text-xl"></i>
+                </div>
+                <span class="text-sm font-medium text-gray-800">Data BUBM</span>
+            </a>
+            <a href="<?= base_url('admin/jaminan') ?>" class="flex flex-col items-center p-4 bg-purple-50 rounded-xl hover:bg-purple-100 transition">
+                <div class="p-3 rounded-lg bg-purple-100 mb-2">
+                    <i class="fas fa-database text-purple-600 text-xl"></i>
+                </div>
+                <span class="text-sm font-medium text-gray-800">Data Jaminan</span>
+            </a>
+        </div>
+    </div>
+</main>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const trendBubm = <?= json_encode($trendBubm) ?>;
+    const trendJaminan = <?= json_encode($trendJaminan) ?>;
+
+    // Daftar bulan fix Januari–Desember
+    const monthNames = [
+        "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+        "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
+    ];
+
+    // Dataset BUBM & Jaminan
+    const bubmData = monthNames.map((_, i) => {
+        const found = trendBubm.find(item => item.bulan == (i + 1));
+        return found ? parseFloat(found.total) : 0;
+    });
+
+    const jaminanData = monthNames.map((_, i) => {
+        const found = trendJaminan.find(item => item.bulan == (i + 1));
+        return found ? parseFloat(found.total) : 0;
+    });
+
+    // Line Chart
+    new Chart(document.getElementById('trendChart'), {
+        type: 'line',
+        data: {
+            labels: monthNames,
+            datasets: [
+                {
+                    label: 'BUBM',
+                    data: bubmData,
+                    borderColor: '#e4943c',
+                    backgroundColor: 'rgba(228, 148, 60, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2
+                },
+                {
+                    label: 'Jaminan',
+                    data: jaminanData,
+                    borderColor: '#1c5ca4',
+                    backgroundColor: 'rgba(28, 92, 164, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': Rp ' + 
+                                new Intl.NumberFormat('id-ID').format(context.raw);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
                         }
                     }
                 }
             }
         }
-    </script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-        
-        body {
-            font-family: 'Poppins', sans-serif;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-        
-        .quick-action-btn:hover {
-            transform: scale(1.05);
-        }
-    </style>
-</head>
-<body class="bg-gray-50">
-    <!-- Modern Header -->
-    <header class="fixed top-0 left-64 right-0 h-16 bg-white/95 backdrop-blur-lg z-40 flex items-center px-6 border-b border-gray-200/20 shadow-sm">
-        <div class="flex items-center justify-between w-full">
-            <div class="flex items-center space-x-2">
-                <h1 class="text-xl font-semibold text-gray-800">Selamat datang,</h1>
-                <span class="text-xl font-bold bg-gradient-to-r from-bpjs-primary to-bpjs-accent bg-clip-text text-transparent">
-                    Admin BPJS
-                </span>
-            </div>
-            
-            <div class="flex items-center space-x-4">
-                <div class="relative">
-                    <button class="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition">
-                        <i class="fas fa-bell text-gray-600"></i>
-                    </button>
-                    <span class="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">3</span>
-                </div>
-                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-bpjs-primary to-bpjs-accent flex items-center justify-center text-white font-semibold">
-                    A
-                </div>
-            </div>
-        </div>
-    </header>
+    });
 
-    <!-- Sidebar -->
-    <aside class="w-64 h-screen fixed top-0 left-0 bg-gradient-to-b from-bpjs-primary to-bpjs-darkblue text-white flex flex-col shadow-xl z-50">
-        <!-- Brand Header -->
-        <div class="p-5 pb-4 border-b border-blue-700/30">
-            <div class="text-2xl font-bold tracking-tight">
-                <span class="bg-gradient-to-r from-bpjs-accent to-[#FFD37A] bg-clip-text text-transparent">BPJS</span>
-                <div class="text-sm font-medium text-gray-300 mt-1">Healthcare Administration</div>
-            </div>
-        </div>
-
-        <!-- Navigation -->
-        <nav class="flex-1 px-3 py-4 space-y-1">
-            <a href="/admin/dashboard" class="flex items-center gap-3 p-3 rounded-xl bg-[#145188]/80 transition group">
-                <div class="p-1.5 rounded-lg bg-bpjs-accent/20">
-                    <i class="fas fa-tachometer-alt w-4 h-4 text-bpjs-accent"></i>
-                </div>
-                <span>Dashboard</span>
-            </a>
-            <a href="/admin/jaminan" class="flex items-center gap-3 p-3 rounded-xl hover:bg-[#145188]/80 transition group">
-                <div class="p-1.5 rounded-lg bg-bpjs-accent/10 group-hover:bg-bpjs-accent/20">
-                    <i class="fas fa-file-medical w-4 h-4 text-bpjs-accent"></i>
-                </div>
-                <span>Jaminan</span>
-            </a>
-            <a href="/admin/bubm" class="flex items-center gap-3 p-3 rounded-xl hover:bg-[#145188]/80 transition group">
-                <div class="p-1.5 rounded-lg bg-bpjs-accent/10 group-hover:bg-bpjs-accent/20">
-                    <i class="fas fa-money-check-alt w-4 h-4 text-bpjs-accent"></i>
-                </div>
-                <span>BUBM</span>
-            </a>
-            <a href="/admin/peserta" class="flex items-center gap-3 p-3 rounded-xl hover:bg-[#145188]/80 transition group">
-                <div class="p-1.5 rounded-lg bg-bpjs-accent/10 group-hover:bg-bpjs-accent/20">
-                    <i class="fas fa-users w-4 h-4 text-bpjs-accent"></i>
-                </div>
-                <span>Data Peserta</span>
-            </a>
-            <a href="/admin/laporan" class="flex items-center gap-3 p-3 rounded-xl hover:bg-[#145188]/80 transition group">
-                <div class="p-1.5 rounded-lg bg-bpjs-accent/10 group-hover:bg-bpjs-accent/20">
-                    <i class="fas fa-chart-bar w-4 h-4 text-bpjs-accent"></i>
-                </div>
-                <span>Laporan</span>
-            </a>
-        </nav>
-
-        <!-- Logout -->
-        <div class="px-3 py-4 border-t border-blue-700/30">
-            <a href="/logout" class="flex items-center gap-3 p-3 rounded-xl hover:bg-red-600/90 transition group">
-                <div class="p-1.5 rounded-lg bg-red-500/10 group-hover:bg-red-500/20">
-                    <i class="fas fa-sign-out-alt w-4 h-4 text-red-300 group-hover:text-white"></i>
-                </div>
-                <span class="text-red-300 group-hover:text-white">Logout</span>
-            </a>
-        </div>
-    </aside>
-
-    <!-- Main Content Area -->
-    <main class="ml-64 pt-16 min-h-screen p-6">
-        <!-- Statistik Ringkas -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            <!-- Total Input Jaminan -->
-            <div class="bg-white rounded-xl shadow-sm p-5 stat-card transition duration-300">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-sm text-gray-500">Total Input Jaminan</p>
-                        <h3 class="text-2xl font-bold text-gray-800 mt-1">1,248</h3>
-                        <p class="text-xs text-green-500 mt-1"><i class="fas fa-arrow-up mr-1"></i> 12% dari bulan lalu</p>
-                    </div>
-                    <div class="bg-blue-100 p-3 rounded-lg">
-                        <i class="fas fa-file-medical text-blue-600 text-xl"></i>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Total Input BUBM -->
-            <div class="bg-white rounded-xl shadow-sm p-5 stat-card transition duration-300">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-sm text-gray-500">Total Input BUBM</p>
-                        <h3 class="text-2xl font-bold text-gray-800 mt-1">892</h3>
-                        <p class="text-xs text-green-500 mt-1"><i class="fas fa-arrow-up mr-1"></i> 8% dari bulan lalu</p>
-                    </div>
-                    <div class="bg-orange-100 p-3 rounded-lg">
-                        <i class="fas fa-money-check-alt text-orange-600 text-xl"></i>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Jumlah Peserta -->
-            <div class="bg-white rounded-xl shadow-sm p-5 stat-card transition duration-300">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-sm text-gray-500">Jumlah Peserta</p>
-                        <h3 class="text-2xl font-bold text-gray-800 mt-1">24,589</h3>
-                        <p class="text-xs text-green-500 mt-1"><i class="fas fa-arrow-up mr-1"></i> 5% dari bulan lalu</p>
-                    </div>
-                    <div class="bg-green-100 p-3 rounded-lg">
-                        <i class="fas fa-users text-green-600 text-xl"></i>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Laporan Dibuat -->
-            <div class="bg-white rounded-xl shadow-sm p-5 stat-card transition duration-300">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-sm text-gray-500">Laporan Dibuat</p>
-                        <h3 class="text-2xl font-bold text-gray-800 mt-1">42</h3>
-                        <p class="text-xs text-red-500 mt-1"><i class="fas fa-arrow-down mr-1"></i> 3% dari bulan lalu</p>
-                    </div>
-                    <div class="bg-purple-100 p-3 rounded-lg">
-                        <i class="fas fa-chart-bar text-purple-600 text-xl"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Grafik dan Quick Actions -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            <!-- Grafik Trend -->
-            <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-5">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Trend Input Jaminan & BUBM</h3>
-                <canvas id="trendChart" height="250"></canvas>
-            </div>
-            
-            <!-- Quick Actions -->
-            <div class="bg-white rounded-xl shadow-sm p-5">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
-                <div class="space-y-3">
-                    <a href="#" class="quick-action-btn flex items-center p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition duration-300">
-                        <div class="bg-blue-100 p-2 rounded-lg mr-3">
-                            <i class="fas fa-plus text-blue-600"></i>
-                        </div>
-                        <span class="text-blue-700 font-medium">Tambah Jaminan</span>
-                    </a>
-                    <a href="#" class="quick-action-btn flex items-center p-3 bg-orange-50 rounded-lg hover:bg-orange-100 transition duration-300">
-                        <div class="bg-orange-100 p-2 rounded-lg mr-3">
-                            <i class="fas fa-plus text-orange-600"></i>
-                        </div>
-                        <span class="text-orange-700 font-medium">Tambah BUBM</span>
-                    </a>
-                    <a href="#" class="quick-action-btn flex items-center p-3 bg-purple-50 rounded-lg hover:bg-purple-100 transition duration-300">
-                        <div class="bg-purple-100 p-2 rounded-lg mr-3">
-                            <i class="fas fa-file-export text-purple-600"></i>
-                        </div>
-                        <span class="text-purple-700 font-medium">Generate Laporan</span>
-                    </a>
-                    <a href="#" class="quick-action-btn flex items-center p-3 bg-green-50 rounded-lg hover:bg-green-100 transition duration-300">
-                        <div class="bg-green-100 p-2 rounded-lg mr-3">
-                            <i class="fas fa-user-plus text-green-600"></i>
-                        </div>
-                        <span class="text-green-700 font-medium">Tambah Peserta</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Pie Chart dan Recent Activity -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            <!-- Pie Chart -->
-            <div class="bg-white rounded-xl shadow-sm p-5">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Distribusi Status Jaminan</h3>
-                <canvas id="statusChart" height="250"></canvas>
-            </div>
-            
-            <!-- Recent Activity -->
-            <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-5">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Aktivitas Terbaru</h3>
-                <div class="space-y-4">
-                    <div class="flex items-start">
-                        <div class="bg-blue-100 p-2 rounded-lg mr-3">
-                            <i class="fas fa-file-medical text-blue-600"></i>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-sm font-medium">Jaminan baru ditambahkan</p>
-                            <p class="text-xs text-gray-500">Jaminan untuk Ahmad Rizki (No. Peserta: 1234567890) telah ditambahkan</p>
-                            <p class="text-xs text-gray-400 mt-1">2 jam yang lalu</p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-start">
-                        <div class="bg-green-100 p-2 rounded-lg mr-3">
-                            <i class="fas fa-check-circle text-green-600"></i>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-sm font-medium">BUBM disetujui</p>
-                            <p class="text-xs text-gray-500">BUBM untuk Siti Rahayu (No. Klaim: BUBM-2023-0872) telah disetujui</p>
-                            <p class="text-xs text-gray-400 mt-1">5 jam yang lalu</p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-start">
-                        <div class="bg-purple-100 p-2 rounded-lg mr-3">
-                            <i class="fas fa-chart-bar text-purple-600"></i>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-sm font-medium">Laporan dibuat</p>
-                            <p class="text-xs text-gray-500">Laporan bulanan Oktober 2023 telah berhasil digenerate</p>
-                            <p class="text-xs text-gray-400 mt-1">Kemarin, 15:42</p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-start">
-                        <div class="bg-amber-100 p-2 rounded-lg mr-3">
-                            <i class="fas fa-user text-amber-600"></i>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-sm font-medium">Admin login</p>
-                            <p class="text-xs text-gray-500">Admin terakhir login: Budi Santoso (08:45)</p>
-                            <p class="text-xs text-gray-400 mt-1">Hari ini, 08:45</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Notifikasi / Reminder -->
-        <div class="bg-white rounded-xl shadow-sm p-5 mb-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Notifikasi & Pengingat</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r">
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-exclamation-circle text-yellow-400"></i>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm text-yellow-700">
-                                <span class="font-medium">Peringatan!</span> 15 data jaminan membutuhkan persetujuan segera.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r">
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-info-circle text-blue-400"></i>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm text-blue-700">
-                                <span class="font-medium">Info!</span> Laporan bulanan harus dikirim sebelum 5 November 2023.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-r">
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-times-circle text-red-400"></i>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm text-red-700">
-                                <span class="font-medium">Penting!</span> 7 data BUBM ditolak dan memerlukan revisi.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r">
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-check-circle text-green-400"></i>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm text-green-700">
-                                <span class="font-medium">Selamat!</span> 98% klaim berhasil diproses bulan ini.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <script>
-        // Trend Chart (Grafik Batang)
-        const trendCtx = document.getElementById('trendChart').getContext('2d');
-        const trendChart = new Chart(trendCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt'],
-                datasets: [
-                    {
-                        label: 'Input Jaminan',
-                        data: [120, 150, 180, 90, 130, 160, 190, 110, 140, 170],
-                        backgroundColor: '#1c5ca4',
-                        borderColor: '#1c5ca4',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Input BUBM',
-                        data: [80, 110, 70, 100, 130, 90, 120, 80, 110, 140],
-                        backgroundColor: '#e4943c',
-                        borderColor: '#e4943c',
-                        borderWidth: 1
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    }
+    // Pie Chart distribusi program
+    const distribusi = <?= json_encode($distribusiProgram) ?>;
+    new Chart(document.getElementById('programChart'), {
+        type: 'doughnut',
+        data: {
+            labels: distribusi.map(d => d.program),
+            datasets: [{
+                data: distribusi.map(d => d.total),
+                backgroundColor: [
+                    '#e4943c', '#1c5ca4', '#10b981', '#f59e0b', '#ef4444',
+                    '#8b5cf6', '#06b6d4', '#84cc16', '#f97316', '#64748b'
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right',
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': Rp ' + 
+                                new Intl.NumberFormat('id-ID').format(context.raw);
+                        }
                     }
                 }
             }
-        });
-        
-        // Status Chart (Pie Chart)
-        const statusCtx = document.getElementById('statusChart').getContext('2d');
-        const statusChart = new Chart(statusCtx, {
-            type: 'pie',
-            data: {
-                labels: ['Disetujui', 'Pending', 'Ditolak'],
-                datasets: [{
-                    data: [65, 25, 10],
-                    backgroundColor: [
-                        '#10B981',
-                        '#F59E0B',
-                        '#EF4444'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    }
-                }
-            }
-        });
-    </script>
-</body>
-</html>
+        }
+    });
+</script>
+
+<style>
+    .hover\:shadow-md {
+        transition: all 0.3s ease;
+    }
+    
+    .hover\:shadow-md:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<?= $this->endSection() ?>

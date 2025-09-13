@@ -77,16 +77,19 @@ class Auth extends BaseController
     /**
      * Helper redirect berdasarkan role user
      */
+    /**
+ * Helper redirect berdasarkan role user
+ */
     private function redirectByRole($role)
     {
         switch ($role) {
             case 'admin':
+            case 'superadmin': // superadmin tetap diarahkan ke admin
                 return redirect()->to('/admin/dashboard');
-            case 'superadmin':
-                return redirect()->to('/super/dashboard');
             default:
                 session()->destroy();
                 return redirect()->to('/login')->with('error', 'Role tidak dikenali.');
         }
     }
+
 }

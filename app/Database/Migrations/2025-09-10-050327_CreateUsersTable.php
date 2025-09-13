@@ -19,12 +19,11 @@ class CreateUsersTable extends Migration
                 'constraint' => 100,
                 'unique'     => true,
             ],
-           'email' => [
-                'type' => 'VARCHAR',
+            'email' => [
+                'type'       => 'VARCHAR',
                 'constraint' => 191,
-                'unique' => true,
+                'unique'     => true,
             ],
-
             'password' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 255,
@@ -33,6 +32,24 @@ class CreateUsersTable extends Migration
                 'type'       => 'ENUM',
                 'constraint' => ['admin', 'superadmin'],
                 'default'    => 'admin',
+            ],
+            'alamat' => [
+                'type'       => 'TEXT',
+                'null'       => true,
+            ],
+            'no_hp' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 20,
+                'null'       => true,
+            ],
+            'jenis_kelamin' => [
+                'type'       => 'ENUM',
+                'constraint' => ['Laki-laki', 'Perempuan'],
+                'null'       => true,
+            ],
+            'tanggal_lahir' => [
+                'type' => 'DATE',
+                'null' => true,
             ],
             'created_at' => [
                 'type' => 'DATETIME',
@@ -43,6 +60,7 @@ class CreateUsersTable extends Migration
                 'null' => true,
             ],
         ]);
+
         $this->forge->addKey('id', true);
         $this->forge->createTable('users');
     }
