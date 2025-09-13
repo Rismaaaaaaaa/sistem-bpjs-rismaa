@@ -321,68 +321,127 @@
         </div>
     </div>
 
-    <!-- Pagination -->
-    <div class="flex justify-between items-center mt-6">
-        <div class="text-sm text-gray-600">
-            Menampilkan <?= count($bubm) ?> dari <?= count($bubm) ?> entri
-        </div>
-        <div class="flex space-x-2">
-            <button class="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 transition">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="px-4 py-2 rounded-xl bg-bpjs-primary text-white">1</button>
-            <button class="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 transition">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
-    </div>
+   
 </div>
+
 
 <!-- Modal Detail BUBM -->
 <div id="modalDetailBubm" class="fixed inset-0 hidden bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative">
-        <!-- Tombol Close -->
-        <button class="absolute top-2 right-2 text-gray-600 hover:text-gray-900" id="closeModalDetailBubm">
-            <i class="fas fa-times"></i>
-        </button>
+  <div class="bg-white w-full max-w-2xl rounded-xl shadow-lg p-6 relative">
+    
+    <!-- Tombol Close -->
+    <button type="button" id="closeModalDetail" 
+            class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">
+      <i class="fas fa-times text-xl"></i>
+    </button>
 
-        <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
-            <i class="fas fa-info-circle text-blue-600"></i> Detail BUBM
-        </h2>
+    <h2 class="text-xl font-semibold mb-4 text-bpjs-primary">Detail Data BUBM</h2>
 
-        <div class="space-y-3 text-gray-700">
-            <p class="flex items-center gap-2">
-                <i class="fas fa-barcode text-bpjs-primary"></i>
-                <strong>Kode Transaksi:</strong> <span id="detailBubmKode"></span>
-            </p>
-            <p class="flex items-center gap-2">
-                <i class="fas fa-ticket-alt text-bpjs-primary"></i>
-                <strong>Voucher:</strong> <span id="detailBubmVoucher"></span>
-            </p>
-            <p class="flex items-center gap-2">
-                <i class="fas fa-calendar-alt text-bpjs-primary"></i>
-                <strong>Tanggal Transaksi:</strong> <span id="detailBubmTanggal"></span>
-            </p>
-            <p class="flex items-center gap-2">
-                <i class="fas fa-layer-group text-bpjs-primary"></i>
-                <strong>Program:</strong> <span id="detailBubmProgram"></span>
-            </p>
-            <p class="flex items-center gap-2">
-                <i class="fas fa-money-bill-wave text-bpjs-primary"></i>
-                <strong>Jumlah Rupiah:</strong> <span id="detailBubmJumlah"></span>
-            </p>
-            <p class="flex items-center gap-2">
-                <i class="fas fa-sticky-note text-bpjs-primary"></i>
-                <strong>Keterangan:</strong> <span id="detailBubmKeterangan"></span>
-            </p>
-            <p class="flex items-center gap-2">
-                <i class="fas fa-file-alt text-bpjs-primary"></i>
-                <strong>Dokumen:</strong> 
-                <a href="#" id="detailBubmDokumen" target="_blank" class="text-blue-600 underline">Lihat Dokumen</a>
-            </p>
+    <div class="grid grid-cols-2 gap-4 text-sm">
+        <div>
+            <p class="font-medium text-gray-600">Kode Transaksi</p>
+            <p id="detail_kode_transaksi" class="text-gray-800"></p>
+        </div>
+        <div>
+            <p class="font-medium text-gray-600">Voucher</p>
+            <p id="detail_voucher" class="text-gray-800"></p>
+        </div>
+        <div>
+            <p class="font-medium text-gray-600">Program</p>
+            <p id="detail_program" class="text-gray-800"></p>
+        </div>
+        <div>
+            <p class="font-medium text-gray-600">Jumlah Rupiah</p>
+            <p id="detail_jumlah_rupiah" class="text-green-600 font-semibold"></p>
+        </div>
+        <div class="col-span-2">
+            <p class="font-medium text-gray-600">Keterangan</p>
+            <p id="detail_keterangan" class="text-gray-800"></p>
+        </div>
+        <div class="col-span-2">
+            <p class="font-medium text-gray-600">Tanggal Transaksi</p>
+            <p id="detail_tanggal_transaksi" class="text-gray-800"></p>
+        </div>
+        <div class="col-span-2">
+            <p class="font-medium text-gray-600">Dokumen</p>
+            <div id="detail_dokumen"></div>
         </div>
     </div>
+
+    <div class="mt-6 flex justify-end">
+        <button type="button" id="closeDetailBtn"
+                class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition">
+            Tutup
+        </button>
+    </div>
+  </div>
 </div>
+
+
+ <!-- Modal Edit BUBM -->
+<div id="modalEditBubm" class="fixed inset-0 hidden bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white w-full max-w-2xl rounded-xl shadow-lg p-6 relative">
+    
+    <!-- Tombol Close -->
+    <button type="button" id="closeModalEdit" 
+            class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">
+      <i class="fas fa-times text-xl"></i>
+    </button>
+
+    <h2 class="text-xl font-semibold mb-4 text-bpjs-primary">Edit Data BUBM</h2>
+
+    <form id="formEditBubm" method="post" enctype="multipart/form-data">
+        <?= csrf_field() ?>
+
+        <input type="hidden" name="id" id="edit_id">
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium">Kode Transaksi</label>
+                <input type="text" name="kode_transaksi" id="edit_kode_transaksi" 
+                       class="w-full border rounded-lg p-2 mt-1" readonly>
+            </div>
+            <div>
+                <label class="block text-sm font-medium">Voucher</label>
+                <input type="text" name="voucher" id="edit_voucher" 
+                       class="w-full border rounded-lg p-2 mt-1">
+            </div>
+            <div>
+                <label class="block text-sm font-medium">Program</label>
+                <input type="text" name="program" id="edit_program" 
+                       class="w-full border rounded-lg p-2 mt-1" readonly>
+            </div>
+            <div>
+                <label class="block text-sm font-medium">Jumlah Rupiah</label>
+                <input type="number" name="jumlah_rupiah" id="edit_jumlah_rupiah" 
+                       class="w-full border rounded-lg p-2 mt-1">
+            </div>
+            <div class="col-span-2">
+                <label class="block text-sm font-medium">Keterangan</label>
+                <textarea name="keterangan" id="edit_keterangan" rows="3" 
+                          class="w-full border rounded-lg p-2 mt-1"></textarea>
+            </div>
+            <div class="col-span-2">
+                <label class="block text-sm font-medium">Dokumen (opsional)</label>
+                <input type="file" name="dokumen" class="w-full border rounded-lg p-2 mt-1">
+                <small class="text-gray-500">Biarkan kosong jika tidak ingin mengganti dokumen.</small>
+            </div>
+        </div>
+
+        <div class="mt-6 flex justify-end space-x-3">
+            <button type="button" id="cancelEdit"
+                    class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition">
+                Batal
+            </button>
+            <button type="submit"
+                    class="px-4 py-2 rounded-lg bg-bpjs-primary text-white hover:bg-bpjs-darkblue transition">
+                Simpan Perubahan
+            </button>
+        </div>
+    </form>
+  </div>
+</div>
+
 
 <style>
     .file-upload:hover {
@@ -395,7 +454,88 @@
     }
 </style>
 
-<?= $this->endSection() ?>
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const modalDetail = document.getElementById("modalDetailBubm");
+    const closeDetail = document.getElementById("closeModalDetail");
+    const closeDetailBtn = document.getElementById("closeDetailBtn");
+
+    document.querySelectorAll(".btn-detail-bubm").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.getElementById("detail_kode_transaksi").innerText = btn.dataset.kode_transaksi;
+            document.getElementById("detail_voucher").innerText = btn.dataset.voucher;
+            document.getElementById("detail_program").innerText = btn.dataset.program;
+            document.getElementById("detail_jumlah_rupiah").innerText = "Rp " + btn.dataset.jumlah_rupiah;
+            document.getElementById("detail_keterangan").innerText = btn.dataset.keterangan || "-";
+            document.getElementById("detail_tanggal_transaksi").innerText = btn.dataset.tanggal_transaksi;
+
+            // Dokumen
+            if (btn.dataset.dokumen) {
+                document.getElementById("detail_dokumen").innerHTML = `
+                    <a href="<?= base_url('uploads/bubm/') ?>${btn.dataset.dokumen}" 
+                       target="_blank" 
+                       class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
+                        <i class="fas fa-file-pdf mr-2"></i> Lihat Dokumen
+                    </a>`;
+            } else {
+                document.getElementById("detail_dokumen").innerHTML = `
+                    <span class="inline-flex items-center px-3 py-2 rounded-lg bg-gray-100 text-gray-600">
+                        <i class="fas fa-times-circle mr-2"></i> Tidak ada dokumen
+                    </span>`;
+            }
+
+            modalDetail.classList.remove("hidden");
+        });
+    });
+
+    // Tutup modal
+    [closeDetail, closeDetailBtn].forEach(el => {
+        el.addEventListener("click", () => modalDetail.classList.add("hidden"));
+    });
+});
+</script>
+
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("modalEditBubm");
+    const closeModal = document.getElementById("closeModalEdit");
+    const cancelEdit = document.getElementById("cancelEdit");
+    const formEdit = document.getElementById("formEditBubm");
+
+    // Klik tombol Edit
+    document.querySelectorAll(".btn-edit-bubm").forEach(btn => {
+        btn.addEventListener("click", () => {
+            // Isi form dari atribut data-*
+            document.getElementById("edit_id").value = btn.dataset.id;
+            document.getElementById("edit_kode_transaksi").value = btn.dataset.kode_transaksi;
+            document.getElementById("edit_voucher").value = btn.dataset.voucher;
+            document.getElementById("edit_program").value = btn.dataset.program;
+            document.getElementById("edit_jumlah_rupiah").value = btn.dataset.jumlah_rupiah;
+            document.getElementById("edit_keterangan").value = btn.dataset.keterangan;
+
+            // Set action form
+            formEdit.action = "<?= base_url('admin/bubm/update/') ?>" + btn.dataset.id;
+
+            // Tampilkan modal
+            modal.classList.remove("hidden");
+        });
+    });
+
+    // Tutup modal
+    [closeModal, cancelEdit].forEach(el => {
+        el.addEventListener("click", () => modal.classList.add("hidden"));
+    });
+});
+</script>
+
+
+
 <script>
 // ambil elemen
 const modalBubm = document.getElementById('modalDetailBubm');
@@ -497,3 +637,5 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 
+
+<?= $this->endSection() ?>

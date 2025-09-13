@@ -96,6 +96,36 @@ class BubmController extends BaseController
     }
 
 
+        public function update($id)
+    {
+        $data = $this->bubmModel->find($id);
+
+        if (!$data) {
+            return redirect()->to('/admin/bubm')->with('error', 'Data tidak ditemukan');
+        }
+
+        $file = $this->request->getFile('dokumen');
+        $fileName = $data['dokumen']; // default pakai yang lama
+
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            // hapus file lama
+            if (!empty($data['dokumen']) && file_exists(WRITEPATH . 'uploads/bubm/' . $data['dokumen'])) {
+                unlink(WRITEPATH . 'uploads/bubm/' . $data['dokumen']);
+            }
+            $fileName = $file->getRandomName();
+            $file->move(WRITEPATH . 'uploads/bubm', $fileName);
+        }
+
+        $this->bubmModel->update($id, [
+            'voucher'       => $this->request->getPost('voucher'),
+            'jumlah_rupiah' => $this->request->getPost('jumlah_rupiah'),
+            'keterangan'    => $this->request->getPost('keterangan'),
+            'dokumen'       => $fileName,
+        ]);
+
+        return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil diperbarui');
+    }
+
         public function delete($id)
     {
         // Cari data berdasarkan ID
