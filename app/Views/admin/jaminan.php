@@ -466,115 +466,133 @@
             </div>
         </div>
         
-       
+        
     </div>
 </div>
 
 
 </div>
 
+
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-    // Modal Edit Functionality
-    const modalEdit = document.getElementById('modalEdit');
-    const btnsEdit = document.querySelectorAll('.btn-edit');
+    const modal = document.getElementById("modalEdit");
+    const btnsEdit = document.querySelectorAll(".btn-edit");
 
     btnsEdit.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const fields = [
-                'id', 'nomor_penetapan', 'tanggal_transaksi', 'kode_transaksi',
-                'nomor_kpj', 'nama_perusahaan', 'pph21', 'jumlah_bayar',
-                'no_rekening', 'atas_nama'
-            ];
-            fields.forEach(field => {
-                document.getElementById(`edit_${field}`).value = btn.dataset[field];
-            });
-            modalEdit.classList.remove('hidden');
+        btn.addEventListener("click", () => {
+            document.getElementById("edit_id").value = btn.dataset.id;
+            document.getElementById("edit_nomor_penetapan").value = btn.dataset.nomor_penetapan;
+            document.getElementById("edit_tanggal_transaksi").value = btn.dataset.tanggal_transaksi;
+            document.getElementById("edit_kode_transaksi").value = btn.dataset.kode_transaksi;
+            document.getElementById("edit_nomor_kpj").value = btn.dataset.nomor_kpj;
+            document.getElementById("edit_nama_perusahaan").value = btn.dataset.nama_perusahaan;
+            document.getElementById("edit_pph21").value = btn.dataset.pph21;
+            document.getElementById("edit_jumlah_bayar").value = btn.dataset.jumlah_bayar;
+            document.getElementById("edit_no_rekening").value = btn.dataset.no_rekening;
+            document.getElementById("edit_atas_nama").value = btn.dataset.atas_nama;
+
+            modal.classList.remove("hidden");
         });
     });
 
-    // Modal Detail Functionality
-    const modalDetail = document.getElementById('modalDetail');
-    const closeModalDetail = document.getElementById('closeModalDetail');
-    const btnsDetail = document.querySelectorAll('.btn-detail');
+    function closeModal() {
+        modal.classList.add("hidden");
+    }
+</script>
 
-    btnsDetail.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const detailFields = {
-                detailNomorPenetapan: 'nomor_penetapan',
-                detailTanggal: 'tanggal_transaksi',
-                detailKode: 'kode_transaksi',
-                detailKpj: 'nomor_kpj',
-                detailPerusahaan: 'nama_perusahaan',
-                detailPph21: 'pph21',
-                detailJumlah: 'jumlah_bayar',
-                detailRekening: 'no_rekening',
-                detailAtasNama: 'atas_nama'
-            };
+<style>
+    table th, table td {
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    table th {
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+    
+    .btn-filter:hover {
+        background-color: #1c5ca4;
+        color: white;
+    }
+</style>
 
-            Object.entries(detailFields).forEach(([elementId, datasetKey]) => {
-                document.getElementById(elementId).textContent = btn.dataset[datasetKey];
-            });
+<script>
+function showNoFileToast() {
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'warning',
+        title: 'Dokumen tidak tersedia',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+    });
+}
+</script>
 
-            const detailDokumen = document.getElementById('detailDokumen');
-            const dokumen = btn.dataset.dokumen;
-
-            if (dokumen && dokumen.trim() !== "" && dokumen.toLowerCase() !== "null" && dokumen.toLowerCase() !== "undefined") {
-                const fileUrl = `/uploads/jaminan/${dokumen}`;
-                const ext = dokumen.split('.').pop().toLowerCase();
-
-                if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) {
-                    detailDokumen.innerHTML = `<img src="${fileUrl}" alt="Dokumen" class="max-h-64 rounded border">`;
-                } else if (ext === 'pdf') {
-                    detailDokumen.innerHTML = `<iframe src="${fileUrl}" class="w-full h-64 border rounded"></iframe>`;
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const dateFilter = document.getElementById('dateFilter');
+        const companyFilter = document.getElementById('companyFilter');
+        const sortBy = document.getElementById('sortBy');
+        const applyFilters = document.getElementById('applyFilters');
+        const resetFilters = document.getElementById('resetFilters');
+        
+        // Search functionality
+        searchInput.addEventListener('keyup', function() {
+            const searchText = this.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchText)) {
+                    row.style.display = '';
                 } else {
-                    detailDokumen.innerHTML = `<a href="${fileUrl}" target="_blank" class="text-blue-600 hover:underline">Lihat Dokumen</a>`;
+                    row.style.display = 'none';
                 }
-            } else {
-                detailDokumen.innerHTML = `
-                    <div class="p-3 bg-yellow-100 border border-yellow-300 text-yellow-800 rounded">
-                        <span class="font-semibold">Info:</span> Tidak ada dokumen yang diunggah.
-                    </div>
-                `;
-            }
-
-
-            modalDetail.classList.remove('hidden');
+            });
+        });
+        
+        // Apply filters
+        applyFilters.addEventListener('click', function() {
+            // In a real application, this would send a request to the server
+            // For demonstration, we'll just show a message
+            alert('Filter diterapkan: ' + 
+                  '\nTanggal: ' + dateFilter.options[dateFilter.selectedIndex].text +
+                  '\nPerusahaan: ' + companyFilter.options[companyFilter.selectedIndex].text +
+                  '\nUrutkan: ' + sortBy.options[sortBy.selectedIndex].text);
+        });
+        
+        // Reset filters
+        resetFilters.addEventListener('click', function() {
+            searchInput.value = '';
+            dateFilter.value = 'all';
+            companyFilter.value = 'all';
+            sortBy.value = 'newest';
+            
+            // Show all rows
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                row.style.display = '';
+            });
         });
     });
+</script>
 
-    closeModalDetail.addEventListener('click', () => {
-        modalDetail.classList.add('hidden');
-    });
 
-    // Filter and Search Functionality
-    const searchInput = document.getElementById('searchInput');
-    const dateFilter = document.getElementById('dateFilter');
-    const companyFilter = document.getElementById('companyFilter');
-    const sortBy = document.getElementById('sortBy');
-    const applyFilters = document.getElementById('applyFilters');
-    const resetFilters = document.getElementById('resetFilters');
+<script>
+document.getElementById("applyFilters").addEventListener("click", function() {
+    const search  = document.getElementById("searchInput").value;
+    const date    = document.getElementById("dateFilter").value;
+    const company = document.getElementById("companyFilter").value;
+    const sortBy  = document.getElementById("sortBy").value;
 
-    searchInput.addEventListener('keyup', () => {
-        const searchText = searchInput.value.toLowerCase();
-        document.querySelectorAll('tbody tr').forEach(row => {
-            row.style.display = row.textContent.toLowerCase().includes(searchText) ? '' : 'none';
-        });
-    });
-
-    applyFilters.addEventListener('click', async () => {
-        const params = new URLSearchParams({
-            search: searchInput.value,
-            date: dateFilter.value,
-            company: companyFilter.value,
-            sortBy: sortBy.value
-        });
-
-        try {
-            const response = await fetch(`/admin/jaminan/filter?${params}`);
-            const data = await response.json();
-            const tbody = document.querySelector('table tbody');
-            tbody.innerHTML = '';
+    fetch(`/admin/jaminan/filter?search=${search}&date=${date}&company=${company}&sortBy=${sortBy}`)
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.querySelector("table tbody");
+            tbody.innerHTML = "";
 
             if (data.length === 0) {
                 tbody.innerHTML = `
@@ -588,7 +606,7 @@
             data.forEach((row, i) => {
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 transition">
-                        <td class="p-4">${i + 1}</td>
+                        <td class="p-4">${i+1}</td>
                         <td class="p-4 font-medium text-bpjs-primary">${row.nomor_penetapan}</td>
                         <td class="p-4">${new Date(row.tanggal_transaksi).toLocaleDateString('id-ID')}</td>
                         <td class="p-4">${row.kode_transaksi}</td>
@@ -598,7 +616,7 @@
                         <td class="p-4">Rp ${parseFloat(row.jumlah_bayar).toLocaleString('id-ID')}</td>
                         <td class="p-4">${row.no_rekening}</td>
                         <td class="p-4">${row.atas_nama}</td>
-                        <td class="p-4">${row.dokumen ? `<a href="/Uploads/${row.dokumen}" target="_blank">Lihat</a>` : 'Tidak ada'}</td>
+                        <td class="p-4">${row.dokumen ? `<a href="/uploads/${row.dokumen}" target="_blank">Lihat</a>` : 'Tidak ada'}</td>
                         <td class="p-4">
                             <button class="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200">
                                 <i class="fas fa-edit"></i>
@@ -610,23 +628,22 @@
                     </tr>
                 `;
             });
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    });
-
-    resetFilters.addEventListener('click', () => {
-        searchInput.value = '';
-        dateFilter.value = 'all';
-        companyFilter.value = 'all';
-        sortBy.value = 'newest';
-        applyFilters.click();
-        document.querySelectorAll('tbody tr').forEach(row => {
-            row.style.display = '';
         });
-    });
+});
 
-    // Toast Notifications
+// Reset filter
+document.getElementById("resetFilters").addEventListener("click", function() {
+    document.getElementById("searchInput").value = "";
+    document.getElementById("dateFilter").value = "all";
+    document.getElementById("companyFilter").value = "all";
+    document.getElementById("sortBy").value = "newest";
+    document.getElementById("applyFilters").click();
+});
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
     <?php if (session()->getFlashdata('success')): ?>
         Swal.fire({
             toast: true,
@@ -650,41 +667,59 @@
             timerProgressBar: true
         });
     <?php endif; ?>
-    });
-
-    function closeModal() {
-        document.getElementById('modalEdit').classList.add('hidden');
-    }
-
-    // Show No File Toast
-    function showNoFileToast() {
-        Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'warning',
-            title: 'Dokumen tidak tersedia',
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true
-        });
-    }
+});
 </script>
 
-<style>
-    table th,
-table td {
-    border-bottom: 1px solid #e5e7eb;
-}
 
-table th {
-    font-weight: 600;
-    font-size: 0.875rem;
-}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const modalDetail = document.getElementById("modalDetail");
+    const closeModalDetail = document.getElementById("closeModalDetail");
 
-.btn-filter:hover {
-    background-color: #1c5ca4;
-    color: white;
-}
-</style>
+    document.querySelectorAll(".btn-detail").forEach(btn => {
+        btn.addEventListener("click", function() {
+            document.getElementById("detailNomorPenetapan").textContent = this.dataset.nomor_penetapan;
+            document.getElementById("detailTanggal").textContent = this.dataset.tanggal_transaksi;
+            document.getElementById("detailKode").textContent = this.dataset.kode_transaksi;
+            document.getElementById("detailKpj").textContent = this.dataset.nomor_kpj;
+            document.getElementById("detailPerusahaan").textContent = this.dataset.nama_perusahaan;
+            document.getElementById("detailPph21").textContent = this.dataset.pph21;
+            document.getElementById("detailJumlah").textContent = this.dataset.jumlah_bayar;
+            document.getElementById("detailRekening").textContent = this.dataset.no_rekening;
+            document.getElementById("detailAtasNama").textContent = this.dataset.atas_nama;
+
+           if(this.dataset.dokumen){
+                let fileUrl = "<?= base_url('uploads/jaminan/') ?>" + this.dataset.dokumen;
+                let ext = this.dataset.dokumen.split('.').pop().toLowerCase();
+
+                if(['jpg','jpeg','png','gif'].includes(ext)){
+                    document.getElementById("detailDokumen").innerHTML = `
+                        <img src="${fileUrl}" alt="Dokumen" class="max-h-64 rounded border">
+                    `;
+                } else if(ext === 'pdf') {
+                    document.getElementById("detailDokumen").innerHTML = `
+                        <iframe src="${fileUrl}" class="w-full h-64 border rounded"></iframe>
+                    `;
+                } else {
+                    document.getElementById("detailDokumen").innerHTML = `
+                        <a href="${fileUrl}" target="_blank" class="text-blue-600 hover:underline">
+                            Lihat Dokumen
+                        </a>
+                    `;
+                }
+            } else {
+                document.getElementById("detailDokumen").textContent = "Tidak ada dokumen";
+            }
+
+
+            modalDetail.classList.remove("hidden");
+        });
+    });
+
+    closeModalDetail.addEventListener("click", () => {
+        modalDetail.classList.add("hidden");
+    });
+});
+</script>
 
 <?= $this->endSection() ?>

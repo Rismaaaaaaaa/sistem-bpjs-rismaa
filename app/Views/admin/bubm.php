@@ -99,12 +99,12 @@
                 >
                     <i class="fas fa-sync"></i> Reset
                 </a>
-                <a 
+                <!-- <a 
                     href="<?= site_url('admin/bubm/export') ?>" 
                     class="w-full md:w-auto px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition font-medium flex items-center gap-2"
                 >
                     <i class="fas fa-file-export"></i> Export
-                </a>
+                </a> -->
             </div>
         </form>
         
