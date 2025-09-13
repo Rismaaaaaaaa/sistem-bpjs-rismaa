@@ -149,36 +149,37 @@ class BubmController extends BaseController
         return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil dihapus');
     }
 
-    public function store()
-    {
-        // Ambil nomor voucher
-        $voucher = $this->request->getPost('voucher');
+  public function store()
+{
+    $voucher = $this->request->getPost('voucher');
 
-        // Buat kode transaksi otomatis
-        $today          = date('d/m/Y');
-        $kodeTransaksi  = $today . ' - ' . $voucher;
+    $today          = date('d/m/Y');
+    $kodeTransaksi  = $today . ' - ' . $voucher;
 
-        // Upload dokumen
-        $file     = $this->request->getFile('dokumen');
-        $fileName = null;
+    $file     = $this->request->getFile('dokumen');
+    $fileName = null;
 
-        if ($file && $file->isValid() && !$file->hasMoved()) {
-            $fileName = $file->getRandomName();
-            $file->move(WRITEPATH . 'uploads/bubm', $fileName); // → simpan di writable/uploads/bubm
-        }
-
-        // Simpan ke DB
-        $this->bubmModel->save([
-            'kode_transaksi' => $kodeTransaksi,
-            'voucher'        => $voucher,
-            'program'        => $this->request->getPost('program') ?? 'BUBM',
-            'jumlah_rupiah'  => $this->request->getPost('jumlah_rupiah'),
-            'keterangan'     => $this->request->getPost('keterangan'),
-            'dokumen'        => $fileName,
-        ]);
-
-        return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil disimpan');
+    if ($file && $file->isValid() && !$file->hasMoved()) {
+        $fileName = $file->getRandomName();
+        $file->move(WRITEPATH . 'uploads/bubm', $fileName);
     }
+
+    // Ambil jumlah_rupiah dan bersihkan dari titik/format ribuan
+    $jumlahRupiah = $this->request->getPost('jumlah_rupiah');
+    $jumlahRupiah = preg_replace('/[^0-9]/', '', $jumlahRupiah); // buang semua non-digit
+
+    $this->bubmModel->save([
+        'kode_transaksi' => $kodeTransaksi,
+        'voucher'        => $voucher,
+        'program'        => $this->request->getPost('program') ?? 'BUBM',
+        'jumlah_rupiah'  => $jumlahRupiah,
+        'keterangan'     => $this->request->getPost('keterangan'),
+        'dokumen'        => $fileName,
+    ]);
+
+    return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil disimpan');
+}
+
 
     public function filter()
     {

@@ -223,7 +223,7 @@
                         <?php $no = 1; foreach ($bubm as $row): ?>
                             <tr class="hover:bg-gray-50 transition">
                                 <td class="p-4"><?= $no++ ?></td>
-                                <td class="p-4 font-medium text-bpjs-primary"><?= esc($row['kode_transaksi']) ?> - <?= esc($row['voucher']) ?></td>
+                                <td class="p-4 font-medium text-bpjs-primary"><?= esc($row['kode_transaksi']) ?></td>
                                 <td class="p-4">
                                     <div class="flex items-center">
                                         <div class="p-2 rounded-lg bg-indigo-100 mr-2">
@@ -248,7 +248,8 @@
                                 </td>
                                 <td class="p-4">
                                     <?php if ($row['dokumen']): ?>
-                                        <a href="<?= base_url('uploads/' . $row['dokumen']) ?>" target="_blank" class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
+                                        <a href="<?= base_url('uploads/bubm/' . $row['dokumen']) ?>" target="_blank"
+                                        class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
                                             <i class="fas fa-file-pdf mr-2"></i> Lihat
                                         </a>
                                     <?php else: ?>
@@ -257,6 +258,7 @@
                                         </span>
                                     <?php endif; ?>
                                 </td>
+
                                 <td class="p-4">
                                     <div class="flex space-x-2">
                                         <!-- Tombol Detail -->
