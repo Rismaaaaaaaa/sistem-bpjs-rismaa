@@ -1,15 +1,8 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Input Jaminan - BPJS</title>
-    <!-- Tailwind CSS CDN -->
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
@@ -53,7 +46,7 @@
         }
     </style>
 </head>
-<body class="p-6">
+<div class="mt-14 p-6">
     <div class="max-w-5xl mx-auto">
         <!-- Header -->
         <div class="flex items-center justify-between mb-8">
@@ -324,6 +317,6 @@
             });
         });
     </script>
-</body>
+</div>
 </html>
 <?= $this->endSection() ?>

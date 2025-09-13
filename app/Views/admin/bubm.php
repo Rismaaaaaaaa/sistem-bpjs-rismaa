@@ -259,23 +259,50 @@
                                 </td>
                                 <td class="p-4">
                                     <div class="flex space-x-2">
-                                        <!-- Edit -->
-                                        <a href="<?= site_url('admin/bubm/edit/'.$row['id']) ?>" class="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition" title="Edit">
+                                        <!-- Tombol Detail -->
+                                      <!-- Tombol Detail BUBM -->
+                                        <button 
+                                            type="button"
+                                            class="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition btn-detail-bubm"
+                                            data-id="<?= $row['id'] ?>"
+                                            data-kode_transaksi="<?= esc($row['kode_transaksi']) ?>"
+                                            data-voucher="<?= esc($row['voucher']) ?>"
+                                            data-program="<?= esc($row['program']) ?>"
+                                            data-jumlah_rupiah="<?= esc(number_format($row['jumlah_rupiah'], 0, ',', '.')) ?>"
+                                            data-keterangan="<?= esc($row['keterangan']) ?>"
+                                            data-dokumen="<?= esc($row['dokumen']) ?>"
+                                            data-tanggal_transaksi="<?= esc($row['tanggal_transaksi']) ?>"
+                                            title="Lihat Detail"
+                                        >
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+
+
+                                        <!-- Tombol Edit -->
+                                        <button 
+                                            class="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition btn-edit-bubm"
+                                            data-id="<?= $row['id'] ?>"
+                                            data-kode_transaksi="<?= esc($row['kode_transaksi']) ?>"
+                                            data-voucher="<?= esc($row['voucher']) ?>"
+                                            data-program="<?= esc($row['program']) ?>"
+                                            data-jumlah_rupiah="<?= esc($row['jumlah_rupiah']) ?>"
+                                            data-keterangan="<?= esc($row['keterangan']) ?>"
+                                            data-dokumen="<?= esc($row['dokumen']) ?>"
+                                            data-tanggal_transaksi="<?= esc($row['tanggal_transaksi']) ?>"
+                                            title="Edit">
                                             <i class="fas fa-edit"></i>
-                                        </a>
-                                        <!-- Hapus -->
+                                        </button>
+
+                                        <!-- Tombol Hapus -->
                                         <form action="<?= base_url('admin/bubm/delete/'.$row['id']) ?>" method="post" onsubmit="return confirm('Yakin mau hapus data ini?')" class="inline">
                                             <?= csrf_field() ?>
                                             <button type="submit" class="p-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition" title="Hapus">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
-                                        <!-- Detail -->
-                                        <button onclick="openBubmDetail(<?= htmlspecialchars(json_encode($row), ENT_QUOTES, 'UTF-8') ?>)" class="p-2 rounded-lg bg-green-100 text-green-600 hover:bg-green-200 transition" title="Detail">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
                                     </div>
                                 </td>
+
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -312,8 +339,49 @@
 </div>
 
 <!-- Modal Detail BUBM -->
-<div id="modalBubmDetail" class="fixed inset-0 hidden bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <!-- Modal content akan diisi oleh JavaScript -->
+<div id="modalDetailBubm" class="fixed inset-0 hidden bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative">
+        <!-- Tombol Close -->
+        <button class="absolute top-2 right-2 text-gray-600 hover:text-gray-900" id="closeModalDetailBubm">
+            <i class="fas fa-times"></i>
+        </button>
+
+        <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+            <i class="fas fa-info-circle text-blue-600"></i> Detail BUBM
+        </h2>
+
+        <div class="space-y-3 text-gray-700">
+            <p class="flex items-center gap-2">
+                <i class="fas fa-barcode text-bpjs-primary"></i>
+                <strong>Kode Transaksi:</strong> <span id="detailBubmKode"></span>
+            </p>
+            <p class="flex items-center gap-2">
+                <i class="fas fa-ticket-alt text-bpjs-primary"></i>
+                <strong>Voucher:</strong> <span id="detailBubmVoucher"></span>
+            </p>
+            <p class="flex items-center gap-2">
+                <i class="fas fa-calendar-alt text-bpjs-primary"></i>
+                <strong>Tanggal Transaksi:</strong> <span id="detailBubmTanggal"></span>
+            </p>
+            <p class="flex items-center gap-2">
+                <i class="fas fa-layer-group text-bpjs-primary"></i>
+                <strong>Program:</strong> <span id="detailBubmProgram"></span>
+            </p>
+            <p class="flex items-center gap-2">
+                <i class="fas fa-money-bill-wave text-bpjs-primary"></i>
+                <strong>Jumlah Rupiah:</strong> <span id="detailBubmJumlah"></span>
+            </p>
+            <p class="flex items-center gap-2">
+                <i class="fas fa-sticky-note text-bpjs-primary"></i>
+                <strong>Keterangan:</strong> <span id="detailBubmKeterangan"></span>
+            </p>
+            <p class="flex items-center gap-2">
+                <i class="fas fa-file-alt text-bpjs-primary"></i>
+                <strong>Dokumen:</strong> 
+                <a href="#" id="detailBubmDokumen" target="_blank" class="text-blue-600 underline">Lihat Dokumen</a>
+            </p>
+        </div>
+    </div>
 </div>
 
 <style>
@@ -327,7 +395,40 @@
     }
 </style>
 
+<?= $this->endSection() ?>
 <script>
+// ambil elemen
+const modalBubm = document.getElementById('modalDetailBubm');
+const closeModalBubm = document.getElementById('closeModalDetailBubm');
+
+function showDetailBubm(data) {
+    document.getElementById('detailBubmKode').textContent = data.kode_transaksi || '-';
+    document.getElementById('detailBubmVoucher').textContent = data.voucher || '-';
+    document.getElementById('detailBubmTanggal').textContent = data.tanggal_transaksi || '-';
+    document.getElementById('detailBubmProgram').textContent = data.program || '-';
+    document.getElementById('detailBubmJumlah').textContent = data.jumlah_rupiah ? 'Rp ' + data.jumlah_rupiah : '-';
+    document.getElementById('detailBubmKeterangan').textContent = data.keterangan || '-';
+
+    const dokumenLink = document.getElementById('detailBubmDokumen');
+    if (data.dokumen) {
+        dokumenLink.href = data.dokumen;
+        dokumenLink.textContent = "Lihat Dokumen";
+    } else {
+        dokumenLink.removeAttribute('href');
+        dokumenLink.textContent = "-";
+    }
+
+    document.getElementById('modalDetailBubm').classList.remove('hidden');
+}
+
+// Tutup modal
+document.getElementById('closeModalDetailBubm').addEventListener('click', () => {
+    document.getElementById('modalDetailBubm').classList.add('hidden');
+});
+
+
+
+
     document.addEventListener('DOMContentLoaded', function() {
         const fileInput = document.getElementById('file_excel');
         const fileUploadArea = document.querySelector('.file-upload');
@@ -368,4 +469,31 @@
     }
 </script>
 
-<?= $this->endSection() ?>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    <?php if (session()->getFlashdata('success')): ?>
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: '<?= session()->getFlashdata('success') ?>',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('error')): ?>
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'error',
+            title: '<?= session()->getFlashdata('error') ?>',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+    <?php endif; ?>
+});
+</script>
+

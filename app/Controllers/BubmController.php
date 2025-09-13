@@ -27,7 +27,6 @@ class BubmController extends BaseController
 
         $query = $this->bubmModel;
 
-        // 🔍 Search
         if (!empty($search)) {
             $query = $query->groupStart()
                 ->like('kode_transaksi', $search)
@@ -36,31 +35,23 @@ class BubmController extends BaseController
                 ->groupEnd();
         }
 
-        // 📅 Filter Tanggal
         if ($date !== 'all') {
-            $today = new Time('now', 'Asia/Jakarta');
-
-            switch ($date) {
-                case 'today':
-                    $query = $query->where('DATE(created_at)', $today->toDateString());
-                    break;
-                case 'week':
-                    $query = $query->where('YEARWEEK(created_at)', $today->format('oW'));
-                    break;
-                case 'month':
-                    $query = $query->where('MONTH(created_at)', $today->getMonth())
-                                   ->where('YEAR(created_at)', $today->getYear());
-                    break;
-                case 'year':
-                    $query = $query->where('YEAR(created_at)', $today->getYear());
-                    break;
+            $today = date('Y-m-d');
+            if ($date === 'today') {
+                $query = $query->where('DATE(tanggal_transaksi)', $today);
+            } elseif ($date === 'week') {
+                $query = $query->where('YEARWEEK(tanggal_transaksi, 1)', date('oW'));
+            } elseif ($date === 'month') {
+                $query = $query->where('MONTH(tanggal_transaksi)', date('m'))
+                            ->where('YEAR(tanggal_transaksi)', date('Y'));
+            } elseif ($date === 'year') {
+                $query = $query->where('YEAR(tanggal_transaksi)', date('Y'));
             }
         }
 
-        // 🔄 Sorting
         switch ($sortBy) {
             case 'oldest':
-                $query = $query->orderBy('created_at', 'ASC');
+                $query = $query->orderBy('tanggal_transaksi', 'ASC');
                 break;
             case 'amount_desc':
                 $query = $query->orderBy('jumlah_rupiah', 'DESC');
@@ -68,25 +59,27 @@ class BubmController extends BaseController
             case 'amount_asc':
                 $query = $query->orderBy('jumlah_rupiah', 'ASC');
                 break;
-            default: // newest
-                $query = $query->orderBy('created_at', 'DESC');
+            default:
+                $query = $query->orderBy('tanggal_transaksi', 'DESC');
         }
 
         $bubm = $query->findAll();
 
-        // Stats
-        $totalData   = count($bubm);
-        $totalRupiah = array_sum(array_column($bubm, 'jumlah_rupiah'));
+        // ✅ Hitung total rupiah
+        $totalRupiah = 0;
+        if (!empty($bubm)) {
+            $totalRupiah = array_sum(array_map(fn($r) => (float)($r['jumlah_rupiah'] ?? 0), $bubm));
+        }
 
         $data = [
-            'title'        => 'Data BUBM',
-            'active_menu'  => 'bubm',
-            'bubm'         => $bubm,
-            'totalData'    => $totalData,
-            'totalRupiah'  => $totalRupiah,
-            'search'       => $search,
-            'date'         => $date,
-            'sortBy'       => $sortBy,
+            'title'       => 'Data BUBM',
+            'active_menu' => 'bubm',
+            'bubm'        => $bubm,
+            'totalData'   => count($bubm),
+            'totalRupiah' => $totalRupiah,   // <-- kirim ke view
+            'search'      => $search,
+            'date'        => $date,
+            'sortBy'      => $sortBy,
         ];
 
         return view('admin/bubm', $data);
@@ -100,6 +93,30 @@ class BubmController extends BaseController
         ];
 
         return view('admin/tambah_bubm', $data);
+    }
+
+
+        public function delete($id)
+    {
+        // Cari data berdasarkan ID
+        $data = $this->bubmModel->find($id);
+
+        if (!$data) {
+            return redirect()->to('/admin/bubm')->with('error', 'Data BUBM tidak ditemukan');
+        }
+
+        // Hapus file dokumen kalau ada
+        if (!empty($data['dokumen'])) {
+            $filePath = WRITEPATH . 'uploads/bubm/' . $data['dokumen'];
+            if (is_file($filePath)) {
+                unlink($filePath);
+            }
+        }
+
+        // Hapus data dari database
+        $this->bubmModel->delete($id);
+
+        return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil dihapus');
     }
 
     public function store()
@@ -133,7 +150,70 @@ class BubmController extends BaseController
         return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil disimpan');
     }
 
+    public function filter()
+    {
+        $search = $this->request->getGet('search');
+        $date   = $this->request->getGet('date');
+        $sortBy = $this->request->getGet('sortBy');
 
+        $builder = $this->bubmModel;
+
+        // 🔎 Search
+        if (!empty($search)) {
+            $builder = $builder->groupStart()
+                ->like('kode_transaksi', $search)
+                ->orLike('voucher', $search)
+                ->orLike('program', $search)
+                ->groupEnd();
+        }
+
+        // 📅 Filter tanggal
+        if ($date && $date !== 'all') {
+            $today = date('Y-m-d');
+            if ($date === 'today') {
+                $builder = $builder->where('DATE(tanggal_transaksi)', $today);
+            } elseif ($date === 'week') {
+                $builder = $builder->where('YEARWEEK(tanggal_transaksi, 1)', date('oW'));
+            } elseif ($date === 'month') {
+                $builder = $builder->where('MONTH(tanggal_transaksi)', date('m'))
+                                ->where('YEAR(tanggal_transaksi)', date('Y'));
+            } elseif ($date === 'year') {
+                $builder = $builder->where('YEAR(tanggal_transaksi)', date('Y'));
+            }
+        }
+
+        // ↕️ Sort
+        if ($sortBy === 'oldest') {
+            $builder = $builder->orderBy('tanggal_transaksi', 'ASC');
+        } elseif ($sortBy === 'amount_desc') {
+            $builder = $builder->orderBy('jumlah_rupiah', 'DESC');
+        } elseif ($sortBy === 'amount_asc') {
+            $builder = $builder->orderBy('jumlah_rupiah', 'ASC');
+        } else {
+            $builder = $builder->orderBy('tanggal_transaksi', 'DESC'); // default newest
+        }
+
+        $bubm = $builder->findAll();
+
+        // ✅ Hitung total rupiah biar sama kayak index()
+        $totalRupiah = 0;
+        if (!empty($bubm)) {
+            $totalRupiah = array_sum(array_map(fn($r) => (float)($r['jumlah_rupiah'] ?? 0), $bubm));
+        }
+
+        $data = [
+            'title'       => 'Data BUBM',
+            'active_menu' => 'bubm',
+            'bubm'        => $bubm,
+            'totalData'   => count($bubm),
+            'totalRupiah' => $totalRupiah,
+            'search'      => $search,
+            'date'        => $date,
+            'sortBy'      => $sortBy,
+        ];
+
+        return view('admin/bubm', $data);
+    }
 
 
     public function import_bubm()

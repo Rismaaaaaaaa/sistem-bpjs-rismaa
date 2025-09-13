@@ -65,7 +65,7 @@
             <!-- Logo -->
             <img src="<?= base_url('assets/images/logo-bpjs.png') ?>" 
                 alt="Logo BPJS" 
-                class="w-20 h-20 p-2 bg-white rounded-full shadow-md">
+                class="w-14 h-14 p-2 bg-white rounded-full shadow-md">
 
 
             <!-- Text -->
