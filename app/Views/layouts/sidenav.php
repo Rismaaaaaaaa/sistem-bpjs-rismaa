@@ -178,6 +178,9 @@ $active_menu = isset($active_menu) ? $active_menu : 'dashboard';
         background: rgba(255, 255, 255, 0.3);
     }
 </style>
+
+
+
 <div class="sidenav-modern">
     <!-- Brand Header -->
     <div class="brand-header-modern">

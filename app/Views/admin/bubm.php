@@ -1,7 +1,7 @@
 <?= $this->extend('layouts/main') ?>
 <?= $this->section('content') ?>
 
-<div class="p-6">
+<div class="p-6 mt-12">
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
         <div>
@@ -13,7 +13,7 @@
             </h1>
             <p class="text-gray-600 mt-2 ml-11">Kelola data Bantuan Uang Muka Biaya Medis (BUBM) BPJS Kesehatan</p>
         </div>
-        <a href="<?= site_url('admin/tambah_bubm') ?>" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-bpjs-accent to-orange-500 text-white font-semibold hover:opacity-90 shadow-lg transition">
+        <a href="<?= site_url('/admin/tambah_bubm') ?>" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-bpjs-accent to-orange-500 text-white font-semibold hover:opacity-90 shadow-lg transition">
             <i class="fas fa-plus"></i>
             Tambah Data
         </a>
@@ -109,27 +109,32 @@
         </form>
         
         <!-- Import Excel/CSV -->
-        <div class="mt-6 pt-6 border-t border-gray-200">
+        <div class="my-6 pt-6 border-t border-gray-200"><div class="mt-6 pt-6 border-t border-gray-200">
             <h3 class="text-lg font-medium text-gray-700 mb-3 flex items-center gap-2">
-                <i class="fas fa-file-import text-bpjs-primary"></i>
+                <i class="fas fa-file-import text-bpjs-primary mr-2"></i>
                 Import Data Excel
             </h3>
             <form action="<?= site_url('admin/bubm/import') ?>" method="post" enctype="multipart/form-data" class="flex flex-col md:flex-row items-start md:items-center gap-4">
                 <div class="relative flex-grow">
+                    <label for="file_excel" class="block text-sm font-medium text-gray-700 mb-2">
+                        Pilih File Excel/CSV
+                    </label>
                     <div class="relative">
-                        <div class="file-upload border-2 border-dashed border-gray-300 rounded-xl p-4 text-center transition cursor-pointer hover:border-bpjs-primary hover:bg-blue-50">
-                            <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-2"></i>
-                            <p class="text-sm text-gray-600 mb-1">Klik untuk upload atau drag & drop file Excel</p>
-                            <p class="text-xs text-gray-500">Format: XLS, XLSX, CSV (Maks. 5MB)</p>
-                            <input type="file" name="file_excel" id="file_excel" accept=".xls,.xlsx,.csv" class="hidden" required>
-                        </div>
+                        <input 
+                            type="file" 
+                            name="file_excel" 
+                            id="file_excel"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                            accept=".xls,.xlsx,.csv"
+                            required
+                        >
                         <div id="fileName" class="text-sm text-gray-600 mt-2 hidden"></div>
                     </div>
                 </div>
-                <div class="flex-shrink-0">
+                <div class="flex-shrink-0 mt-5 md:mt-0">
                     <button 
                         type="submit"
-                        class="w-full md:w-auto px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition font-medium flex items-center gap-2"
+                        class="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition font-medium flex items-center gap-2"
                     >
                         <i class="fas fa-file-excel"></i> Import Data
                     </button>
@@ -324,35 +329,43 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // File upload interaction
         const fileInput = document.getElementById('file_excel');
         const fileUploadArea = document.querySelector('.file-upload');
         const fileName = document.getElementById('fileName');
-        
+
+        // klik area untuk buka input file
         fileUploadArea.addEventListener('click', function() {
             fileInput.click();
         });
-        
+
         fileInput.addEventListener('change', function() {
             if (this.files.length > 0) {
-                fileName.textContent = 'File terpilih: ' + this.files[0].name;
+                const selectedFile = this.files[0].name;
+                fileName.textContent = 'File terpilih: ' + selectedFile;
                 fileName.classList.remove('hidden');
+
+                // Tambahin style hijau biar keliatan sukses
                 fileUploadArea.classList.add('border-green-400', 'bg-green-50');
-                fileUploadArea.innerHTML = `
-                    <i class="fas fa-check-circle text-2xl text-green-500 mb-2"></i>
-                    <p class="text-sm text-green-600 mb-1">File berhasil dipilih</p>
-                    <p class="text-xs text-green-500">${this.files[0].name}</p>
-                `;
+
+                // Jangan replace seluruh innerHTML!  
+                // Cukup update teks/ikon di area fileName
+                const statusArea = document.getElementById('fileStatus');
+                if (statusArea) {
+                    statusArea.innerHTML = `
+                        <i class="fas fa-check-circle text-2xl text-green-500 mb-2"></i>
+                        <p class="text-sm text-green-600 mb-1">File berhasil dipilih</p>
+                        <p class="text-xs text-green-500">${selectedFile}</p>
+                    `;
+                }
             }
         });
     });
-    
-    // Function to open BUBM detail modal
+
+    // Modal detail
     function openBubmDetail(data) {
-        // Implement modal detail similar to jaminan modal
         console.log('BUBM Detail:', data);
-        // You can implement a modal similar to the jaminan detail modal here
         alert('Detail fitur akan diimplementasikan di sini untuk: ' + data.kode_transaksi);
     }
 </script>
+
 <?= $this->endSection() ?>

@@ -3,6 +3,7 @@
 namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
+use CodeIgniter\Database\RawSql;
 
 class CreateBubmTable extends Migration
 {
@@ -11,6 +12,8 @@ class CreateBubmTable extends Migration
         $this->forge->addField([
             'id' => [
                 'type'           => 'INT',
+                'constraint'     => 11,
+                'unsigned'       => true,
                 'auto_increment' => true,
             ],
             'kode_transaksi' => [
@@ -23,10 +26,17 @@ class CreateBubmTable extends Migration
                 'constraint' => '100',
                 'null'       => false,
             ],
+            // tanggal_transaksi otomatis sekarang
+            'tanggal_transaksi' => [
+                'type'    => 'DATETIME',
+                'null'    => false,
+                'default' => new RawSql('CURRENT_TIMESTAMP'),
+            ],
             'program' => [
                 'type'       => 'VARCHAR',
                 'constraint' => '100',
                 'null'       => false,
+                'default'    => 'BUBM',
             ],
             'jumlah_rupiah' => [
                 'type'       => 'DECIMAL',
@@ -38,9 +48,9 @@ class CreateBubmTable extends Migration
                 'null' => true,
             ],
             'dokumen' => [
-                'type' => 'VARCHAR',
+                'type'       => 'VARCHAR',
                 'constraint' => '255',
-                'null' => true,
+                'null'       => true,
             ],
             'created_at' => [
                 'type' => 'DATETIME',

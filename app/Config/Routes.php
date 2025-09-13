@@ -43,9 +43,11 @@ $routes->get('/super/dashboard', 'Super::dashboard');
 
 
 // Tambah data
-$routes->get('admin/bubm/create', 'BubmController::create');
 $routes->post('admin/bubm/store', 'BubmController::store');
+
 $routes->post('admin/bubm/update', 'BubmController::update');
 $routes->post('admin/bubm/delete/(:num)', 'BubmController::delete/$1');
 $routes->get('admin/bubm/filter', 'BubmController::filter');
 $routes->post('admin/bubm/import', 'BubmController::import_bubm');
+$routes->get('/admin/tambah_bubm', 'BubmController::create');
+

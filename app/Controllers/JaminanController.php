@@ -6,6 +6,7 @@ use App\Models\JaminanModel;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 
+
 class JaminanController extends BaseController
 {
     protected $jaminanModel;
@@ -15,38 +16,41 @@ class JaminanController extends BaseController
         $this->jaminanModel = new JaminanModel();
     }
 
-    public function index()
-    {
-        $jaminan = $this->jaminanModel->orderBy('tanggal_transaksi', 'DESC')->findAll();
+   public function index()
+{
+    // Ambil semua data terbaru (DESC)
+    $jaminan = $this->jaminanModel->orderBy('tanggal_transaksi', 'DESC')->findAll();
 
-        $totalData = $this->jaminanModel->countAll();
-        $totalNilai = $this->jaminanModel->selectSum('jumlah_bayar')->first()['jumlah_bayar'];
-        $totalPerusahaan = $this->jaminanModel->select('nama_perusahaan')->distinct()->countAllResults();
+    // Stats
+    $totalData = $this->jaminanModel->countAll();
+    $totalNilai = $this->jaminanModel->selectSum('jumlah_bayar')->first()['jumlah_bayar'];
+    $totalPerusahaan = $this->jaminanModel->select('nama_perusahaan')->distinct()->countAllResults();
 
-        $bulanData = $this->jaminanModel
-            ->select("DATE_FORMAT(tanggal_transaksi, '%Y-%m') as bulan, SUM(jumlah_bayar) as total")
-            ->groupBy("bulan")
-            ->get()
-            ->getResultArray();
+    // Rata-rata per bulan
+    $bulanData = $this->jaminanModel
+        ->select("DATE_FORMAT(tanggal_transaksi, '%Y-%m') as bulan, SUM(jumlah_bayar) as total")
+        ->groupBy("bulan")
+        ->get()
+        ->getResultArray();
 
-        $totalBulan = count($bulanData);
-        $rataRata = $totalBulan > 0 ? array_sum(array_column($bulanData, 'total')) / $totalBulan : 0;
+    $totalBulan = count($bulanData);
+    $rataRata = $totalBulan > 0 ? array_sum(array_column($bulanData, 'total')) / $totalBulan : 0;
 
-        $data = [
-            'title'           => 'Data Jaminan',
-            'active_menu'     => 'jaminan',
-            'jaminan'         => $jaminan,
-            'totalData'       => $totalData,
-            'totalNilai'      => $totalNilai,
-            'totalPerusahaan' => $totalPerusahaan,
-            'rataRata'        => $rataRata,
-            'search'          => '',
-            'date'            => 'all',
-            'sortBy'          => 'newest'
-        ];
+    $data = [
+        'title'           => 'Data Jaminan',
+        'active_menu'     => 'jaminan',
+        'jaminan'         => $jaminan,
+        'totalData'       => $totalData,
+        'totalNilai'      => $totalNilai,
+        'totalPerusahaan' => $totalPerusahaan,
+        'rataRata'        => $rataRata,
+        'search'          => '',
+        'date'            => 'all',
+        'sortBy'          => 'newest'
+    ];
 
-        return view('admin/jaminan', $data);
-    }
+    return view('admin/jaminan', $data);
+}
 
     public function create()
     {
@@ -60,6 +64,7 @@ class JaminanController extends BaseController
 
     public function store()
     {
+        // Validasi input
         $validation = \Config\Services::validation();
         $validation->setRules([
             'nomor_penetapan'   => 'required',
@@ -78,14 +83,16 @@ class JaminanController extends BaseController
             return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
 
+        // Handle upload dokumen
         $file = $this->request->getFile('dokumen');
         $fileName = null;
 
         if ($file && $file->isValid() && !$file->hasMoved()) {
             $fileName = $file->getRandomName();
-            $file->move(FCPATH . 'uploads/jaminan/', $fileName); // simpan di public/uploads/jaminan/
+            $file->move(FCPATH . 'uploads', $fileName);
         }
 
+        // Simpan ke database
         $this->jaminanModel->save([
             'nomor_penetapan'   => $this->request->getPost('nomor_penetapan'),
             'tanggal_transaksi' => $this->request->getPost('tanggal_transaksi'),
@@ -106,23 +113,13 @@ class JaminanController extends BaseController
     {
         $id = $this->request->getPost('id');
 
+        // upload file (opsional)
         $file = $this->request->getFile('dokumen');
         $fileName = null;
-
         if ($file && $file->isValid() && !$file->hasMoved()) {
-        $fileName = $file->getRandomName();
-        $file->move(FCPATH . 'uploads/jaminan/', $fileName);
-
-        // hapus file lama
-        $oldData = $this->jaminanModel->find($id);
-        if ($oldData && !empty($oldData['dokumen'])) {
-            $oldPath = FCPATH . 'uploads/jaminan/' . $oldData['dokumen'];
-            if (file_exists($oldPath)) {
-                unlink($oldPath);
-            }
+            $fileName = $file->getRandomName();
+            $file->move(FCPATH . 'uploads', $fileName);
         }
-    }
-
 
         $data = [
             'nomor_penetapan'   => $this->request->getPost('nomor_penetapan'),
@@ -143,33 +140,16 @@ class JaminanController extends BaseController
         $this->jaminanModel->update($id, $data);
 
         return redirect()->to('/admin/jaminan')->with('success', 'Data Jaminan berhasil diupdate');
-        
     }
 
     public function delete($id)
     {
-        $data = $this->jaminanModel->find($id);
-        if ($data && !empty($data['dokumen'])) {
-            $path = WRITEPATH . 'uploads/jaminan/' . $data['dokumen'];
-            if (file_exists($path)) {
-                unlink($path);
-            }
-        }
-
         $this->jaminanModel->delete($id);
         return redirect()->to('/admin/jaminan')->with('success', 'Data Jaminan berhasil dihapus');
     }
 
-    public function viewFile($filename)
-    {
-        $path = WRITEPATH . 'uploads/jaminan/' . $filename;
-        if (!file_exists($path)) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException("File tidak ditemukan");
-        }
-        return $this->response->download($path, null)->setFileName($filename);
-    }
-
-    public function filter()
+    
+   public function filter()
     {
         $search  = $this->request->getGet('search') ?? '';
         $date    = $this->request->getGet('date') ?? 'all';
@@ -177,11 +157,13 @@ class JaminanController extends BaseController
 
         $builder = $this->jaminanModel;
 
+        // 🔎 Search
         if (!empty($search)) {
             $builder = $builder->like('nomor_penetapan', $search)
-                ->orLike('nomor_kpj', $search);
+                            ->orLike('nomor_kpj', $search);
         }
 
+        // 📅 Filter tanggal
         if ($date !== 'all') {
             $today = date('Y-m-d');
             switch ($date) {
@@ -193,7 +175,7 @@ class JaminanController extends BaseController
                     break;
                 case 'month':
                     $builder = $builder->where('MONTH(tanggal_transaksi)', date('m'))
-                        ->where('YEAR(tanggal_transaksi)', date('Y'));
+                                    ->where('YEAR(tanggal_transaksi)', date('Y'));
                     break;
                 case 'year':
                     $builder = $builder->where('YEAR(tanggal_transaksi)', date('Y'));
@@ -201,6 +183,7 @@ class JaminanController extends BaseController
             }
         }
 
+        // ↕️ Sorting
         switch ($sortBy) {
             case 'oldest':
                 $builder = $builder->orderBy('tanggal_transaksi', 'ASC');
@@ -215,8 +198,10 @@ class JaminanController extends BaseController
                 $builder = $builder->orderBy('tanggal_transaksi', 'DESC');
         }
 
+        // Ambil semua data
         $jaminan = $builder->findAll();
 
+        // Stats
         $totalData = $this->jaminanModel->countAll();
         $totalNilai = $this->jaminanModel->selectSum('jumlah_bayar')->first()['jumlah_bayar'];
         $totalPerusahaan = $this->jaminanModel->select('nama_perusahaan')->distinct()->countAllResults();
@@ -246,7 +231,7 @@ class JaminanController extends BaseController
         return view('admin/jaminan', $data);
     }
 
-    public function import()
+   public function import()
     {
         $file = $this->request->getFile('file_excel');
 
@@ -255,14 +240,18 @@ class JaminanController extends BaseController
         }
 
         $ext = $file->getClientExtension();
-        $reader = $ext === 'csv' ? new Csv() : new Xlsx();
+        if ($ext === 'csv') {
+            $reader = new Csv();
+        } else {
+            $reader = new Xlsx();
+        }
 
         $spreadsheet = $reader->load($file->getTempName());
         $sheetData   = $spreadsheet->getActiveSheet()->toArray();
 
         $dataInsert = [];
         foreach ($sheetData as $index => $row) {
-            if ($index == 0) continue;
+            if ($index == 0) continue; // skip header
 
             $dataInsert[] = [
                 'nomor_penetapan'   => $row[0] ?? null,
@@ -286,4 +275,5 @@ class JaminanController extends BaseController
 
         return redirect()->to('/admin/jaminan')->with('success', 'Data berhasil diimport!');
     }
+
 }
