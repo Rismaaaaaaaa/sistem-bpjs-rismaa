@@ -11,7 +11,7 @@
                 </div>
                 Data Jaminan BPJS
             </h1>
-            <p class="text-gray-600 mt-2 ml-11">Kelola data jaminan peserta BPJS Kesehatan</p>
+            <p class="text-gray-600 mt-2 ml-11">Kelola data jaminan BPJS Ketenagakerjaan</p>
         </div>
        <a 
             href="<?= site_url('admin/tambah_jaminan') ?>" 

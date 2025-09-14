@@ -32,37 +32,7 @@
                 </p>
             </div>
 
-            <!-- Notifications -->
-            <div class="p-5">
-                <?php if(session()->getFlashdata('success')): ?>
-                    <div class="p-4 mb-4 bg-green-50 border-l-4 border-green-500 rounded-r">
-                        <div class="flex items-center">
-                            <i class="fas fa-check-circle text-green-500 text-lg mr-3"></i>
-                            <div>
-                                <p class="text-green-700 font-medium">Berhasil!</p>
-                                <p class="text-green-600 text-sm"><?= session()->getFlashdata('success') ?></p>
-                            </div>
-                        </div>
-                    </div>
-                <?php endif; ?>
-
-                <?php if(session()->getFlashdata('errors')): ?>
-                    <div class="p-4 mb-4 bg-red-50 border-l-4 border-red-500 rounded-r">
-                        <div class="flex items-center">
-                            <i class="fas fa-exclamation-circle text-red-500 text-lg mr-3"></i>
-                            <div>
-                                <p class="text-red-700 font-medium">Terjadi Kesalahan:</p>
-                                <ul class="text-red-600 text-sm list-disc list-inside mt-1">
-                                    <?php foreach(session()->getFlashdata('errors') as $error): ?>
-                                        <li><?= esc($error) ?></li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                <?php endif; ?>
-            </div>
-
+        
             <!-- Form Content -->
             <form action="<?= site_url('admin/settings/update') ?>" method="post" class="p-5 space-y-6">
                 <?= csrf_field() ?>
@@ -196,5 +166,31 @@
         box-shadow: 0 6px 15px rgba(228, 148, 60, 0.4);
     }
 </style>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    <?php if (session()->getFlashdata('success')): ?>
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: '<?= session()->getFlashdata('success') ?>',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+    <?php endif; ?>
 
+    <?php if (session()->getFlashdata('error')): ?>
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'error',
+            title: '<?= session()->getFlashdata('error') ?>',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+        });
+    <?php endif; ?>
+});
+</script>
 <?= $this->endSection() ?>

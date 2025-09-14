@@ -11,7 +11,7 @@
                 </div>
                 Data BUBM BPJS
             </h1>
-            <p class="text-gray-600 mt-2 ml-11">Kelola data Bantuan Uang Muka Biaya Medis (BUBM) BPJS Kesehatan</p>
+            <p class="text-gray-600 mt-2 ml-11">Kelola data BUBM BPJS Ketenagakerjaan</p>
         </div>
         <a href="<?= site_url('/admin/tambah_bubm') ?>" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-bpjs-accent to-orange-500 text-white font-semibold hover:opacity-90 shadow-lg transition">
             <i class="fas fa-plus"></i>
