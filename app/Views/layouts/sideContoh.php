@@ -39,11 +39,12 @@
 <header class="fixed top-0 left-64 right-0 h-16 bg-white/95 backdrop-blur-lg z-40 flex items-center px-6 border-b border-gray-200/20 shadow-sm">
     <div class="flex items-center justify-between w-full">
         <div class="flex items-center space-x-2">
-            <h1 class="text-xl font-semibold text-gray-800">Selamat datang,</h1>
-            <span class="text-xl font-bold bg-gradient-to-r from-bpjs-primary to-bpjs-accent bg-clip-text text-transparent">
-                Admin BPJS
-            </span>
-        </div>
+        <h1 class="text-xl font-semibold text-gray-800">Selamat datang,</h1>
+        <span class="text-xl font-bold bg-gradient-to-r from-bpjs-primary to-bpjs-accent bg-clip-text text-transparent">
+            <?= esc(session('username')) ?>
+        </span>
+    </div>
+
         
         <div class="flex items-center space-x-4">
             <div class="relative">

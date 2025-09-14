@@ -1,7 +1,7 @@
 <?= $this->extend('layouts/main') ?>
 <?= $this->section('content') ?>
 
-<div class="p-6 min-h-screen flex flex-col items-center">
+<div class="p-6 min-h-screen flex flex-col items-center mt-14">
     <!-- Header -->
     <div class="flex items-center justify-between mb-8 w-full ">
         <div>
@@ -15,10 +15,7 @@
                 Kelola informasi dan preferensi akun Anda
             </p>
         </div>
-        <a href="<?= site_url('admin/dashboard') ?>" 
-           class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition">
-            <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
-        </a>
+        
     </div>
 
     <!-- Main Content (centered) -->
