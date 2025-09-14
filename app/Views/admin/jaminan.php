@@ -248,15 +248,16 @@
                                 <td class="p-4"><?= esc($row['no_rekening']) ?></td>
                                 <td class="p-4"><?= esc($row['atas_nama']) ?></td>
 
-                                <td class="p-4">
+                               <td class="p-4">
                                     <?php 
                                         $filePath = FCPATH . 'uploads/jaminan/' . ($row['dokumen'] ?? '');
                                         if (!empty($row['dokumen']) && file_exists($filePath)): 
+                                            $fileUrl = base_url('uploads/jaminan/' . $row['dokumen']);
                                     ?>
-                                        <a href="<?= base_url('uploads/jaminan/' . $row['dokumen']) ?>" target="_blank"
-                                        class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
+                                        <button type="button" onclick="openImageModal('<?= $fileUrl ?>')" 
+                                            class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
                                             <i class="fas fa-image mr-2"></i> Lihat
-                                        </a>
+                                        </button>
                                     <?php else: ?>
                                         <button type="button" onclick="showNoFileToast()" 
                                             class="inline-flex items-center px-3 py-2 rounded-lg bg-gray-100 text-gray-600">
@@ -264,6 +265,7 @@
                                         </button>
                                     <?php endif; ?>
                                 </td>
+
 
 
 
@@ -334,6 +336,31 @@
     </div>
 
    
+
+    <!-- Modal Preview Foto -->
+<div id="imagePreviewModal" class="fixed inset-0 hidden bg-black bg-opacity-70 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-6 relative">
+        
+        <!-- Tombol Close -->
+        <button onclick="closeImageModal()" 
+            class="absolute top-4 right-4 text-gray-500 hover:text-red-600 transition">
+            <i class="fas fa-times text-2xl"></i>
+        </button>
+        
+        <!-- Gambar -->
+        <div class="flex justify-center">
+            <img id="modalImage" src="" alt="Preview Dokumen" class="rounded-lg max-h-[70vh] object-contain">
+        </div>
+
+        <!-- Tombol Download -->
+        <div class="mt-4 flex justify-center">
+            <a id="downloadLink" href="#" download 
+               class="px-5 py-2 bg-bpjs-primary text-white rounded-lg shadow hover:bg-bpjs-darkblue transition">
+                <i class="fas fa-download mr-2"></i> Download
+            </a>
+        </div>
+    </div>
+</div>
 
 
     <!-- Modal -->
@@ -475,6 +502,21 @@
 
 
 </div>
+
+
+
+<script>
+function openImageModal(url) {
+    document.getElementById('modalImage').src = url;
+    document.getElementById('downloadLink').href = url;
+    document.getElementById('imagePreviewModal').classList.remove('hidden');
+}
+
+function closeImageModal() {
+    document.getElementById('imagePreviewModal').classList.add('hidden');
+    document.getElementById('modalImage').src = '';
+}
+</script>
 
 
 <script>
