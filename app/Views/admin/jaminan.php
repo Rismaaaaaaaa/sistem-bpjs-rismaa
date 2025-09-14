@@ -249,22 +249,24 @@
                                 <td class="p-4"><?= esc($row['atas_nama']) ?></td>
 
                                <td class="p-4">
-                                    <?php 
-                                        $filePath = FCPATH . 'uploads/jaminan/' . ($row['dokumen'] ?? '');
-                                        if (!empty($row['dokumen']) && file_exists($filePath)): 
-                                            $fileUrl = base_url('uploads/jaminan/' . $row['dokumen']);
-                                    ?>
-                                        <button type="button" onclick="openImageModal('<?= $fileUrl ?>')" 
-                                            class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
-                                            <i class="fas fa-image mr-2"></i> Lihat
-                                        </button>
-                                    <?php else: ?>
-                                        <button type="button" onclick="showNoFileToast()" 
-                                            class="inline-flex items-center px-3 py-2 rounded-lg bg-gray-100 text-gray-600">
-                                            <i class="fas fa-times-circle mr-2"></i> Tidak ada
-                                        </button>
-                                    <?php endif; ?>
-                                </td>
+    <?php 
+        $filePath = FCPATH . 'uploads/jaminan/' . ($row['dokumen'] ?? '');
+        if (!empty($row['dokumen']) && file_exists($filePath)): 
+            $fileUrl = base_url('uploads/jaminan/' . $row['dokumen']);
+    ?>
+        <button type="button" 
+            onclick="showImageModal('<?= $fileUrl ?>', '<?= $row['dokumen'] ?>', 'Ukuran otomatis')"
+            class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
+            <i class="fas fa-image mr-2"></i> Lihat
+        </button>
+    <?php else: ?>
+        <button type="button" onclick="showNoFileToast()" 
+            class="inline-flex items-center px-3 py-2 rounded-lg bg-gray-100 text-gray-600">
+            <i class="fas fa-times-circle mr-2"></i> Tidak ada
+        </button>
+    <?php endif; ?>
+</td>
+
 
 
 
@@ -337,30 +339,7 @@
 
    
 
-    <!-- Modal Preview Foto -->
-<div id="imagePreviewModal" class="fixed inset-0 hidden bg-black bg-opacity-70 flex items-center justify-center z-50">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-6 relative">
-        
-        <!-- Tombol Close -->
-        <button onclick="closeImageModal()" 
-            class="absolute top-4 right-4 text-gray-500 hover:text-red-600 transition">
-            <i class="fas fa-times text-2xl"></i>
-        </button>
-        
-        <!-- Gambar -->
-        <div class="flex justify-center">
-            <img id="modalImage" src="" alt="Preview Dokumen" class="rounded-lg max-h-[70vh] object-contain">
-        </div>
-
-        <!-- Tombol Download -->
-        <div class="mt-4 flex justify-center">
-            <a id="downloadLink" href="#" download 
-               class="px-5 py-2 bg-bpjs-primary text-white rounded-lg shadow hover:bg-bpjs-darkblue transition">
-                <i class="fas fa-download mr-2"></i> Download
-            </a>
-        </div>
-    </div>
-</div>
+ 
 
 
     <!-- Modal -->
@@ -503,19 +482,134 @@
 
 </div>
 
+<!-- Modal Preview Foto Modern -->
+<div id="imagePreviewModal" class="fixed inset-0 hidden items-center justify-center z-50">
+    <!-- Overlay -->
+    <div id="modalOverlay" class="absolute inset-0 bg-black bg-opacity-70 glass-effect backdrop-blur-sm" onclick="closeImageModal()"></div>
+    
+    <!-- Konten Modal -->
+    <div id="modalContent" class="bg-white/95 rounded-2xl shadow-2xl max-w-3xl w-full mx-4 p-6 relative transform transition-all duration-300 scale-95 opacity-0">
+        <!-- Tombol Close -->
+        <button onclick="closeImageModal()" 
+            class="absolute top-4 right-4 bg-gray-100 hover:bg-red-100 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 group">
+            <i class="fas fa-times text-xl text-gray-600 group-hover:text-red-600"></i>
+        </button>
+        
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">Pratinjau Dokumen Jaminan BPJS</h3>
+            <p class="text-sm text-gray-500 mt-1">Pastikan dokumen sudah sesuai sebelum diunduh</p>
+        </div>
+        
+        <!-- Gambar -->
+        <div class="flex justify-center relative">
+            <img id="modalImage" src="" alt="Preview Dokumen" class="rounded-xl max-h-[60vh] object-contain shadow-lg">
+            
+            <!-- Loading indicator -->
+            <div id="loadingIndicator" class="absolute inset-0 flex items-center justify-center hidden">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-bpjs-primary"></div>
+            </div>
+        </div>
 
+        <!-- Informasi File -->
+        <div class="mt-4 flex justify-between items-center text-sm text-gray-500 bg-gray-50 p-3 rounded-lg">
+            <div class="flex items-center">
+                <i class="far fa-file-image text-bpjs-primary mr-2"></i>
+                <span id="fileName">document.jpg</span>
+            </div>
+            <div id="fileSize" class="text-gray-400">2.4 MB</div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-6 flex justify-center space-x-3">
+            <a id="downloadLink" href="#" download 
+               class="px-6 py-3 bg-bpjs-primary text-white rounded-xl shadow hover:bg-bpjs-darkblue transition-all duration-300 flex items-center group">
+                <i class="fas fa-download mr-2 group-hover:animate-bounce"></i> Download
+            </a>
+            
+           <button onclick="closeImageModal()" 
+                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.glass-effect {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+#imagePreviewModal.active {
+    display: flex;
+    animation: fadeIn 0.3s ease-out;
+}
+
+#imagePreviewModal.active #modalContent {
+    animation: slideUp 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        transform: translateY(20px) scale(0.95);
+        opacity: 0;
+    }
+    to { 
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+</style>
 
 <script>
-function openImageModal(url) {
-    document.getElementById('modalImage').src = url;
-    document.getElementById('downloadLink').href = url;
-    document.getElementById('imagePreviewModal').classList.remove('hidden');
+function showImageModal(imageSrc, fileName, fileSize) {
+    const modal = document.getElementById('imagePreviewModal');
+    const modalImage = document.getElementById('modalImage');
+    const downloadLink = document.getElementById('downloadLink');
+    const fileNameEl = document.getElementById('fileName');
+    const fileSizeEl = document.getElementById('fileSize');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    
+    // Tampilkan loading indicator
+    loadingIndicator.classList.remove('hidden');
+    
+    // Set data gambar
+    modalImage.onload = function() {
+        loadingIndicator.classList.add('hidden');
+    };
+    
+    modalImage.src = imageSrc;
+    downloadLink.href = imageSrc;
+    
+    if (fileName) fileNameEl.textContent = fileName;
+    if (fileSize) fileSizeEl.textContent = fileSize;
+    
+    // Tampilkan modal
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modal.classList.add('active');
+    }, 10);
 }
 
 function closeImageModal() {
-    document.getElementById('imagePreviewModal').classList.add('hidden');
-    document.getElementById('modalImage').src = '';
+    const modal = document.getElementById('imagePreviewModal');
+    modal.classList.remove('active');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
 }
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeImageModal();
+    }
+});
 </script>
 
 

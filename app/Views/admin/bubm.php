@@ -246,15 +246,17 @@
                                         <span class="text-gray-400">-</span>
                                     <?php endif; ?>
                                 </td>
-                               <td class="p-4">
+                                <td class="p-4">
                                     <?php 
                                         $filePath = FCPATH . 'uploads/bubm/' . ($row['dokumen'] ?? '');
                                         if (!empty($row['dokumen']) && file_exists($filePath)): 
+                                            $fileUrl = base_url('uploads/bubm/' . $row['dokumen']);
                                     ?>
-                                        <a href="<?= base_url('uploads/bubm/' . $row['dokumen']) ?>" target="_blank"
-                                        class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
+                                        <button type="button" 
+                                                onclick="showBubmImageModal('<?= $fileUrl ?>', '<?= $row['dokumen'] ?>')" 
+                                                class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
                                             <i class="fas fa-image mr-2"></i> Lihat
-                                        </a>
+                                        </button>
                                     <?php else: ?>
                                         <button type="button" onclick="showNoFileToast()" 
                                             class="inline-flex items-center px-3 py-2 rounded-lg bg-gray-100 text-gray-600">
@@ -262,6 +264,9 @@
                                         </button>
                                     <?php endif; ?>
                                 </td>
+
+
+    
 
                                 <td class="p-4">
                                     <div class="flex space-x-2">
@@ -332,7 +337,6 @@
 
 
 <!-- Modal Detail BUBM -->
-<!-- Modal Detail BUBM -->
 <div id="modalDetailBubm" 
      class="fixed inset-0 hidden bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity duration-300">
   
@@ -390,6 +394,50 @@
   </div>
 </div>
 
+<!-- Modal Preview BUBM -->
+<div id="bubmImagePreviewModal" class="fixed inset-0 hidden items-center justify-center z-50">
+    <!-- Overlay -->
+    <div class="absolute inset-0 bg-black bg-opacity-70 glass-effect backdrop-blur-sm" onclick="closeBubmImageModal()"></div>
+
+    <!-- Konten Modal -->
+    <div id="bubmModalContent" 
+         class="relative bg-white/95 rounded-2xl shadow-2xl max-w-2xl w-full mx-4 p-6 transform transition-all duration-300 scale-95 opacity-0">
+        <!-- Tombol Close -->
+        <button onclick="closeBubmImageModal()" 
+            class="absolute top-4 right-4 bg-gray-100 hover:bg-red-100 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 group">
+            <i class="fas fa-times text-xl text-gray-600 group-hover:text-red-600"></i>
+        </button>
+        
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">Preview Dokumen BUBM</h3>
+            <p class="text-sm text-gray-500 mt-1">Pastikan dokumen sesuai sebelum digunakan</p>
+        </div>
+        
+        <!-- Gambar -->
+        <div class="flex justify-center relative">
+            <img id="bubmPreviewImage" src="" alt="Preview Dokumen" class="rounded-xl max-h-[60vh] object-contain shadow-lg">
+            
+            <!-- Loading indicator -->
+            <div id="bubmLoading" class="absolute inset-0 flex items-center justify-center hidden">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-6 flex justify-center space-x-3">
+            <a id="bubmDownloadLink" href="#" download 
+               class="px-6 py-3 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 transition-all duration-300 flex items-center group">
+                <i class="fas fa-download mr-2 group-hover:animate-bounce"></i> Download
+            </a>
+            
+            <button onclick="closeBubmImageModal()" 
+                class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-300 flex items-center">
+                <i class="fas fa-times mr-2"></i> Tutup
+            </button>
+        </div>
+    </div>
+</div>
 
  <!-- Modal Edit BUBM -->
 <div id="modalEditBubm" class="fixed inset-0 hidden bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -547,108 +595,167 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+<script>
+        // ambil elemen
+        const modalBubm = document.getElementById('modalDetailBubm');
+        const closeModalBubm = document.getElementById('closeModalDetailBubm');
 
+        function showDetailBubm(data) {
+            document.getElementById('detailBubmKode').textContent = data.kode_transaksi || '-';
+            document.getElementById('detailBubmVoucher').textContent = data.voucher || '-';
+            document.getElementById('detailBubmTanggal').textContent = data.tanggal_transaksi || '-';
+            document.getElementById('detailBubmProgram').textContent = data.program || '-';
+            document.getElementById('detailBubmJumlah').textContent = data.jumlah_rupiah ? 'Rp ' + data.jumlah_rupiah : '-';
+            document.getElementById('detailBubmKeterangan').textContent = data.keterangan || '-';
+
+            const dokumenLink = document.getElementById('detailBubmDokumen');
+            if (data.dokumen) {
+                dokumenLink.href = data.dokumen;
+                dokumenLink.textContent = "Lihat Dokumen";
+            } else {
+                dokumenLink.removeAttribute('href');
+                dokumenLink.textContent = "-";
+            }
+
+            document.getElementById('modalDetailBubm').classList.remove('hidden');
+        }
+
+        // Tutup modal
+        document.getElementById('closeModalDetailBubm').addEventListener('click', () => {
+            document.getElementById('modalDetailBubm').classList.add('hidden');
+        });
+
+
+
+
+            document.addEventListener('DOMContentLoaded', function() {
+                const fileInput = document.getElementById('file_excel');
+                const fileUploadArea = document.querySelector('.file-upload');
+                const fileName = document.getElementById('fileName');
+
+                // klik area untuk buka input file
+                fileUploadArea.addEventListener('click', function() {
+                    fileInput.click();
+                });
+
+                fileInput.addEventListener('change', function() {
+                    if (this.files.length > 0) {
+                        const selectedFile = this.files[0].name;
+                        fileName.textContent = 'File terpilih: ' + selectedFile;
+                        fileName.classList.remove('hidden');
+
+                        // Tambahin style hijau biar keliatan sukses
+                        fileUploadArea.classList.add('border-green-400', 'bg-green-50');
+
+                        // Jangan replace seluruh innerHTML!  
+                        // Cukup update teks/ikon di area fileName
+                        const statusArea = document.getElementById('fileStatus');
+                        if (statusArea) {
+                            statusArea.innerHTML = `
+                                <i class="fas fa-check-circle text-2xl text-green-500 mb-2"></i>
+                                <p class="text-sm text-green-600 mb-1">File berhasil dipilih</p>
+                                <p class="text-xs text-green-500">${selectedFile}</p>
+                            `;
+                        }
+                    }
+                });
+            });
+
+            // Modal detail
+            function openBubmDetail(data) {
+                console.log('BUBM Detail:', data);
+                alert('Detail fitur akan diimplementasikan di sini untuk: ' + data.kode_transaksi);
+            }
+</script>
 
 <script>
-// ambil elemen
-const modalBubm = document.getElementById('modalDetailBubm');
-const closeModalBubm = document.getElementById('closeModalDetailBubm');
+    document.addEventListener("DOMContentLoaded", function() {
+        <?php if (session()->getFlashdata('success')): ?>
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: '<?= session()->getFlashdata('success') ?>',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true
+            });
+        <?php endif; ?>
 
-function showDetailBubm(data) {
-    document.getElementById('detailBubmKode').textContent = data.kode_transaksi || '-';
-    document.getElementById('detailBubmVoucher').textContent = data.voucher || '-';
-    document.getElementById('detailBubmTanggal').textContent = data.tanggal_transaksi || '-';
-    document.getElementById('detailBubmProgram').textContent = data.program || '-';
-    document.getElementById('detailBubmJumlah').textContent = data.jumlah_rupiah ? 'Rp ' + data.jumlah_rupiah : '-';
-    document.getElementById('detailBubmKeterangan').textContent = data.keterangan || '-';
+        <?php if (session()->getFlashdata('error')): ?>
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
+                title: '<?= session()->getFlashdata('error') ?>',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true
+            });
+        <?php endif; ?>
+    });
+</script>
 
-    const dokumenLink = document.getElementById('detailBubmDokumen');
-    if (data.dokumen) {
-        dokumenLink.href = data.dokumen;
-        dokumenLink.textContent = "Lihat Dokumen";
-    } else {
-        dokumenLink.removeAttribute('href');
-        dokumenLink.textContent = "-";
-    }
-
-    document.getElementById('modalDetailBubm').classList.remove('hidden');
+<style>
+.glass-effect {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
-// Tutup modal
-document.getElementById('closeModalDetailBubm').addEventListener('click', () => {
-    document.getElementById('modalDetailBubm').classList.add('hidden');
-});
+#bubmImagePreviewModal.active {
+    display: flex;
+    animation: fadeIn 0.3s ease-out;
+}
 
+#bubmImagePreviewModal.active #bubmModalContent {
+    animation: slideUp 0.4s ease-out forwards;
+}
 
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
 
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const fileInput = document.getElementById('file_excel');
-        const fileUploadArea = document.querySelector('.file-upload');
-        const fileName = document.getElementById('fileName');
-
-        // klik area untuk buka input file
-        fileUploadArea.addEventListener('click', function() {
-            fileInput.click();
-        });
-
-        fileInput.addEventListener('change', function() {
-            if (this.files.length > 0) {
-                const selectedFile = this.files[0].name;
-                fileName.textContent = 'File terpilih: ' + selectedFile;
-                fileName.classList.remove('hidden');
-
-                // Tambahin style hijau biar keliatan sukses
-                fileUploadArea.classList.add('border-green-400', 'bg-green-50');
-
-                // Jangan replace seluruh innerHTML!  
-                // Cukup update teks/ikon di area fileName
-                const statusArea = document.getElementById('fileStatus');
-                if (statusArea) {
-                    statusArea.innerHTML = `
-                        <i class="fas fa-check-circle text-2xl text-green-500 mb-2"></i>
-                        <p class="text-sm text-green-600 mb-1">File berhasil dipilih</p>
-                        <p class="text-xs text-green-500">${selectedFile}</p>
-                    `;
-                }
-            }
-        });
-    });
-
-    // Modal detail
-    function openBubmDetail(data) {
-        console.log('BUBM Detail:', data);
-        alert('Detail fitur akan diimplementasikan di sini untuk: ' + data.kode_transaksi);
+@keyframes slideUp {
+    from { 
+        transform: translateY(20px) scale(0.95);
+        opacity: 0;
     }
-</script>
+    to { 
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+</style>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    <?php if (session()->getFlashdata('success')): ?>
-        Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'success',
-            title: '<?= session()->getFlashdata('success') ?>',
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true
-        });
-    <?php endif; ?>
+function showBubmImageModal(imageSrc, fileName) {
+    const modal = document.getElementById('bubmImagePreviewModal');
+    const modalImage = document.getElementById('bubmPreviewImage');
+    const downloadLink = document.getElementById('bubmDownloadLink');
+    const loading = document.getElementById('bubmLoading');
+    
+    // Tampilkan loading
+    loading.classList.remove('hidden');
+    
+    // Set gambar
+    modalImage.onload = function() {
+        loading.classList.add('hidden');
+    };
+    
+    modalImage.src = imageSrc;
+    downloadLink.href = imageSrc;
+    if (fileName) downloadLink.setAttribute("download", fileName);
+    
+    // Tampilkan modal
+    modal.classList.remove('hidden');
+    setTimeout(() => modal.classList.add('active'), 10);
+}
 
-    <?php if (session()->getFlashdata('error')): ?>
-        Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'error',
-            title: '<?= session()->getFlashdata('error') ?>',
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true
-        });
-    <?php endif; ?>
-});
+function closeBubmImageModal() {
+    const modal = document.getElementById('bubmImagePreviewModal');
+    modal.classList.remove('active');
+    setTimeout(() => modal.classList.add('hidden'), 300);
+}
 </script>
-
-
 <?= $this->endSection() ?>
