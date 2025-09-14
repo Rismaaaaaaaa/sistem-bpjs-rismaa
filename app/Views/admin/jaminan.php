@@ -23,6 +23,9 @@
 
     </div>
 
+
+    
+
     <!-- Search and Filter Section -->
     <div class="bg-white rounded-2xl shadow-sm p-5 mb-6 border border-gray-200">
         <form method="get" action="<?= site_url('/admin/jaminan/filter') ?>" class="grid grid-cols-1 md:grid-cols-3 gap-4">

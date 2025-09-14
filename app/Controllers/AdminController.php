@@ -45,21 +45,21 @@ class AdminController extends BaseController
         $bulanIni = $bulanIniBubm + $bulanIniJaminan;
 
         // === 2. Grafik & Visualisasi ===
-    $yearNow = date('Y'); // otomatis ambil tahun sekarang
+            $yearNow = date('Y'); // otomatis ambil tahun sekarang
 
-$trendBubm = $bubmModel
-    ->select("MONTH(tanggal_transaksi) as bulan, SUM(jumlah_rupiah) as total")
-    ->where("YEAR(tanggal_transaksi)", $yearNow)
-    ->groupBy('bulan')
-    ->orderBy('bulan', 'ASC')
-    ->findAll();
+        $trendBubm = $bubmModel
+            ->select("MONTH(tanggal_transaksi) as bulan, SUM(jumlah_rupiah) as total")
+            ->where("YEAR(tanggal_transaksi)", $yearNow)
+            ->groupBy('bulan')
+            ->orderBy('bulan', 'ASC')
+            ->findAll();
 
-$trendJaminan = $jaminanModel
-    ->select("MONTH(tanggal_transaksi) as bulan, SUM(jumlah_bayar) as total")
-    ->where("YEAR(tanggal_transaksi)", $yearNow)
-    ->groupBy('bulan')
-    ->orderBy('bulan', 'ASC')
-    ->findAll();
+        $trendJaminan = $jaminanModel
+            ->select("MONTH(tanggal_transaksi) as bulan, SUM(jumlah_bayar) as total")
+            ->where("YEAR(tanggal_transaksi)", $yearNow)
+            ->groupBy('bulan')
+            ->orderBy('bulan', 'ASC')
+            ->findAll();
 
         // Distribusi Program (dari bubm)
         $distribusiProgram = $bubmModel

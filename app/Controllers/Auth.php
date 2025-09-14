@@ -26,53 +26,44 @@ class Auth extends BaseController
 
     public function auth()
     {
-        // Rules validasi
-        $validationRules = [
-            'email'    => 'required|valid_email',
-            'password' => 'required|min_length[6]',
-        ];
+        $userModel = new \App\Models\UserModel();
 
-        // Jalankan validasi
-        if (!$this->validate($validationRules)) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', implode('<br>', $this->validator->getErrors()));
-        }
-
-        // Ambil data dari form
-        $email    = $this->request->getPost('email', FILTER_SANITIZE_EMAIL);
+        $identity = $this->request->getPost('email'); // bisa email / username
         $password = $this->request->getPost('password');
 
-        // Cari user berdasarkan email
-        $user = $this->userModel->where('email', $email)->first();
+        // Prioritas cek email dulu
+        $user = $userModel->where('email', $identity)->first();
 
-        if ($user && password_verify($password, $user['password'])) {
-            // Regenerate session ID biar lebih aman
-            session()->regenerate();
-
-            // Simpan data ke session
-            session()->set([
-                'user_id'   => $user['id'],
-                'username'  => $user['username'],
-                'role'      => $user['role'],
-                'logged_in' => true,
-            ]);
-
-            // Redirect berdasarkan role
-            return $this->redirectByRole($user['role']);
+        // Kalau ga ketemu dengan email, cek username
+        if (!$user) {
+            $user = $userModel->where('username', $identity)->first();
         }
 
-        // Kalau gagal login
-        return redirect()->back()
-            ->withInput()
-            ->with('error', 'Email atau password salah.');
+        if ($user && password_verify($password, $user['password'])) {
+            // ✅ Simpan session
+            session()->set([
+                'isLoggedIn' => true,
+                'user_id'    => $user['id'],
+                'username'   => $user['username'],
+                'email'      => $user['email'],
+                'role'       => $user['role'],
+            ]);
+
+            return redirect()->to('/dashboard')
+                            ->with('success', 'Selamat datang, ' . $user['username']);
+        }
+
+        return redirect()->back()->with('error', 'Email/Username atau password salah');
     }
+
+
 
     public function logout()
     {
         session()->destroy();
         return redirect()->to('/login')->with('success', 'Berhasil logout.');
     }
+    
 
     /**
      * Helper redirect berdasarkan role user

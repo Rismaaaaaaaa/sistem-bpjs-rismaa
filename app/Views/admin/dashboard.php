@@ -33,9 +33,7 @@
                     </p>
                     <h3 class="text-2xl font-bold text-gray-800"><?= $totalBubm ?></h3>
                 </div>
-                <div class="text-green-500 text-sm font-semibold">
-                    +12% <i class="fas fa-arrow-up"></i>
-                </div>
+               
             </div>
         </div>
 
@@ -51,9 +49,7 @@
                     </p>
                     <h3 class="text-2xl font-bold text-gray-800"><?= $totalJaminan ?></h3>
                 </div>
-                <div class="text-green-500 text-sm font-semibold">
-                    +8% <i class="fas fa-arrow-up"></i>
-                </div>
+                
             </div>
         </div>
 
@@ -69,9 +65,7 @@
                     </p>
                     <h3 class="text-2xl font-bold text-gray-800">Rp <?= number_format($totalDana, 0, ',', '.') ?></h3>
                 </div>
-                <div class="text-green-500 text-sm font-semibold">
-                    +15% <i class="fas fa-arrow-up"></i>
-                </div>
+               
             </div>
         </div>
 
