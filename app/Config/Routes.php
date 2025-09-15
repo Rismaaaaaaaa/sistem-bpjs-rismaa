@@ -65,6 +65,7 @@ $routes->group('admin', ['filter' => 'auth'], function($routes) {
     
 });
 
+$routes->get('admin/jaminan/exportExcel', 'JaminanController::exportExcel');
 
 
 

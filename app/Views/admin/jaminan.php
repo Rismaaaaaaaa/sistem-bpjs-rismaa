@@ -91,6 +91,7 @@
             </div>
 
             <!-- Action Buttons -->
+                        <!-- Action Buttons -->
             <div class="flex items-end col-span-2 md:col-span-1">
                 <button 
                     type="submit"
@@ -104,7 +105,18 @@
                 >
                     Reset
                 </a>
+                <a 
+                    href="<?= site_url('admin/jaminan/exportExcel?' . http_build_query([
+                        'search' => $search,
+                        'date'   => $date,
+                        'sortBy' => $sortBy
+                    ])) ?>" 
+                    class="ml-2 px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition font-medium flex items-center gap-2"
+                >
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </a>
             </div>
+
         </form>
         
         <!-- Import Excel/CSV - Revisi -->
