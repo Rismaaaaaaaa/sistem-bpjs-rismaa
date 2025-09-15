@@ -117,6 +117,22 @@
                         <input type="text" name="nomor_kpj" class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white" placeholder="Masukkan nomor KPJ" required>
                     </div>
                 </div>
+                <!-- Nama Tenaga Kerja -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-user text-bpjs-primary mr-1"></i>
+                        Nama Tenaga Kerja <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative group">
+                        <i class="fas fa-id-badge absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-bpjs-accent"></i>
+                        <input type="text" name="nama_tenaga_kerja" 
+                            class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl 
+                                    focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition 
+                                    bg-gray-50 hover:bg-white" 
+                            placeholder="Masukkan nama tenaga kerja" required>
+                    </div>
+                </div>
+
                 <!-- Nama Perusahaan -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -172,20 +188,27 @@
                         <input type="text" name="atas_nama" class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white" placeholder="Masukkan nama pemilik rekening" required>
                     </div>
                 </div>
-                <!-- Upload Dokumen -->
-                <div class="md:col-span-2">
+                                <!-- Upload Dokumen -->
+                    <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         <i class="fas fa-file-upload text-bpjs-primary mr-1"></i>
                         Upload Dokumen (PNG/JPG) <span class="text-red-500">*</span>
                     </label>
-                    <div class="file-upload border-2 border-dashed border-gray-300 rounded-xl p-5 text-center transition cursor-pointer hover:border-bpjs-primary hover:bg-blue-50 group">
+
+                    <div id="fileUploadArea"
+                        class="file-upload border-2 border-dashed border-gray-300 rounded-xl p-5 text-center transition cursor-pointer hover:border-bpjs-primary hover:bg-blue-50 group">
                         <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-3 group-hover:text-bpjs-accent"></i>
                         <p class="text-sm text-gray-600 mb-1">Klik untuk upload atau drag & drop file di sini</p>
                         <p class="text-xs text-gray-500">Format: PNG, JPG, JPEG (Maks. 5MB)</p>
-                        <input type="file" name="dokumen" accept=".png,.jpg,.jpeg" class="hidden" id="fileInput" >
+
+                        <!-- input file tetap ada -->
+                        <input type="file" name="dokumen" accept=".png,.jpg,.jpeg" class="hidden" id="fileInput">
                     </div>
+
+                    <!-- Preview nama file -->
                     <div id="fileName" class="text-sm text-gray-600 mt-2 hidden"></div>
-                </div>
+                    </div>
+
                 <!-- Form Actions -->
                 <div class="md:col-span-2 flex justify-end gap-4 pt-6 border-t border-gray-200 mt-4">
                     <button type="reset" class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition flex items-center gap-2">
@@ -234,13 +257,14 @@
                     fileName.textContent = 'File terpilih: ' + this.files[0].name;
                     fileName.classList.remove('hidden');
                     fileUploadArea.classList.add('border-green-400', 'bg-green-50');
-                    fileUploadArea.innerHTML = `
-                        <i class="fas fa-check-circle text-3xl text-green-500 mb-3"></i>
-                        <p class="text-sm text-green-600 mb-1">File berhasil dipilih</p>
-                        <p class="text-xs text-green-500">${this.files[0].name}</p>
-                    `;
+
+                    // Jangan hapus input! cukup tambahin ikon + teks status
+                    fileUploadArea.querySelector('i').className = "fas fa-check-circle text-3xl text-green-500 mb-3";
+                    fileUploadArea.querySelector('p.text-sm').textContent = "File berhasil dipilih";
+                    fileUploadArea.querySelector('p.text-xs').textContent = this.files[0].name;
                 }
             });
+
            
             // Drag and drop for file upload
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -318,8 +342,8 @@
     if (!valid) {
         e.preventDefault();
         alert('Harap lengkapi semua field yang wajib diisi!');
-    }
-});
+        }
+    });
 
         });
     </script>

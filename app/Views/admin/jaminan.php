@@ -205,7 +205,7 @@
     <!-- Data Table -->
     <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
         <div class="overflow-x-auto">
-            <table class="w-full">
+           <table class="w-full">
                 <thead class="bg-gradient-to-r from-bpjs-primary to-bpjs-darkblue text-white">
                     <tr>
                         <th class="p-4 text-left font-semibold">#</th>
@@ -214,6 +214,7 @@
                         <th class="p-4 text-left font-semibold">Kode Transaksi</th>
                         <th class="p-4 text-left font-semibold">No. KPJ</th>
                         <th class="p-4 text-left font-semibold">Perusahaan</th>
+                        <th class="p-4 text-left font-semibold">Tenaga Kerja</th> <!-- NEW -->
                         <th class="p-4 text-left font-semibold">PPH 21</th>
                         <th class="p-4 text-left font-semibold">Jumlah Bayar</th>
                         <th class="p-4 text-left font-semibold">Rekening</th>
@@ -239,6 +240,14 @@
                                         <?= esc($row['nama_perusahaan']) ?>
                                     </div>
                                 </td>
+                                <td class="p-4">
+                                    <div class="flex items-center">
+                                        <div class="p-2 rounded-lg bg-yellow-100 mr-2">
+                                            <i class="fas fa-user text-yellow-600"></i>
+                                        </div>
+                                        <?= esc($row['nama_tenaga_kerja']) ?>
+                                    </div>
+                                </td>
                                 <td class="p-4">Rp <?= number_format($row['pph21'], 2, ',', '.') ?></td>
                                 <td class="p-4">
                                     <span class="px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium">
@@ -248,32 +257,29 @@
                                 <td class="p-4"><?= esc($row['no_rekening']) ?></td>
                                 <td class="p-4"><?= esc($row['atas_nama']) ?></td>
 
-                               <td class="p-4">
-    <?php 
-        $filePath = FCPATH . 'uploads/jaminan/' . ($row['dokumen'] ?? '');
-        if (!empty($row['dokumen']) && file_exists($filePath)): 
-            $fileUrl = base_url('uploads/jaminan/' . $row['dokumen']);
-    ?>
-        <button type="button" 
-            onclick="showImageModal('<?= $fileUrl ?>', '<?= $row['dokumen'] ?>', 'Ukuran otomatis')"
-            class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
-            <i class="fas fa-image mr-2"></i> Lihat
-        </button>
-    <?php else: ?>
-        <button type="button" onclick="showNoFileToast()" 
-            class="inline-flex items-center px-3 py-2 rounded-lg bg-gray-100 text-gray-600">
-            <i class="fas fa-times-circle mr-2"></i> Tidak ada
-        </button>
-    <?php endif; ?>
-</td>
+                                <td class="p-4">
+                                    <?php 
+                                        $filePath = FCPATH . 'uploads/jaminan/' . ($row['dokumen'] ?? '');
+                                        if (!empty($row['dokumen']) && file_exists($filePath)): 
+                                            $fileUrl = base_url('uploads/jaminan/' . $row['dokumen']);
+                                    ?>
+                                        <button type="button" 
+                                            onclick="showImageModal('<?= $fileUrl ?>', '<?= $row['dokumen'] ?>', 'Ukuran otomatis')"
+                                            class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
+                                            <i class="fas fa-image mr-2"></i> Lihat
+                                        </button>
+                                    <?php else: ?>
+                                        <button type="button" onclick="showNoFileToast()" 
+                                            class="inline-flex items-center px-3 py-2 rounded-lg bg-gray-100 text-gray-600">
+                                            <i class="fas fa-times-circle mr-2"></i> Tidak ada
+                                        </button>
+                                    <?php endif; ?>
+                                </td>
 
-
-
-
-
-                               <td class="p-4">
+                                <td class="p-4">
                                     <div class="flex space-x-2">
                                         <!-- Tombol Detail -->
+                                                                            <!-- Tombol Detail -->
                                         <button 
                                             class="p-2 rounded-lg bg-green-100 text-green-600 hover:bg-green-200 transition btn-detail"
                                             data-id="<?= $row['id'] ?>"
@@ -282,6 +288,7 @@
                                             data-kode_transaksi="<?= esc($row['kode_transaksi']) ?>"
                                             data-nomor_kpj="<?= esc($row['nomor_kpj']) ?>"
                                             data-nama_perusahaan="<?= esc($row['nama_perusahaan']) ?>"
+                                            data-nama_tenaga_kerja="<?= esc($row['nama_tenaga_kerja']) ?>"
                                             data-pph21="<?= esc($row['pph21']) ?>"
                                             data-jumlah_bayar="<?= esc($row['jumlah_bayar']) ?>"
                                             data-no_rekening="<?= esc($row['no_rekening']) ?>"
@@ -291,22 +298,25 @@
                                             <i class="fas fa-eye"></i>
                                         </button>
 
+
                                         <!-- Tombol Edit -->
-                                        <button 
-                                            class="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition btn-edit"
-                                            data-id="<?= $row['id'] ?>"
-                                            data-nomor_penetapan="<?= esc($row['nomor_penetapan']) ?>"
-                                            data-tanggal_transaksi="<?= esc($row['tanggal_transaksi']) ?>"
-                                            data-kode_transaksi="<?= esc($row['kode_transaksi']) ?>"
-                                            data-nomor_kpj="<?= esc($row['nomor_kpj']) ?>"
-                                            data-nama_perusahaan="<?= esc($row['nama_perusahaan']) ?>"
-                                            data-pph21="<?= esc($row['pph21']) ?>"
-                                            data-jumlah_bayar="<?= esc($row['jumlah_bayar']) ?>"
-                                            data-no_rekening="<?= esc($row['no_rekening']) ?>"
-                                            data-atas_nama="<?= esc($row['atas_nama']) ?>"
-                                            title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
+                                            <button 
+                                                class="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition btn-edit"
+                                                data-id="<?= $row['id'] ?>"
+                                                data-nomor_penetapan="<?= esc($row['nomor_penetapan']) ?>"
+                                                data-tanggal_transaksi="<?= esc($row['tanggal_transaksi']) ?>"
+                                                data-kode_transaksi="<?= esc($row['kode_transaksi']) ?>"
+                                                data-nomor_kpj="<?= esc($row['nomor_kpj']) ?>"
+                                                data-nama_perusahaan="<?= esc($row['nama_perusahaan']) ?>"
+                                                data-nama_tenaga_kerja="<?= esc($row['nama_tenaga_kerja']) ?>"
+                                                data-pph21="<?= esc($row['pph21']) ?>"
+                                                data-jumlah_bayar="<?= esc($row['jumlah_bayar']) ?>"
+                                                data-no_rekening="<?= esc($row['no_rekening']) ?>"
+                                                data-atas_nama="<?= esc($row['atas_nama']) ?>"
+                                                title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+
 
                                         <!-- Tombol Hapus -->
                                         <form action="<?= base_url('admin/jaminan/delete/'.$row['id']) ?>" method="post" onsubmit="return confirm('Yakin mau hapus data ini?')" class="inline">
@@ -317,13 +327,11 @@
                                         </form>
                                     </div>
                                 </td>
-
-
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="12" class="p-8 text-center">
+                            <td colspan="13" class="p-8 text-center">
                                 <div class="flex flex-col items-center justify-center text-gray-400 py-8">
                                     <i class="fas fa-inbox text-4xl mb-3"></i>
                                     <p class="text-lg">Tidak ada data jaminan</p>
@@ -334,79 +342,108 @@
                     <?php endif; ?>
                 </tbody>
             </table>
+
         </div>
     </div>
 
    
 
  
+<!-- Modal Edit -->
+<div id="modalEdit" class="fixed inset-0 hidden bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white w-full max-w-2xl rounded-xl shadow-lg p-6 relative">
+    
+    <!-- Tombol Close -->
+    <button type="button" onclick="closeModal()" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800">
+      ✕
+    </button>
 
+    <h2 class="text-xl font-semibold mb-4">Edit Data Jaminan</h2>
 
-    <!-- Modal -->
-    <div id="modalEdit" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
-        <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl p-6">
-            <h2 class="text-xl font-semibold mb-4">Edit Data Jaminan</h2>
+    <form action="<?= base_url('admin/jaminan/update') ?>" method="post" enctype="multipart/form-data" class="space-y-4">
+      <input type="hidden" name="id" id="edit_id">
 
-            <form id="formEdit" action="<?= base_url('admin/jaminan/update') ?>" method="post" enctype="multipart/form-data">
-                <?= csrf_field() ?>
-                <input type="hidden" name="id" id="edit_id">
+      <div>
+        <label class="block mb-1 font-medium">Nomor Penetapan</label>
+        <input type="text" name="nomor_penetapan" id="edit_nomor_penetapan" 
+               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+      </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium">No. Penetapan</label>
-                        <input type="text" name="nomor_penetapan" id="edit_nomor_penetapan" class="w-full border rounded-lg p-2">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium">Tanggal</label>
-                        <input type="date" name="tanggal_transaksi" id="edit_tanggal_transaksi" class="w-full border rounded-lg p-2">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium">Kode Transaksi</label>
-                        <input type="text" name="kode_transaksi" id="edit_kode_transaksi" class="w-full border rounded-lg p-2">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium">No. KPJ</label>
-                        <input type="text" name="nomor_kpj" id="edit_nomor_kpj" class="w-full border rounded-lg p-2">
-                    </div>
-                    <div class="col-span-2">
-                        <label class="block text-sm font-medium">Perusahaan</label>
-                        <input type="text" name="nama_perusahaan" id="edit_nama_perusahaan" class="w-full border rounded-lg p-2">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium">PPH 21</label>
-                        <input type="number" step="0.01" name="pph21" id="edit_pph21" class="w-full border rounded-lg p-2">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium">Jumlah Bayar</label>
-                        <input type="number" step="0.01" name="jumlah_bayar" id="edit_jumlah_bayar" class="w-full border rounded-lg p-2">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium">Rekening</label>
-                        <input type="text" name="no_rekening" id="edit_no_rekening" class="w-full border rounded-lg p-2">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium">Atas Nama</label>
-                        <input type="text" name="atas_nama" id="edit_atas_nama" class="w-full border rounded-lg p-2">
-                    </div>
-                    <div class="col-span-2">
-                        <label class="block text-sm font-medium">Dokumen (opsional)</label>
-                        <input type="file" name="dokumen" class="w-full border rounded-lg p-2">
-                    </div>
-                </div>
+      <div>
+        <label class="block mb-1 font-medium">Tanggal Transaksi</label>
+        <input type="date" name="tanggal_transaksi" id="edit_tanggal_transaksi" 
+               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+      </div>
 
-                <div class="flex justify-end mt-6 space-x-2">
-                    <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">Batal</button>
-                    <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
+      <div>
+        <label class="block mb-1 font-medium">Kode Transaksi</label>
+        <input type="text" name="kode_transaksi" id="edit_kode_transaksi" 
+               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+      </div>
 
-    <!-- Modal dua -->
-    <!-- Modal Detail Modern -->
+      <div>
+        <label class="block mb-1 font-medium">Nomor KPJ</label>
+        <input type="text" name="nomor_kpj" id="edit_nomor_kpj" 
+               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <div>
+        <label class="block mb-1 font-medium">Nama Perusahaan</label>
+        <input type="text" name="nama_perusahaan" id="edit_nama_perusahaan" 
+               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <!-- 🔥 Tambahan Nama Tenaga Kerja -->
+      <div>
+        <label class="block mb-1 font-medium">Nama Tenaga Kerja</label>
+        <input type="text" name="nama_tenaga_kerja" id="edit_nama_tenaga_kerja" 
+               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <div>
+        <label class="block mb-1 font-medium">PPH 21</label>
+        <input type="number" name="pph21" id="edit_pph21" 
+               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <div>
+        <label class="block mb-1 font-medium">Jumlah Bayar</label>
+        <input type="number" name="jumlah_bayar" id="edit_jumlah_bayar" 
+               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <div>
+        <label class="block mb-1 font-medium">No Rekening</label>
+        <input type="text" name="no_rekening" id="edit_no_rekening" 
+               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <div>
+        <label class="block mb-1 font-medium">Atas Nama</label>
+        <input type="text" name="atas_nama" id="edit_atas_nama" 
+               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <div>
+        <label class="block mb-1 font-medium">Upload Dokumen</label>
+        <input type="file" name="dokumen" 
+               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <div class="text-right">
+        <button type="submit" 
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
+          Simpan
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- Modal Detail Modern -->
 <div id="modalDetail" 
      class="fixed inset-0 hidden bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity duration-300">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-transform duration-300 scale-95">
+        
         <!-- Header -->
         <div class="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-4 flex justify-between items-center">
             <h2 class="text-xl font-bold text-white">Detail Jaminan</h2>
@@ -414,7 +451,6 @@
                 <i class="fas fa-times text-lg"></i>
             </button>
         </div>
-        
         
         <!-- Content -->
         <div class="p-6 max-h-[70vh] overflow-y-auto">
@@ -441,6 +477,12 @@
                 <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <p class="text-sm text-gray-600 font-medium mb-1">Nama Perusahaan</p>
                     <p class="text-gray-800 font-semibold text-lg" id="detailPerusahaan">-</p>
+                </div>
+
+                <!-- 🔥 Tambahan Nama Tenaga Kerja -->
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <p class="text-sm text-gray-600 font-medium mb-1">Nama Tenaga Kerja</p>
+                    <p class="text-gray-800 font-semibold text-lg" id="detailTenagaKerja">-</p>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -474,8 +516,6 @@
                 </div>
             </div>
         </div>
-        
-        
     </div>
 </div>
 
@@ -625,6 +665,12 @@ document.addEventListener('keydown', function(e) {
             document.getElementById("edit_kode_transaksi").value = btn.dataset.kode_transaksi;
             document.getElementById("edit_nomor_kpj").value = btn.dataset.nomor_kpj;
             document.getElementById("edit_nama_perusahaan").value = btn.dataset.nama_perusahaan;
+
+            // === tambahan: nama tenaga kerja ===
+            if (document.getElementById("edit_nama_tenaga_kerja")) {
+                document.getElementById("edit_nama_tenaga_kerja").value = btn.dataset.nama_tenaga_kerja || "";
+            }
+
             document.getElementById("edit_pph21").value = btn.dataset.pph21;
             document.getElementById("edit_jumlah_bayar").value = btn.dataset.jumlah_bayar;
             document.getElementById("edit_no_rekening").value = btn.dataset.no_rekening;
@@ -721,63 +767,63 @@ function showNoFileToast() {
 
 
 <script>
-document.getElementById("applyFilters").addEventListener("click", function() {
-    const search  = document.getElementById("searchInput").value;
-    const date    = document.getElementById("dateFilter").value;
-    const company = document.getElementById("companyFilter").value;
-    const sortBy  = document.getElementById("sortBy").value;
+    document.getElementById("applyFilters").addEventListener("click", function() {
+        const search  = document.getElementById("searchInput").value;
+        const date    = document.getElementById("dateFilter").value;
+        const company = document.getElementById("companyFilter").value;
+        const sortBy  = document.getElementById("sortBy").value;
 
-    fetch(`/admin/jaminan/filter?search=${search}&date=${date}&company=${company}&sortBy=${sortBy}`)
-        .then(res => res.json())
-        .then(data => {
-            const tbody = document.querySelector("table tbody");
-            tbody.innerHTML = "";
+        fetch(`/admin/jaminan/filter?search=${search}&date=${date}&company=${company}&sortBy=${sortBy}`)
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.querySelector("table tbody");
+                tbody.innerHTML = "";
 
-            if (data.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="12" class="p-8 text-center text-gray-500">Tidak ada data ditemukan</td>
-                    </tr>
-                `;
-                return;
-            }
+                if (data.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="12" class="p-8 text-center text-gray-500">Tidak ada data ditemukan</td>
+                        </tr>
+                    `;
+                    return;
+                }
 
-            data.forEach((row, i) => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="p-4">${i+1}</td>
-                        <td class="p-4 font-medium text-bpjs-primary">${row.nomor_penetapan}</td>
-                        <td class="p-4">${new Date(row.tanggal_transaksi).toLocaleDateString('id-ID')}</td>
-                        <td class="p-4">${row.kode_transaksi}</td>
-                        <td class="p-4">${row.nomor_kpj}</td>
-                        <td class="p-4">${row.nama_perusahaan}</td>
-                        <td class="p-4">Rp ${parseFloat(row.pph21).toLocaleString('id-ID')}</td>
-                        <td class="p-4">Rp ${parseFloat(row.jumlah_bayar).toLocaleString('id-ID')}</td>
-                        <td class="p-4">${row.no_rekening}</td>
-                        <td class="p-4">${row.atas_nama}</td>
-                        <td class="p-4">${row.dokumen ? `<a href="/uploads/${row.dokumen}" target="_blank">Lihat</a>` : 'Tidak ada'}</td>
-                        <td class="p-4">
-                            <button class="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="p-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
+                data.forEach((row, i) => {
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="p-4">${i+1}</td>
+                            <td class="p-4 font-medium text-bpjs-primary">${row.nomor_penetapan}</td>
+                            <td class="p-4">${new Date(row.tanggal_transaksi).toLocaleDateString('id-ID')}</td>
+                            <td class="p-4">${row.kode_transaksi}</td>
+                            <td class="p-4">${row.nomor_kpj}</td>
+                            <td class="p-4">${row.nama_perusahaan}</td>
+                            <td class="p-4">Rp ${parseFloat(row.pph21).toLocaleString('id-ID')}</td>
+                            <td class="p-4">Rp ${parseFloat(row.jumlah_bayar).toLocaleString('id-ID')}</td>
+                            <td class="p-4">${row.no_rekening}</td>
+                            <td class="p-4">${row.atas_nama}</td>
+                            <td class="p-4">${row.dokumen ? `<a href="/uploads/${row.dokumen}" target="_blank">Lihat</a>` : 'Tidak ada'}</td>
+                            <td class="p-4">
+                                <button class="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="p-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
             });
-        });
-});
+    });
 
-// Reset filter
-document.getElementById("resetFilters").addEventListener("click", function() {
-    document.getElementById("searchInput").value = "";
-    document.getElementById("dateFilter").value = "all";
-    document.getElementById("companyFilter").value = "all";
-    document.getElementById("sortBy").value = "newest";
-    document.getElementById("applyFilters").click();
-});
+    // Reset filter
+    document.getElementById("resetFilters").addEventListener("click", function() {
+        document.getElementById("searchInput").value = "";
+        document.getElementById("dateFilter").value = "all";
+        document.getElementById("companyFilter").value = "all";
+        document.getElementById("sortBy").value = "newest";
+        document.getElementById("applyFilters").click();
+    });
 </script>
 
 
@@ -811,54 +857,58 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    const modalDetail = document.getElementById("modalDetail");
-    const closeModalDetail = document.getElementById("closeModalDetail");
+    document.addEventListener("DOMContentLoaded", function() {
+        const modalDetail = document.getElementById("modalDetail");
+        const closeModalDetail = document.getElementById("closeModalDetail");
 
-    document.querySelectorAll(".btn-detail").forEach(btn => {
-        btn.addEventListener("click", function() {
-            document.getElementById("detailNomorPenetapan").textContent = this.dataset.nomor_penetapan;
-            document.getElementById("detailTanggal").textContent = this.dataset.tanggal_transaksi;
-            document.getElementById("detailKode").textContent = this.dataset.kode_transaksi;
-            document.getElementById("detailKpj").textContent = this.dataset.nomor_kpj;
-            document.getElementById("detailPerusahaan").textContent = this.dataset.nama_perusahaan;
-            document.getElementById("detailPph21").textContent = this.dataset.pph21;
-            document.getElementById("detailJumlah").textContent = this.dataset.jumlah_bayar;
-            document.getElementById("detailRekening").textContent = this.dataset.no_rekening;
-            document.getElementById("detailAtasNama").textContent = this.dataset.atas_nama;
+        document.querySelectorAll(".btn-detail").forEach(btn => {
+            btn.addEventListener("click", function() {
+                document.getElementById("detailNomorPenetapan").textContent = this.dataset.nomor_penetapan;
+                document.getElementById("detailTanggal").textContent = this.dataset.tanggal_transaksi;
+                document.getElementById("detailKode").textContent = this.dataset.kode_transaksi;
+                document.getElementById("detailKpj").textContent = this.dataset.nomor_kpj;
+                document.getElementById("detailPerusahaan").textContent = this.dataset.nama_perusahaan;
 
-           if(this.dataset.dokumen){
-                let fileUrl = "<?= base_url('uploads/jaminan/') ?>" + this.dataset.dokumen;
-                let ext = this.dataset.dokumen.split('.').pop().toLowerCase();
+                // === tambahan: nama tenaga kerja ===
+                document.getElementById("detailTenagaKerja").textContent = this.dataset.nama_tenaga_kerja || "-";
 
-                if(['jpg','jpeg','png','gif'].includes(ext)){
-                    document.getElementById("detailDokumen").innerHTML = `
-                        <img src="${fileUrl}" alt="Dokumen" class="max-h-64 rounded border">
-                    `;
-                } else if(ext === 'pdf') {
-                    document.getElementById("detailDokumen").innerHTML = `
-                        <iframe src="${fileUrl}" class="w-full h-64 border rounded"></iframe>
-                    `;
+                document.getElementById("detailPph21").textContent = this.dataset.pph21;
+                document.getElementById("detailJumlah").textContent = this.dataset.jumlah_bayar;
+                document.getElementById("detailRekening").textContent = this.dataset.no_rekening;
+                document.getElementById("detailAtasNama").textContent = this.dataset.atas_nama;
+
+                if (this.dataset.dokumen) {
+                    let fileUrl = "<?= base_url('uploads/jaminan/') ?>" + this.dataset.dokumen;
+                    let ext = this.dataset.dokumen.split('.').pop().toLowerCase();
+
+                    if (['jpg','jpeg','png','gif'].includes(ext)) {
+                        document.getElementById("detailDokumen").innerHTML = `
+                            <img src="${fileUrl}" alt="Dokumen" class="max-h-64 rounded border">
+                        `;
+                    } else if (ext === 'pdf') {
+                        document.getElementById("detailDokumen").innerHTML = `
+                            <iframe src="${fileUrl}" class="w-full h-64 border rounded"></iframe>
+                        `;
+                    } else {
+                        document.getElementById("detailDokumen").innerHTML = `
+                            <a href="${fileUrl}" target="_blank" class="text-blue-600 hover:underline">
+                                Lihat Dokumen
+                            </a>
+                        `;
+                    }
                 } else {
-                    document.getElementById("detailDokumen").innerHTML = `
-                        <a href="${fileUrl}" target="_blank" class="text-blue-600 hover:underline">
-                            Lihat Dokumen
-                        </a>
-                    `;
+                    document.getElementById("detailDokumen").textContent = "Tidak ada dokumen";
                 }
-            } else {
-                document.getElementById("detailDokumen").textContent = "Tidak ada dokumen";
-            }
 
+                modalDetail.classList.remove("hidden");
+            });
+        });
 
-            modalDetail.classList.remove("hidden");
+        closeModalDetail.addEventListener("click", () => {
+            modalDetail.classList.add("hidden");
         });
     });
-
-    closeModalDetail.addEventListener("click", () => {
-        modalDetail.classList.add("hidden");
-    });
-});
 </script>
+
 
 <?= $this->endSection() ?>

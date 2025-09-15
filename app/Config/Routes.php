@@ -48,6 +48,7 @@ $routes->group('admin', ['filter' => 'auth'], function($routes) {
     $routes->get('bubm/filter', 'BubmController::filter');
     $routes->post('bubm/delete/(:num)', 'BubmController::delete/$1');
     $routes->post('bubm/import', 'BubmController::import_bubm');
+    $routes->post('jaminan/import_jaminan', 'JaminanController::import');
     $routes->get('bubm/export', 'BubmController::export_bubm');
 
     // User

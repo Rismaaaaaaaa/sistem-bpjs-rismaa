@@ -14,6 +14,7 @@ class JaminanModel extends Model
         'kode_transaksi',
         'nomor_kpj',
         'nama_perusahaan',
+        'nama_tenaga_kerja',
         'pph21',
         'jumlah_bayar',
         'no_rekening',

@@ -10,9 +10,9 @@ class UserSeeder extends Seeder
     {
         $data = [
             [
-                'username'      => 'admin1',
-                'email'         => 'admin1@gmail.com',
-                'password'      => password_hash('admin123', PASSWORD_DEFAULT),
+                'username'      => 'Admin',
+                'email'         => 'admin@gmail.com',
+                'password'      => password_hash('password123', PASSWORD_DEFAULT),
                 'role'          => 'admin',
                 'alamat'        => 'Jl. Merdeka No. 123, Jakarta',
                 'no_hp'         => '081234567890',
@@ -22,9 +22,9 @@ class UserSeeder extends Seeder
                 'updated_at'    => date('Y-m-d H:i:s'),
             ],
             [
-                'username'      => 'superadmin1',
+                'username'      => 'Super Admin',
                 'email'         => 'superadmin@gmail.com',
-                'password'      => password_hash('super123', PASSWORD_DEFAULT),
+                'password'      => password_hash('password123', PASSWORD_DEFAULT),
                 'role'          => 'superadmin',
                 'alamat'        => 'Jl. Sudirman No. 45, Bandung',
                 'no_hp'         => '082345678901',

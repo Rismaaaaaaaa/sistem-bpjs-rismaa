@@ -58,49 +58,61 @@ class JaminanController extends BaseController
         return view('/admin/tambah_jaminan', $data);
     }
 
-    public function store()
-    {
-        $validation = \Config\Services::validation();
-        $validation->setRules([
-            'nomor_penetapan'   => 'required',
-            'tanggal_transaksi' => 'required|valid_date',
-            'kode_transaksi'    => 'required',
-            'nomor_kpj'         => 'required',
-            'nama_perusahaan'   => 'required',
-            'pph21'             => 'permit_empty|decimal',
-            'jumlah_bayar'      => 'required|decimal',
-            'no_rekening'       => 'required',
-            'atas_nama'         => 'required',
-            'dokumen'           => 'permit_empty|uploaded[dokumen]|is_image[dokumen]|mime_in[dokumen,image/jpg,image/jpeg,image/png]',
-        ]);
+public function store()
+{
+    $validation = \Config\Services::validation();
+    $validation->setRules([
+        'nomor_penetapan'   => 'required',
+        'tanggal_transaksi' => 'required|valid_date',
+        'kode_transaksi'    => 'required',
+        'nomor_kpj'         => 'required',
+        'nama_tenaga_kerja' => 'required', // <-- tambahin ini
+        'nama_perusahaan'   => 'required',
+        'pph21'             => 'permit_empty|decimal',
+        'jumlah_bayar'      => 'required|decimal',
+        'no_rekening'       => 'required',
+        'atas_nama'         => 'required',
+        'dokumen'           => 'if_exist|is_image[dokumen]|mime_in[dokumen,image/jpg,image/jpeg,image/png]',
+    ]);
 
-        if (!$validation->withRequest($this->request)->run()) {
-            return redirect()->back()->withInput()->with('errors', $validation->getErrors());
-        }
-
-        $file = $this->request->getFile('dokumen');
-        $fileName = null;
-
-        if ($file && $file->isValid() && !$file->hasMoved()) {
-            $fileName = $file->getRandomName();
-            $file->move(FCPATH . 'uploads/jaminan/', $fileName); // simpan di public/uploads/jaminan/
-        }
-
-        $this->jaminanModel->save([
-            'nomor_penetapan'   => $this->request->getPost('nomor_penetapan'),
-            'tanggal_transaksi' => $this->request->getPost('tanggal_transaksi'),
-            'kode_transaksi'    => $this->request->getPost('kode_transaksi'),
-            'nomor_kpj'         => $this->request->getPost('nomor_kpj'),
-            'nama_perusahaan'   => $this->request->getPost('nama_perusahaan'),
-            'pph21'             => $this->request->getPost('pph21'),
-            'jumlah_bayar'      => $this->request->getPost('jumlah_bayar'),
-            'no_rekening'       => $this->request->getPost('no_rekening'),
-            'atas_nama'         => $this->request->getPost('atas_nama'),
-            'dokumen'           => $fileName,
-        ]);
-
-        return redirect()->to('/admin/jaminan')->with('success', 'Data Jaminan berhasil disimpan');
+    if (!$validation->withRequest($this->request)->run()) {
+        return redirect()->back()->withInput()->with('errors', $validation->getErrors());
     }
+
+    $file = $this->request->getFile('dokumen');
+    $fileName = null;
+
+    if ($file && $file->isValid() && !$file->hasMoved()) {
+        // Pastikan folder ada
+        $uploadPath = FCPATH . 'uploads/jaminan/';
+        if (!is_dir($uploadPath)) {
+            mkdir($uploadPath, 0777, true);
+        }
+
+        $fileName = $file->getRandomName();
+        $file->move($uploadPath, $fileName);
+    }
+
+    $this->jaminanModel->save([
+        'nomor_penetapan'   => $this->request->getPost('nomor_penetapan'),
+        'tanggal_transaksi' => $this->request->getPost('tanggal_transaksi'),
+        'kode_transaksi'    => $this->request->getPost('kode_transaksi'),
+        'nomor_kpj'         => $this->request->getPost('nomor_kpj'),
+        'nama_tenaga_kerja' => $this->request->getPost('nama_tenaga_kerja'), // <-- masukin sini
+        'nama_perusahaan'   => $this->request->getPost('nama_perusahaan'),
+        'pph21'             => $this->request->getPost('pph21'),
+        'jumlah_bayar'      => $this->request->getPost('jumlah_bayar'),
+        'no_rekening'       => $this->request->getPost('no_rekening'),
+        'atas_nama'         => $this->request->getPost('atas_nama'),
+        'dokumen'           => $fileName,
+    ]);
+
+    return redirect()->to('/admin/jaminan')->with('success', 'Data Jaminan berhasil disimpan');
+}
+
+
+
+
 
     public function update()
     {
@@ -110,19 +122,18 @@ class JaminanController extends BaseController
         $fileName = null;
 
         if ($file && $file->isValid() && !$file->hasMoved()) {
-        $fileName = $file->getRandomName();
-        $file->move(FCPATH . 'uploads/jaminan/', $fileName);
+            $fileName = $file->getRandomName();
+            $file->move(FCPATH . 'uploads/jaminan/', $fileName);
 
-        // hapus file lama
-        $oldData = $this->jaminanModel->find($id);
-        if ($oldData && !empty($oldData['dokumen'])) {
-            $oldPath = FCPATH . 'uploads/jaminan/' . $oldData['dokumen'];
-            if (file_exists($oldPath)) {
-                unlink($oldPath);
+            // hapus file lama
+            $oldData = $this->jaminanModel->find($id);
+            if ($oldData && !empty($oldData['dokumen'])) {
+                $oldPath = FCPATH . 'uploads/jaminan/' . $oldData['dokumen'];
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
             }
         }
-    }
-
 
         $data = [
             'nomor_penetapan'   => $this->request->getPost('nomor_penetapan'),
@@ -130,6 +141,7 @@ class JaminanController extends BaseController
             'kode_transaksi'    => $this->request->getPost('kode_transaksi'),
             'nomor_kpj'         => $this->request->getPost('nomor_kpj'),
             'nama_perusahaan'   => $this->request->getPost('nama_perusahaan'),
+            'nama_tenaga_kerja' => $this->request->getPost('nama_tenaga_kerja'), // ✅
             'pph21'             => $this->request->getPost('pph21'),
             'jumlah_bayar'      => $this->request->getPost('jumlah_bayar'),
             'no_rekening'       => $this->request->getPost('no_rekening'),
@@ -143,31 +155,32 @@ class JaminanController extends BaseController
         $this->jaminanModel->update($id, $data);
 
         return redirect()->to('/admin/jaminan')->with('success', 'Data Jaminan berhasil diupdate');
-        
     }
+
 
     public function delete($id)
-    {
-        $data = $this->jaminanModel->find($id);
-        if ($data && !empty($data['dokumen'])) {
-            $path = WRITEPATH . 'uploads/jaminan/' . $data['dokumen'];
-            if (file_exists($path)) {
-                unlink($path);
-            }
+{
+    $data = $this->jaminanModel->find($id);
+    if ($data && !empty($data['dokumen'])) {
+        $path = FCPATH . 'uploads/jaminan/' . $data['dokumen'];
+        if (file_exists($path)) {
+            unlink($path);
         }
-
-        $this->jaminanModel->delete($id);
-        return redirect()->to('/admin/jaminan')->with('success', 'Data Jaminan berhasil dihapus');
     }
 
-    public function viewFile($filename)
-    {
-        $path = WRITEPATH . 'uploads/jaminan/' . $filename;
-        if (!file_exists($path)) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException("File tidak ditemukan");
-        }
-        return $this->response->download($path, null)->setFileName($filename);
+    $this->jaminanModel->delete($id);
+    return redirect()->to('/admin/jaminan')->with('success', 'Data Jaminan berhasil dihapus');
+}
+
+public function viewFile($filename)
+{
+    $path = FCPATH . 'uploads/jaminan/' . $filename;
+    if (!file_exists($path)) {
+        throw new \CodeIgniter\Exceptions\PageNotFoundException("File tidak ditemukan");
     }
+    return $this->response->download($path, null)->setFileName($filename);
+}
+
 
     public function filter()
     {
@@ -246,38 +259,68 @@ class JaminanController extends BaseController
         return view('admin/jaminan', $data);
     }
 
-    public function import()
-    {
-        $file = $this->request->getFile('file_excel');
+   public function import()
+{
+    $file = $this->request->getFile('file_excel');
 
-        if (!$file->isValid()) {
-            return redirect()->back()->with('error', 'File tidak valid');
-        }
+    if (!$file || !$file->isValid()) {
+        return redirect()->back()->with('error', 'File tidak valid atau tidak ditemukan');
+    }
 
-        $ext = $file->getClientExtension();
-        $reader = $ext === 'csv' ? new Csv() : new Xlsx();
+    $ext = strtolower($file->getClientExtension());
+    if (!in_array($ext, ['csv', 'xlsx'])) {
+        return redirect()->back()->with('error', 'Format file tidak didukung. Gunakan CSV atau XLSX.');
+    }
+
+    try {
+        $reader = $ext === 'csv'
+            ? new \PhpOffice\PhpSpreadsheet\Reader\Csv()
+            : new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
 
         $spreadsheet = $reader->load($file->getTempName());
         $sheetData   = $spreadsheet->getActiveSheet()->toArray();
 
+        if (empty($sheetData)) {
+            return redirect()->back()->with('error', 'File kosong atau tidak terbaca');
+        }
+
+        // Ambil header dari row pertama
+        $headers = array_map('strtolower', $sheetData[0]);
+
         $dataInsert = [];
         foreach ($sheetData as $index => $row) {
-            if ($index == 0) continue;
+            if ($index == 0) continue; // skip header
 
-            $dataInsert[] = [
-                'nomor_penetapan'   => $row[0] ?? null,
-                'tanggal_transaksi' => !empty($row[1]) ? date('Y-m-d', strtotime($row[1])) : null,
-                'kode_transaksi'    => $row[2] ?? null,
-                'nomor_kpj'         => $row[3] ?? null,
-                'nama_perusahaan'   => $row[4] ?? null,
-                'pph21'             => !empty($row[5]) ? (float) $row[5] : 0,
-                'jumlah_bayar'      => !empty($row[6]) ? (float) $row[6] : 0,
-                'no_rekening'       => $row[7] ?? null,
-                'atas_nama'         => $row[8] ?? null,
-                'dokumen'           => $row[9] ?? null,
+            $rowData = array_combine($headers, $row);
+
+            // Handle tanggal
+            $tanggalTransaksi = null;
+            if (!empty($rowData['tanggal_transaksi'])) {
+                if (is_numeric($rowData['tanggal_transaksi'])) {
+                    $tanggalTransaksi = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject(
+                        $rowData['tanggal_transaksi']
+                    )->format('Y-m-d');
+                } else {
+                    $tanggalTransaksi = date('Y-m-d', strtotime($rowData['tanggal_transaksi']));
+                }
+            }
+
+           $dataInsert[] = [
+                'nomor_penetapan'   => trim($rowData['nomor_penetapan'] ?? ''),
+                'tanggal_transaksi' => $tanggalTransaksi,
+                'kode_transaksi'    => trim($rowData['kode_transaksi'] ?? ''),
+                'nomor_kpj'         => trim($rowData['nomor_kpj'] ?? ''),
+                'nama_tenaga_kerja' => trim($rowData['nama_tenaga_kerja'] ?? ''), // <<< tambahin ini
+                'nama_perusahaan'   => trim($rowData['nama_perusahaan'] ?? ''),
+                'pph21'             => isset($rowData['pph21']) ? (float) preg_replace('/[^0-9.]/', '', $rowData['pph21']) : 0,
+                'jumlah_bayar'      => isset($rowData['jumlah_bayar']) ? (float) preg_replace('/[^0-9.]/', '', $rowData['jumlah_bayar']) : 0,
+                'no_rekening'       => trim($rowData['no_rekening'] ?? ''),
+                'atas_nama'         => trim($rowData['atas_nama'] ?? ''),
+                'dokumen'           => trim($rowData['dokumen'] ?? ''),
                 'created_at'        => date('Y-m-d H:i:s'),
                 'updated_at'        => date('Y-m-d H:i:s'),
             ];
+
         }
 
         if (!empty($dataInsert)) {
@@ -285,5 +328,9 @@ class JaminanController extends BaseController
         }
 
         return redirect()->to('/admin/jaminan')->with('success', 'Data berhasil diimport!');
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'Gagal import: ' . $e->getMessage());
     }
+}
+
 }
