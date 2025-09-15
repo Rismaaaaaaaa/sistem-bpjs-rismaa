@@ -8,6 +8,7 @@ use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 
+
 class JaminanController extends BaseController
 {
     protected $jaminanModel;
@@ -114,64 +115,64 @@ public function store()
 
 
 
-public function exportExcel()
-{
-    $search  = $this->request->getGet('search');
-    $date    = $this->request->getGet('date');
-    $sortBy  = $this->request->getGet('sortBy');
+    public function exportExcel()
+    {
+        $search  = $this->request->getGet('search');
+        $date    = $this->request->getGet('date');
+        $sortBy  = $this->request->getGet('sortBy');
 
-    // ambil data sesuai filter
-    $jaminan = $this->jaminanModel->getFilteredData($search, $date, $sortBy);
+        // ambil data sesuai filter
+        $jaminan = $this->jaminanModel->getFilteredData($search, $date, $sortBy);
 
-    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
 
-    // Header
-    $headers = [
-        'A1' => 'Nomor Penetapan',
-        'B1' => 'Tanggal Transaksi',
-        'C1' => 'Kode Transaksi',
-        'D1' => 'Nomor KPJ',
-        'E1' => 'Nama Tenaga Kerja',
-        'F1' => 'Nama Perusahaan',
-        'G1' => 'PPh21',
-        'H1' => 'Jumlah Bayar',
-        'I1' => 'No Rekening',
-        'J1' => 'Atas Nama',
-        'K1' => 'Dokumen',
-    ];
-    foreach ($headers as $col => $text) {
-        $sheet->setCellValue($col, $text);
+        // Header
+        $headers = [
+            'A1' => 'Nomor Penetapan',
+            'B1' => 'Tanggal Transaksi',
+            'C1' => 'Kode Transaksi',
+            'D1' => 'Nomor KPJ',
+            'E1' => 'Nama Tenaga Kerja',
+            'F1' => 'Nama Perusahaan',
+            'G1' => 'PPh21',
+            'H1' => 'Jumlah Bayar',
+            'I1' => 'No Rekening',
+            'J1' => 'Atas Nama',
+            'K1' => 'Dokumen',
+        ];
+        foreach ($headers as $col => $text) {
+            $sheet->setCellValue($col, $text);
+        }
+
+        // Data
+        $row = 2;
+        foreach ($jaminan as $item) {
+            $sheet->setCellValue('A' . $row, $item['nomor_penetapan']);
+            $sheet->setCellValue('B' . $row, $item['tanggal_transaksi']);
+            $sheet->setCellValue('C' . $row, $item['kode_transaksi']);
+            $sheet->setCellValue('D' . $row, $item['nomor_kpj']);
+            $sheet->setCellValue('E' . $row, $item['nama_tenaga_kerja']);
+            $sheet->setCellValue('F' . $row, $item['nama_perusahaan']);
+            $sheet->setCellValue('G' . $row, $item['pph21']);
+            $sheet->setCellValue('H' . $row, $item['jumlah_bayar']);
+            $sheet->setCellValue('I' . $row, $item['no_rekening']);
+            $sheet->setCellValue('J' . $row, $item['atas_nama']);
+            $sheet->setCellValue('K' . $row, $item['dokumen']);
+            $row++;
+        }
+
+        // Download response
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $filename = 'data_jaminan_' . date('Ymd_His') . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment;filename=\"$filename\"");
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit;
     }
-
-    // Data
-    $row = 2;
-    foreach ($jaminan as $item) {
-        $sheet->setCellValue('A' . $row, $item['nomor_penetapan']);
-        $sheet->setCellValue('B' . $row, $item['tanggal_transaksi']);
-        $sheet->setCellValue('C' . $row, $item['kode_transaksi']);
-        $sheet->setCellValue('D' . $row, $item['nomor_kpj']);
-        $sheet->setCellValue('E' . $row, $item['nama_tenaga_kerja']);
-        $sheet->setCellValue('F' . $row, $item['nama_perusahaan']);
-        $sheet->setCellValue('G' . $row, $item['pph21']);
-        $sheet->setCellValue('H' . $row, $item['jumlah_bayar']);
-        $sheet->setCellValue('I' . $row, $item['no_rekening']);
-        $sheet->setCellValue('J' . $row, $item['atas_nama']);
-        $sheet->setCellValue('K' . $row, $item['dokumen']);
-        $row++;
-    }
-
-    // Download response
-    $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-    $filename = 'data_jaminan_' . date('Ymd_His') . '.xlsx';
-
-    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header("Content-Disposition: attachment;filename=\"$filename\"");
-    header('Cache-Control: max-age=0');
-
-    $writer->save('php://output');
-    exit;
-}
 
 
     public function update()

@@ -99,13 +99,14 @@
                 >
                     <i class="fas fa-sync"></i> Reset
                 </a>
-                <!-- <a 
-                    href="<?= site_url('admin/bubm/export') ?>" 
+                <a 
+                    href="<?= site_url('admin/bubm/exportExcel?search=' . urlencode($search) . '&date=' . urlencode($date) . '&sortBy=' . urlencode($sortBy)) ?>" 
                     class="w-full md:w-auto px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition font-medium flex items-center gap-2"
                 >
-                    <i class="fas fa-file-export"></i> Export
-                </a> -->
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </a>
             </div>
+
         </form>
         
         <!-- Import Excel/CSV -->

@@ -14,17 +14,16 @@ class BubmModel extends Model
     protected $useSoftDeletes   = false;
 
     protected $allowedFields = [
-    'kode_transaksi',
-    'voucher',
-    'program',
-    'jumlah_rupiah',
-    'keterangan',
-    'dokumen',
-    'tanggal_transaksi', // ✅ tambahin ini
-    'created_at',
-    'updated_at'
+        'kode_transaksi',
+        'voucher',
+        'program',
+        'jumlah_rupiah',
+        'keterangan',
+        'dokumen',
+        'tanggal_transaksi',
+        'created_at',
+        'updated_at'
     ];
-
 
     // Timestamp
     protected $useTimestamps = true;
@@ -57,5 +56,60 @@ class BubmModel extends Model
         ],
     ];
 
-    protected $skipValidation     = false;
+    protected $skipValidation = false;
+
+    /**
+     * Ambil data berdasarkan filter (search, date, sort)
+     */
+    public function getFilteredData($search = null, $date = 'all', $sortBy = 'newest')
+    {
+        $builder = $this->builder();
+
+        // 🔎 Pencarian
+        if (!empty($search)) {
+            $builder->groupStart()
+                ->like('kode_transaksi', $search)
+                ->orLike('voucher', $search)
+                ->orLike('program', $search)
+            ->groupEnd();
+        }
+
+        // 📅 Filter tanggal
+        switch ($date) {
+            case 'today':
+                $builder->where('DATE(tanggal_transaksi)', date('Y-m-d'));
+                break;
+            case 'week':
+                $builder->where('YEARWEEK(tanggal_transaksi, 1)', date('oW'));
+                break;
+            case 'month':
+                $builder->where('MONTH(tanggal_transaksi)', date('m'))
+                        ->where('YEAR(tanggal_transaksi)', date('Y'));
+                break;
+            case 'year':
+                $builder->where('YEAR(tanggal_transaksi)', date('Y'));
+                break;
+            default:
+                // "all" → tanpa filter tanggal
+                break;
+        }
+
+        // ↕️ Sorting
+        switch ($sortBy) {
+            case 'oldest':
+                $builder->orderBy('tanggal_transaksi', 'ASC');
+                break;
+            case 'amount_desc':
+                $builder->orderBy('jumlah_rupiah', 'DESC');
+                break;
+            case 'amount_asc':
+                $builder->orderBy('jumlah_rupiah', 'ASC');
+                break;
+            default:
+                $builder->orderBy('tanggal_transaksi', 'DESC'); // newest
+                break;
+        }
+
+        return $builder->get()->getResultArray();
+    }
 }

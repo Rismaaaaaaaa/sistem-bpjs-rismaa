@@ -8,6 +8,8 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+
 
 
 class BubmController extends BaseController
@@ -85,14 +87,58 @@ class BubmController extends BaseController
         return view('admin/bubm', $data);
     }
 
-    public function create()
-    {
-        $data = [
-            'title'       => 'Tambah BUBM',
-            'active_menu' => 'bubm',
-        ];
 
-        return view('admin/tambah_bubm', $data);
+public function exportExcel()
+    {
+        $search = $this->request->getGet('search');
+        $date   = $this->request->getGet('date') ?? 'all';
+        $sortBy = $this->request->getGet('sortBy') ?? 'newest';
+
+        // ambil data pake model + filter
+        $bubm = $this->bubmModel->getFilteredData($search, $date, $sortBy);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Header Excel
+        $headers = [
+            'A1' => 'Kode Transaksi',
+            'B1' => 'Voucher',
+            'C1' => 'Tanggal Transaksi',
+            'D1' => 'Program',
+            'E1' => 'Jumlah Rupiah',
+            'F1' => 'Keterangan',
+            'G1' => 'Dokumen',
+        ];
+        foreach ($headers as $col => $text) {
+            $sheet->setCellValue($col, $text);
+        }
+
+        // Isi data
+        $row = 2;
+        foreach ($bubm as $item) {
+            $sheet->setCellValue('A' . $row, $item['kode_transaksi']);
+            $sheet->setCellValue('B' . $row, $item['voucher']);
+            $sheet->setCellValue('C' . $row, $item['tanggal_transaksi']);
+            $sheet->setCellValue('D' . $row, $item['program']);
+            $sheet->setCellValue('E' . $row, $item['jumlah_rupiah']);
+            $sheet->setCellValue('F' . $row, $item['keterangan']);
+            $sheet->setCellValue('G' . $row, $item['dokumen']);
+            $row++;
+        }
+
+        // Download response
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'data_bubm_' . date('Ymd_His') . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment;filename=\"$filename\"");
+        header('Cache-Control: max-age=0');
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('php://output');
+
+        exit;
     }
 
 
