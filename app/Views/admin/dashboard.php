@@ -9,9 +9,9 @@
                 <div class="p-2 rounded-lg bg-bpjs-accent/10">
                     <i class="fas fa-tachometer-alt text-bpjs-accent text-xl"></i>
                 </div>
-                Dashboard BPJS Kesehatan
+                Dashboard BPJS Ketenagakerjaan
             </h1>
-            <p class="text-gray-600 mt-2 ml-11">Ringkasan data BUBM dan Jaminan BPJS Kesehatan</p>
+            <p class="text-gray-600 mt-2 ml-11">Ringkasan data BUBM dan Jaminan BPJS Ketenagakerjaan</p>
         </div>
         <div class="flex items-center gap-2 text-sm text-gray-500">
             <i class="fas fa-calendar-alt"></i>
