@@ -40,7 +40,7 @@
                     <input 
                         type="text" 
                         name="search" 
-                        placeholder="Cari berdasarkan no. penetapan atau no. KPJ..." 
+                        placeholder="Cari berdasarkan No. Penetapan, No. KPJ, No. Rak, atau No. Baris..." 
                         class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition"
                         value="<?= esc($search) ?>"
                     >
@@ -232,6 +232,7 @@
                         <th class="p-4 text-left font-semibold">Rekening</th>
                         <th class="p-4 text-left font-semibold">Atas Nama</th>
                         <th class="p-4 text-left font-semibold">Nomor Rak</th>
+                        <th class="p-4 text-left font-semibold">Nomor Baris</th>
                         <th class="p-4 text-left font-semibold">Dokumen</th>
                         <th class="p-4 text-left font-semibold">Aksi</th>
                     </tr>
@@ -272,6 +273,9 @@
                                 <td class="p-4">
                                     <?= esc($row['nomor_rak'] ?? '-') ?>
                                 </td>
+                                <td class="p-4">
+                                    <?= esc($row['nomor_baris'] ?? '-') ?>
+                                </td>
 
                                 <td class="p-4">
                                     <?php 
@@ -308,11 +312,13 @@
                                             data-jumlah_bayar="<?= esc($row['jumlah_bayar']) ?>"
                                             data-no_rekening="<?= esc($row['no_rekening']) ?>"
                                             data-atas_nama="<?= esc($row['atas_nama']) ?>"
-                                            data-nomor_rak="<?= esc($row['nomor_rak']) ?>"  
+                                            data-nomor_rak="<?= esc($row['nomor_rak']) ?>"
+                                            data-nomor_baris="<?= esc($row['nomor_baris']) ?>"  
                                             data-dokumen="<?= esc($row['dokumen']) ?>"
                                             title="Detail">
                                             <i class="fas fa-eye"></i>
                                         </button>
+
 
                                         <!-- Tombol Edit -->
                                         <button 
@@ -328,10 +334,12 @@
                                             data-jumlah_bayar="<?= esc($row['jumlah_bayar']) ?>"
                                             data-no_rekening="<?= esc($row['no_rekening']) ?>"
                                             data-atas_nama="<?= esc($row['atas_nama']) ?>"
-                                            data-nomor_rak="<?= esc($row['nomor_rak']) ?>"  
+                                            data-nomor_rak="<?= esc($row['nomor_rak']) ?>"
+                                            data-nomor_baris="<?= esc($row['nomor_baris']) ?>"   
                                             title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </button>
+
 
                                         <!-- Tombol Hapus -->
                                         <form action="<?= base_url('admin/jaminan/delete/'.$row['id']) ?>" method="post" onsubmit="return confirm('Yakin mau hapus data ini?')" class="inline">
@@ -362,274 +370,267 @@
         </div>
     </div>
 
-   
+    <!-- Modal Edit -->
+    <div id="modalEdit" 
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300 opacity-0 pointer-events-none" 
+        aria-labelledby="modal-title" role="dialog" aria-modal="true">
 
- <div id="modalEdit" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300 opacity-0 pointer-events-none" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-  <div class="bg-white w-full max-w-2xl rounded-xl shadow-2xl p-6 relative transform scale-95 transition-transform duration-300 sm:p-8">
-    <!-- Tombol Close -->
-    <button type="button" onclick="closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full p-1" aria-label="Close modal">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-      </svg>
-    </button>
-    <h2 id="modal-title" class="text-2xl font-semibold mb-6 text-gray-800">Edit Data Jaminan</h2>
-    <form action="<?= base_url('admin/jaminan/update') ?>" method="post" enctype="multipart/form-data" class="space-y-5">
-      <input type="hidden" name="id" id="edit_id">
-      <div>
-        <label for="edit_nomor_penetapan" class="block mb-1 font-medium text-gray-700">Nomor Penetapan</label>
-        <input type="text" name="nomor_penetapan" id="edit_nomor_penetapan" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
-      </div>
-      <div>
-        <label for="edit_tanggal_transaksi" class="block mb-1 font-medium text-gray-700">Tanggal Transaksi</label>
-        <input type="date" name="tanggal_transaksi" id="edit_tanggal_transaksi" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
-      </div>
-      <div>
-        <label for="edit_kode_transaksi" class="block mb-1 font-medium text-gray-700">Kode Transaksi</label>
-        <input type="text" name="kode_transaksi" id="edit_kode_transaksi" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
-      </div>
-      <div>
-        <label for="edit_nomor_kpj" class="block mb-1 font-medium text-gray-700">Nomor KPJ</label>
-        <input type="text" name="nomor_kpj" id="edit_nomor_kpj" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
-      </div>
-      <div>
-        <label for="edit_nama_perusahaan" class="block mb-1 font-medium text-gray-700">Nama Perusahaan</label>
-        <input type="text" name="nama_perusahaan" id="edit_nama_perusahaan" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
-      </div>
-      <div>
-        <label for="edit_nama_tenaga_kerja" class="block mb-1 font-medium text-gray-700">Nama Tenaga Kerja</label>
-        <input type="text" name="nama_tenaga_kerja" id="edit_nama_tenaga_kerja" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
-      </div>
-      <div>
-        <label for="edit_pph21" class="block mb-1 font-medium text-gray-700">PPH 21</label>
-        <input type="number" name="pph21" id="edit_pph21" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
-      </div>
-      <div>
-        <label for="edit_jumlah_bayar" class="block mb-1 font-medium text-gray-700">Jumlah Bayar</label>
-        <input type="number" name="jumlah_bayar" id="edit_jumlah_bayar" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
-      </div>
-      <div>
-        <label for="edit_no_rekening" class="block mb-1 font-medium text-gray-700">No Rekening</label>
-        <input type="text" name="no_rekening" id="edit_no_rekening" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
-      </div>
-      <div>
-        <label for="edit_atas_nama" class="block mb-1 font-medium text-gray-700">Atas Nama</label>
-        <input type="text" name="atas_nama" id="edit_atas_nama" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
-      </div>
-      <div>
-        <label for="edit_nomor_rak" class="block mb-1 font-medium text-gray-700">Nomor Rak</label>
-        <input type="text" name="nomor_rak" id="edit_nomor_rak" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
-      </div>
-      <div>
-        <label for="dokumen" class="block mb-1 font-medium text-gray-700">Upload Dokumen</label>
-        <input type="file" name="dokumen" id="dokumen" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-      </div>
-      <div class="text-right">
-        <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition">Simpan</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<script>
-  // Function to open modal and populate form fields
-  document.querySelectorAll('.btn-edit').forEach(button => {
-    button.addEventListener('click', function() {
-      // Get data from button's data attributes
-      const id = this.dataset.id;
-      const nomorPenetapan = this.dataset.nomor_penetapan;
-      const tanggalTransaksi = this.dataset.tanggal_transaksi;
-      const kodeTransaksi = this.dataset.kode_transaksi;
-      const nomorKpj = this.dataset.nomor_kpj;
-      const namaPerusahaan = this.dataset.nama_perusahaan;
-      const namaTenagaKerja = this.dataset.nama_tenaga_kerja;
-      const pph21 = this.dataset.pph21;
-      const jumlahBayar = this.dataset.jumlah_bayar;
-      const noRekening = this.dataset.no_rekening;
-      const atasNama = this.dataset.atas_nama;
-      const nomorRak = this.dataset.nomor_rak;
-
-      // Populate form fields
-      document.getElementById('edit_id').value = id;
-      document.getElementById('edit_nomor_penetapan').value = nomorPenetapan;
-      document.getElementById('edit_tanggal_transaksi').value = tanggalTransaksi;
-      document.getElementById('edit_kode_transaksi').value = kodeTransaksi;
-      document.getElementById('edit_nomor_kpj').value = nomorKpj;
-      document.getElementById('edit_nama_perusahaan').value = namaPerusahaan;
-      document.getElementById('edit_nama_tenaga_kerja').value = namaTenagaKerja;
-      document.getElementById('edit_pph21').value = pph21;
-      document.getElementById('edit_jumlah_bayar').value = jumlahBayar;
-      document.getElementById('edit_no_rekening').value = noRekening;
-      document.getElementById('edit_atas_nama').value = atasNama;
-      document.getElementById('edit_nomor_rak').value = nomorRak;
-
-      // Open the modal
-      openModal();
-    });
-  });
-
-  function openModal() {
-    const modal = document.getElementById('modalEdit');
-    modal.classList.remove('opacity-0', 'pointer-events-none');
-    modal.classList.add('opacity-100', 'pointer-events-auto');
-    modal.querySelector('.transform').classList.remove('scale-95');
-    modal.querySelector('.transform').classList.add('scale-100');
-  }
-
-  function closeModal() {
-    const modal = document.getElementById('modalEdit');
-    modal.classList.remove('opacity-100', 'pointer-events-auto');
-    modal.classList.add('opacity-0', 'pointer-events-none');
-    modal.querySelector('.transform').classList.remove('scale-100');
-    modal.querySelector('.transform').classList.add('scale-95');
-  }
-
-  // Close modal when clicking outside
-  document.getElementById('modalEdit').addEventListener('click', function(event) {
-    if (event.target === this) {
-      closeModal();
-    }
-  });
-</script>
-<!-- Modal Detail Modern -->
-<div id="modalDetail" 
-     class="fixed inset-0 hidden bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity duration-300">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-transform duration-300 scale-95">
+        <div class="bg-white w-full max-w-2xl rounded-xl shadow-2xl p-6 relative transform scale-95 transition-transform duration-300 sm:p-8">
         
-        <!-- Header -->
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-4 flex justify-between items-center">
-            <h2 class="text-xl font-bold text-white">Detail Jaminan</h2>
-            <button class="text-white hover:text-blue-200 transition-colors duration-200 rounded-full p-1 hover:bg-blue-500/30" id="closeModalDetail">
-                <i class="fas fa-times text-lg"></i>
+        <!-- Tombol Close -->
+        <button type="button" onclick="closeModal()" 
+                class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full p-1" 
+                aria-label="Close modal">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+        </button>
+
+        <!-- Title -->
+        <h2 id="modal-title" class="text-2xl font-semibold mb-6 text-gray-800">Edit Data Jaminan</h2>
+
+        <!-- Form -->
+        <form action="<?= base_url('admin/jaminan/update') ?>" method="post" enctype="multipart/form-data" class="space-y-5">
+        <input type="hidden" name="id" id="edit_id">
+
+        <!-- Grid Form -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+            <label for="edit_nomor_penetapan" class="block mb-1 font-medium text-gray-700">Nomor Penetapan</label>
+            <input type="text" name="nomor_penetapan" id="edit_nomor_penetapan" 
+                    class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 transition" required>
+            </div>
+
+            <div>
+            <label for="edit_tanggal_transaksi" class="block mb-1 font-medium text-gray-700">Tanggal Transaksi</label>
+            <input type="date" name="tanggal_transaksi" id="edit_tanggal_transaksi" 
+                    class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 transition" required>
+            </div>
+
+            <div>
+            <label for="edit_kode_transaksi" class="block mb-1 font-medium text-gray-700">Kode Transaksi</label>
+            <input type="text" name="kode_transaksi" id="edit_kode_transaksi" 
+                    class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 transition" required>
+            </div>
+
+            <div>
+            <label for="edit_nomor_kpj" class="block mb-1 font-medium text-gray-700">Nomor KPJ</label>
+            <input type="text" name="nomor_kpj" id="edit_nomor_kpj" 
+                    class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 transition" required>
+            </div>
+
+            <div>
+            <label for="edit_nama_perusahaan" class="block mb-1 font-medium text-gray-700">Nama Perusahaan</label>
+            <input type="text" name="nama_perusahaan" id="edit_nama_perusahaan" 
+                    class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 transition" required>
+            </div>
+
+            <div>
+            <label for="edit_nama_tenaga_kerja" class="block mb-1 font-medium text-gray-700">Nama Tenaga Kerja</label>
+            <input type="text" name="nama_tenaga_kerja" id="edit_nama_tenaga_kerja" 
+                    class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 transition" required>
+            </div>
+
+            <div>
+            <label for="edit_pph21" class="block mb-1 font-medium text-gray-700">PPH 21</label>
+            <input type="number" name="pph21" id="edit_pph21" 
+                    class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 transition" required>
+            </div>
+
+            <div>
+            <label for="edit_jumlah_bayar" class="block mb-1 font-medium text-gray-700">Jumlah Bayar</label>
+            <input type="number" name="jumlah_bayar" id="edit_jumlah_bayar" 
+                    class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 transition" required>
+            </div>
+
+            <div>
+            <label for="edit_no_rekening" class="block mb-1 font-medium text-gray-700">No Rekening</label>
+            <input type="text" name="no_rekening" id="edit_no_rekening" 
+                    class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 transition" required>
+            </div>
+
+            <div>
+            <label for="edit_atas_nama" class="block mb-1 font-medium text-gray-700">Atas Nama</label>
+            <input type="text" name="atas_nama" id="edit_atas_nama" 
+                    class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 transition" required>
+            </div>
+
+            <div>
+            <label for="edit_nomor_rak" class="block mb-1 font-medium text-gray-700">Nomor Rak</label>
+            <input type="text" name="nomor_rak" id="edit_nomor_rak" 
+                    class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 transition" required>
+            </div>
+
+            <div>
+            <label for="edit_nomor_baris" class="block mb-1 font-medium text-gray-700">Nomor Baris</label>
+            <input type="text" name="nomor_baris" id="edit_nomor_baris" 
+                    class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 transition" required>
+            </div>
+        </div>
+
+        <!-- Upload Dokumen -->
+        <div>
+            <label for="dokumen" class="block mb-1 font-medium text-gray-700">Upload Dokumen</label>
+            <input type="file" name="dokumen" id="dokumen" 
+                class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 transition">
+        </div>
+
+        <!-- Button -->
+        <div class="text-right">
+            <button type="submit" 
+                    class="px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition">
+            Simpan
             </button>
         </div>
-        
-        <!-- Content -->
-        <div class="p-6 max-h-[70vh] overflow-y-auto">
-            <div class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                        <p class="text-sm text-blue-600 font-medium mb-1">Nomor Penetapan</p>
-                        <p class="text-gray-800 font-semibold" id="detailNomorPenetapan">-</p>
-                    </div>
-                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                        <p class="text-sm text-blue-600 font-medium mb-1">Tanggal Transaksi</p>
-                        <p class="text-gray-800 font-semibold" id="detailTanggal">-</p>
-                    </div>
-                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                        <p class="text-sm text-blue-600 font-medium mb-1">Kode Transaksi</p>
-                        <p class="text-gray-800 font-semibold" id="detailKode">-</p>
-                    </div>
-                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                        <p class="text-sm text-blue-600 font-medium mb-1">Nomor KPJ</p>
-                        <p class="text-gray-800 font-semibold" id="detailKpj">-</p>
-                    </div>
-                </div>
-                
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    <p class="text-sm text-gray-600 font-medium mb-1">Nama Perusahaan</p>
-                    <p class="text-gray-800 font-semibold text-lg" id="detailPerusahaan">-</p>
-                </div>
+        </form>
+        </div>
+    </div>
 
-                <!-- 🔥 Tambahan Nama Tenaga Kerja -->
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    <p class="text-sm text-gray-600 font-medium mb-1">Nama Tenaga Kerja</p>
-                    <p class="text-gray-800 font-semibold text-lg" id="detailTenagaKerja">-</p>
-                </div>
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    <p class="text-sm text-gray-600 font-medium mb-1">Nomor Rak</p>
-                    <p class="text-gray-800 font-semibold" id="detailNomorRak">-</p>
-                    </div>
 
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+    <!-- Modal Detail Modern -->
+    <div id="modalDetail" 
+        class="fixed inset-0 hidden bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-transform duration-300 scale-95">
+            
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-4 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-white">Detail Jaminan</h2>
+                <button class="text-white hover:text-blue-200 transition-colors duration-200 rounded-full p-1 hover:bg-blue-500/30" id="closeModalDetail">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+            
+            <!-- Content -->
+            <div class="p-6 max-h-[70vh] overflow-y-auto">
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                            <p class="text-sm text-blue-600 font-medium mb-1">Nomor Penetapan</p>
+                            <p class="text-gray-800 font-semibold" id="detailNomorPenetapan">-</p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                            <p class="text-sm text-blue-600 font-medium mb-1">Tanggal Transaksi</p>
+                            <p class="text-gray-800 font-semibold" id="detailTanggal">-</p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                            <p class="text-sm text-blue-600 font-medium mb-1">Kode Transaksi</p>
+                            <p class="text-gray-800 font-semibold" id="detailKode">-</p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                            <p class="text-sm text-blue-600 font-medium mb-1">Nomor KPJ</p>
+                            <p class="text-gray-800 font-semibold" id="detailKpj">-</p>
+                        </div>
+                    </div>
+                    
                     <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                        <p class="text-sm text-gray-600 font-medium mb-1">PPH21</p>
-                        <p class="text-gray-800 font-semibold" id="detailPph21">-</p>
+                        <p class="text-sm text-gray-600 font-medium mb-1">Nama Perusahaan</p>
+                        <p class="text-gray-800 font-semibold text-lg" id="detailPerusahaan">-</p>
                     </div>
-                    <div class="bg-green-50 p-4 rounded-lg border border-green-200">
-                        <p class="text-sm text-green-600 font-medium mb-1">Jumlah Bayar</p>
-                        <p class="text-green-700 font-bold text-lg" id="detailJumlah">-</p>
+
+                    <!-- 🔥 Tambahan Nama Tenaga Kerja -->
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <p class="text-sm text-gray-600 font-medium mb-1">Nama Tenaga Kerja</p>
+                        <p class="text-gray-800 font-semibold text-lg" id="detailTenagaKerja">-</p>
                     </div>
-                </div>
-                
-                <div class="border-t border-gray-200 pt-4 mt-2">
-                    <h3 class="font-semibold text-gray-700 mb-3">Informasi Rekening</h3>
+                    <!-- Nomor Rak & Baris -->
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <p class="text-sm text-gray-600 font-medium mb-1">Lokasi Penyimpanan</p>
+                        <p class="text-gray-800 font-semibold" id="detailLokasiRak">-</p>
+                    </div>
+
+
+                    
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                            <p class="text-sm text-gray-600 font-medium mb-1">No Rekening</p>
-                            <p class="text-gray-800 font-semibold" id="detailRekening">-</p>
+                            <p class="text-sm text-gray-600 font-medium mb-1">PPH21</p>
+                            <p class="text-gray-800 font-semibold" id="detailPph21">-</p>
                         </div>
-                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                            <p class="text-sm text-gray-600 font-medium mb-1">Atas Nama</p>
-                            <p class="text-gray-800 font-semibold" id="detailAtasNama">-</p>
+                        <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                            <p class="text-sm text-green-600 font-medium mb-1">Jumlah Bayar</p>
+                            <p class="text-green-700 font-bold text-lg" id="detailJumlah">-</p>
                         </div>
                     </div>
-                </div>
-                
-                <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                    <p class="text-sm text-purple-600 font-medium mb-1">Dokumen</p>
-                    <p class="text-gray-800 font-semibold" id="detailDokumen">-</p>
+                    
+                    <div class="border-t border-gray-200 pt-4 mt-2">
+                        <h3 class="font-semibold text-gray-700 mb-3">Informasi Rekening</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <p class="text-sm text-gray-600 font-medium mb-1">No Rekening</p>
+                                <p class="text-gray-800 font-semibold" id="detailRekening">-</p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <p class="text-sm text-gray-600 font-medium mb-1">Atas Nama</p>
+                                <p class="text-gray-800 font-semibold" id="detailAtasNama">-</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                        <p class="text-sm text-purple-600 font-medium mb-1">Dokumen</p>
+                        <p class="text-gray-800 font-semibold" id="detailDokumen">-</p>
+                    </div>
                 </div>
             </div>
         </div>
+        </div>
+
+
     </div>
-</div>
 
-
-</div>
-
-<!-- Modal Preview Foto Modern -->
-<div id="imagePreviewModal" class="fixed inset-0 hidden items-center justify-center z-50">
-    <!-- Overlay -->
-    <div id="modalOverlay" class="absolute inset-0 bg-black bg-opacity-70 glass-effect backdrop-blur-sm" onclick="closeImageModal()"></div>
-    
-    <!-- Konten Modal -->
-    <div id="modalContent" class="bg-white/95 rounded-2xl shadow-2xl max-w-3xl w-full mx-4 p-6 relative transform transition-all duration-300 scale-95 opacity-0">
-        <!-- Tombol Close -->
-        <button onclick="closeImageModal()" 
-            class="absolute top-4 right-4 bg-gray-100 hover:bg-red-100 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 group">
-            <i class="fas fa-times text-xl text-gray-600 group-hover:text-red-600"></i>
-        </button>
+    <!-- Modal Preview Foto Modern -->
+    <div id="imagePreviewModal" class="fixed inset-0 hidden items-center justify-center z-50">
+        <!-- Overlay -->
+        <div id="modalOverlay" class="absolute inset-0 bg-black bg-opacity-70 glass-effect backdrop-blur-sm" onclick="closeImageModal()"></div>
         
-        <!-- Header -->
-        <div class="text-center mb-4">
-            <h3 class="text-xl font-semibold text-gray-800">Pratinjau Dokumen Jaminan BPJS</h3>
-            <p class="text-sm text-gray-500 mt-1">Pastikan dokumen sudah sesuai sebelum diunduh</p>
-        </div>
-        
-        <!-- Gambar -->
-        <div class="flex justify-center relative">
-            <img id="modalImage" src="" alt="Preview Dokumen" class="rounded-xl max-h-[60vh] object-contain shadow-lg">
-            
-            <!-- Loading indicator -->
-            <div id="loadingIndicator" class="absolute inset-0 flex items-center justify-center hidden">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-bpjs-primary"></div>
-            </div>
-        </div>
-
-        <!-- Informasi File -->
-        <div class="mt-4 flex justify-between items-center text-sm text-gray-500 bg-gray-50 p-3 rounded-lg">
-            <div class="flex items-center">
-                <i class="far fa-file-image text-bpjs-primary mr-2"></i>
-                <span id="fileName">document.jpg</span>
-            </div>
-            <div id="fileSize" class="text-gray-400">2.4 MB</div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="mt-6 flex justify-center space-x-3">
-            <a id="downloadLink" href="#" download 
-               class="px-6 py-3 bg-bpjs-primary text-white rounded-xl shadow hover:bg-bpjs-darkblue transition-all duration-300 flex items-center group">
-                <i class="fas fa-download mr-2 group-hover:animate-bounce"></i> Download
-            </a>
-            
-           <button onclick="closeImageModal()" 
-                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-                Tutup
+        <!-- Konten Modal -->
+        <div id="modalContent" class="bg-white/95 rounded-2xl shadow-2xl max-w-3xl w-full mx-4 p-6 relative transform transition-all duration-300 scale-95 opacity-0">
+            <!-- Tombol Close -->
+            <button onclick="closeImageModal()" 
+                class="absolute top-4 right-4 bg-gray-100 hover:bg-red-100 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 group">
+                <i class="fas fa-times text-xl text-gray-600 group-hover:text-red-600"></i>
             </button>
+            
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <h3 class="text-xl font-semibold text-gray-800">Pratinjau Dokumen Jaminan BPJS</h3>
+                <p class="text-sm text-gray-500 mt-1">Pastikan dokumen sudah sesuai sebelum diunduh</p>
+            </div>
+            
+            <!-- Gambar -->
+            <div class="flex justify-center relative">
+                <img id="modalImage" src="" alt="Preview Dokumen" class="rounded-xl max-h-[60vh] object-contain shadow-lg">
+                
+                <!-- Loading indicator -->
+                <div id="loadingIndicator" class="absolute inset-0 flex items-center justify-center hidden">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-bpjs-primary"></div>
+                </div>
+            </div>
+
+            <!-- Informasi File -->
+            <div class="mt-4 flex justify-between items-center text-sm text-gray-500 bg-gray-50 p-3 rounded-lg">
+                <div class="flex items-center">
+                    <i class="far fa-file-image text-bpjs-primary mr-2"></i>
+                    <span id="fileName">document.jpg</span>
+                </div>
+                <div id="fileSize" class="text-gray-400">2.4 MB</div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="mt-6 flex justify-center space-x-3">
+                <a id="downloadLink" href="#" download 
+                class="px-6 py-3 bg-bpjs-primary text-white rounded-xl shadow hover:bg-bpjs-darkblue transition-all duration-300 flex items-center group">
+                    <i class="fas fa-download mr-2 group-hover:animate-bounce"></i> Download
+                </a>
+                
+            <button onclick="closeImageModal()" 
+                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                    Tutup
+                </button>
+            </div>
         </div>
     </div>
-</div>
 
 <style>
 .glass-effect {
@@ -662,6 +663,72 @@
     }
 }
 </style>
+
+
+<script>
+  // Function to open modal and populate form fields
+  // Function to open modal and populate form fields
+    document.querySelectorAll('.btn-edit').forEach(button => {
+    button.addEventListener('click', function() {
+        // Get data from button's data attributes
+        const id = this.dataset.id;
+        const nomorPenetapan = this.dataset.nomor_penetapan;
+        const tanggalTransaksi = this.dataset.tanggal_transaksi;
+        const kodeTransaksi = this.dataset.kode_transaksi;
+        const nomorKpj = this.dataset.nomor_kpj;
+        const namaPerusahaan = this.dataset.nama_perusahaan;
+        const namaTenagaKerja = this.dataset.nama_tenaga_kerja;
+        const pph21 = this.dataset.pph21;
+        const jumlahBayar = this.dataset.jumlah_bayar;
+        const noRekening = this.dataset.no_rekening;
+        const atasNama = this.dataset.atas_nama;
+        const nomorRak = this.dataset.nomor_rak;
+        const nomorBaris = this.dataset.nomor_baris; // ✅ tambahan
+
+        // Populate form fields
+        document.getElementById('edit_id').value = id;
+        document.getElementById('edit_nomor_penetapan').value = nomorPenetapan;
+        document.getElementById('edit_tanggal_transaksi').value = tanggalTransaksi;
+        document.getElementById('edit_kode_transaksi').value = kodeTransaksi;
+        document.getElementById('edit_nomor_kpj').value = nomorKpj;
+        document.getElementById('edit_nama_perusahaan').value = namaPerusahaan;
+        document.getElementById('edit_nama_tenaga_kerja').value = namaTenagaKerja;
+        document.getElementById('edit_pph21').value = pph21;
+        document.getElementById('edit_jumlah_bayar').value = jumlahBayar;
+        document.getElementById('edit_no_rekening').value = noRekening;
+        document.getElementById('edit_atas_nama').value = atasNama;
+        document.getElementById('edit_nomor_rak').value = nomorRak;
+        document.getElementById('edit_nomor_baris').value = nomorBaris; // ✅ tambahan
+
+        // Open the modal
+        openModal();
+    });
+    });
+
+
+  function openModal() {
+    const modal = document.getElementById('modalEdit');
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    modal.classList.add('opacity-100', 'pointer-events-auto');
+    modal.querySelector('.transform').classList.remove('scale-95');
+    modal.querySelector('.transform').classList.add('scale-100');
+  }
+
+  function closeModal() {
+    const modal = document.getElementById('modalEdit');
+    modal.classList.remove('opacity-100', 'pointer-events-auto');
+    modal.classList.add('opacity-0', 'pointer-events-none');
+    modal.querySelector('.transform').classList.remove('scale-100');
+    modal.querySelector('.transform').classList.add('scale-95');
+  }
+
+  // Close modal when clicking outside
+  document.getElementById('modalEdit').addEventListener('click', function(event) {
+    if (event.target === this) {
+      closeModal();
+    }
+  });
+</script>
 
 <script>
 function showImageModal(imageSrc, fileName, fileSize) {
@@ -708,38 +775,6 @@ document.addEventListener('keydown', function(e) {
 });
 </script>
 
-
-<script>
-    const modal = document.getElementById("modalEdit");
-    const btnsEdit = document.querySelectorAll(".btn-edit");
-
-    btnsEdit.forEach(btn => {
-        btn.addEventListener("click", () => {
-            document.getElementById("edit_id").value = btn.dataset.id;
-            document.getElementById("edit_nomor_penetapan").value = btn.dataset.nomor_penetapan;
-            document.getElementById("edit_tanggal_transaksi").value = btn.dataset.tanggal_transaksi;
-            document.getElementById("edit_kode_transaksi").value = btn.dataset.kode_transaksi;
-            document.getElementById("edit_nomor_kpj").value = btn.dataset.nomor_kpj;
-            document.getElementById("edit_nama_perusahaan").value = btn.dataset.nama_perusahaan;
-
-            // === tambahan: nama tenaga kerja ===
-            if (document.getElementById("edit_nama_tenaga_kerja")) {
-                document.getElementById("edit_nama_tenaga_kerja").value = btn.dataset.nama_tenaga_kerja || "";
-            }
-
-            document.getElementById("edit_pph21").value = btn.dataset.pph21;
-            document.getElementById("edit_jumlah_bayar").value = btn.dataset.jumlah_bayar;
-            document.getElementById("edit_no_rekening").value = btn.dataset.no_rekening;
-            document.getElementById("edit_atas_nama").value = btn.dataset.atas_nama;
-
-            modal.classList.remove("hidden");
-        });
-    });
-
-    function closeModal() {
-        modal.classList.add("hidden");
-    }
-</script>
 
 <style>
     table th, table td {
@@ -914,56 +949,65 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const modalDetail = document.getElementById("modalDetail");
-        const closeModalDetail = document.getElementById("closeModalDetail");
+    const modalDetail = document.getElementById("modalDetail");
+    const closeModalDetail = document.getElementById("closeModalDetail");
 
-        document.querySelectorAll(".btn-detail").forEach(btn => {
-            btn.addEventListener("click", function() {
-                document.getElementById("detailNomorPenetapan").textContent = this.dataset.nomor_penetapan;
-                document.getElementById("detailTanggal").textContent = this.dataset.tanggal_transaksi;
-                document.getElementById("detailKode").textContent = this.dataset.kode_transaksi;
-                document.getElementById("detailKpj").textContent = this.dataset.nomor_kpj;
-                document.getElementById("detailPerusahaan").textContent = this.dataset.nama_perusahaan;
+    document.querySelectorAll(".btn-detail").forEach(btn => {
+        btn.addEventListener("click", function() {
+            document.getElementById("detailNomorPenetapan").textContent = this.dataset.nomor_penetapan;
+            document.getElementById("detailTanggal").textContent = this.dataset.tanggal_transaksi;
+            document.getElementById("detailKode").textContent = this.dataset.kode_transaksi;
+            document.getElementById("detailKpj").textContent = this.dataset.nomor_kpj;
+            document.getElementById("detailPerusahaan").textContent = this.dataset.nama_perusahaan;
 
-                // === tambahan: nama tenaga kerja ===
-                document.getElementById("detailTenagaKerja").textContent = this.dataset.nama_tenaga_kerja || "-";
+            // === tambahan: nama tenaga kerja ===
+            document.getElementById("detailTenagaKerja").textContent = this.dataset.nama_tenaga_kerja || "-";
 
-                document.getElementById("detailPph21").textContent = this.dataset.pph21;
-                document.getElementById("detailJumlah").textContent = this.dataset.jumlah_bayar;
-                document.getElementById("detailRekening").textContent = this.dataset.no_rekening;
-                document.getElementById("detailAtasNama").textContent = this.dataset.atas_nama;
+            // === tambahan: lokasi rak & baris ===
+            let nomorRak = this.dataset.nomor_rak || "-";
+            let nomorBaris = this.dataset.nomor_baris || "-";
+            document.getElementById("detailLokasiRak").textContent = 
+                (nomorRak !== "-" && nomorBaris !== "-") 
+                ? `NR - ${nomorRak} - BARIS ${nomorBaris}` 
+                : "-";
 
-                if (this.dataset.dokumen) {
-                    let fileUrl = "<?= base_url('uploads/jaminan/') ?>" + this.dataset.dokumen;
-                    let ext = this.dataset.dokumen.split('.').pop().toLowerCase();
+            document.getElementById("detailPph21").textContent = this.dataset.pph21;
+            document.getElementById("detailJumlah").textContent = this.dataset.jumlah_bayar;
+            document.getElementById("detailRekening").textContent = this.dataset.no_rekening;
+            document.getElementById("detailAtasNama").textContent = this.dataset.atas_nama;
 
-                    if (['jpg','jpeg','png','gif'].includes(ext)) {
-                        document.getElementById("detailDokumen").innerHTML = `
-                            <img src="${fileUrl}" alt="Dokumen" class="max-h-64 rounded border">
-                        `;
-                    } else if (ext === 'pdf') {
-                        document.getElementById("detailDokumen").innerHTML = `
-                            <iframe src="${fileUrl}" class="w-full h-64 border rounded"></iframe>
-                        `;
-                    } else {
-                        document.getElementById("detailDokumen").innerHTML = `
-                            <a href="${fileUrl}" target="_blank" class="text-blue-600 hover:underline">
-                                Lihat Dokumen
-                            </a>
-                        `;
-                    }
+            if (this.dataset.dokumen) {
+                let fileUrl = "<?= base_url('uploads/jaminan/') ?>" + this.dataset.dokumen;
+                let ext = this.dataset.dokumen.split('.').pop().toLowerCase();
+
+                if (['jpg','jpeg','png','gif'].includes(ext)) {
+                    document.getElementById("detailDokumen").innerHTML = `
+                        <img src="${fileUrl}" alt="Dokumen" class="max-h-64 rounded border">
+                    `;
+                } else if (ext === 'pdf') {
+                    document.getElementById("detailDokumen").innerHTML = `
+                        <iframe src="${fileUrl}" class="w-full h-64 border rounded"></iframe>
+                    `;
                 } else {
-                    document.getElementById("detailDokumen").textContent = "Tidak ada dokumen";
+                    document.getElementById("detailDokumen").innerHTML = `
+                        <a href="${fileUrl}" target="_blank" class="text-blue-600 hover:underline">
+                            Lihat Dokumen
+                        </a>
+                    `;
                 }
+            } else {
+                document.getElementById("detailDokumen").textContent = "Tidak ada dokumen";
+            }
 
-                modalDetail.classList.remove("hidden");
-            });
+            modalDetail.classList.remove("hidden");
         });
+    });
 
         closeModalDetail.addEventListener("click", () => {
             modalDetail.classList.add("hidden");
         });
     });
+
 </script>
 
 

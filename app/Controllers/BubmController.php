@@ -87,6 +87,16 @@ class BubmController extends BaseController
         return view('admin/bubm', $data);
     }
 
+    public function create()
+    {
+        $data = [
+            'title' => 'Tambah Bubm',
+            'active_menu' => 'bubm',
+        ];
+
+        return view('/admin/tambah_bubm', $data);
+    }
+
 
 public function exportExcel()
     {

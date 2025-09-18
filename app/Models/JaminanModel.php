@@ -16,6 +16,7 @@ class JaminanModel extends Model
         'nama_perusahaan',
         'nama_tenaga_kerja',
         'pph21','nomor_rak',
+        'nomor_baris',
         'jumlah_bayar',
         'no_rekening',
         'atas_nama',

@@ -75,7 +75,8 @@ class JaminanController extends BaseController
             'jumlah_bayar'      => 'required|decimal',
             'no_rekening'       => 'required',
             'atas_nama'         => 'required',
-            'nomor_rak'         => 'required', // <-- tambahin validasi nomor rak
+            'nomor_rak'         => 'required',   // ✅ validasi nomor rak
+            'nomor_baris'       => 'required',   // ✅ validasi nomor baris
             'dokumen'           => 'if_exist|is_image[dokumen]|mime_in[dokumen,image/jpg,image/jpeg,image/png]',
         ]);
 
@@ -108,12 +109,14 @@ class JaminanController extends BaseController
             'jumlah_bayar'      => $this->request->getPost('jumlah_bayar'),
             'no_rekening'       => $this->request->getPost('no_rekening'),
             'atas_nama'         => $this->request->getPost('atas_nama'),
-            'nomor_rak'         => $this->request->getPost('nomor_rak'), // <-- simpan nomor rak
+            'nomor_rak'         => $this->request->getPost('nomor_rak'),   // ✅ simpan nomor rak
+            'nomor_baris'       => $this->request->getPost('nomor_baris'), // ✅ simpan nomor baris
             'dokumen'           => $fileName,
         ]);
 
         return redirect()->to('/admin/jaminan')->with('success', 'Data Jaminan berhasil disimpan');
     }
+
 
 
 
@@ -213,7 +216,8 @@ class JaminanController extends BaseController
             'jumlah_bayar'      => $this->request->getPost('jumlah_bayar'),
             'no_rekening'       => $this->request->getPost('no_rekening'),
             'atas_nama'         => $this->request->getPost('atas_nama'),
-            'nomor_rak'         => $this->request->getPost('nomor_rak'), // ✅ tambahin nomor rak
+            'nomor_rak'         => $this->request->getPost('nomor_rak'),   // ✅ simpan nomor rak
+            'nomor_baris'       => $this->request->getPost('nomor_baris'), // ✅ simpan nomor baris
         ];
 
         if ($fileName) {
@@ -224,6 +228,7 @@ class JaminanController extends BaseController
 
         return redirect()->to('/admin/jaminan')->with('success', 'Data Jaminan berhasil diupdate');
     }
+
 
 
 
@@ -260,9 +265,16 @@ public function viewFile($filename)
         $builder = $this->jaminanModel;
 
         if (!empty($search)) {
-            $builder = $builder->like('nomor_penetapan', $search)
-                ->orLike('nomor_kpj', $search);
+            $builder = $builder
+                ->groupStart()
+                    ->like('nomor_penetapan', $search)
+                    ->orLike('nomor_kpj', $search)
+                    ->orLike('nomor_rak', $search)
+                    ->orLike('nomor_baris', $search)
+                ->groupEnd();
         }
+
+
 
         if ($date !== 'all') {
             $today = date('Y-m-d');

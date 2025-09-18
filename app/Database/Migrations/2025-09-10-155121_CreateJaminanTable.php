@@ -65,6 +65,10 @@ class CreateJaminanTable extends Migration
                 'constraint' => 50,
                 'null'       => true,
             ],
+            'nomor_baris' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 50,
+            ],
             'created_at'        => [
                 'type' => 'DATETIME',
                 'null' => true,
