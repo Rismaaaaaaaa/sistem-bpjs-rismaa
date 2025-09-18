@@ -117,6 +117,37 @@
                         <input type="text" name="nomor_kpj" class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white" placeholder="Masukkan nomor KPJ" required>
                     </div>
                 </div>
+                <!-- Nomor Rak -->
+                <!-- Nomor Rak -->
+                <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-archive text-bpjs-primary mr-1"></i>
+                    Nomor Rak <span class="text-red-500">*</span>
+                </label>
+                <div class="relative group">
+                    <i class="fas fa-box absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 
+                            group-focus-within:text-bpjs-accent"></i>
+                    <input type="text" name="nomor_rak" placeholder="Contoh: 14"
+                        class="form-input w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 
+                                focus:ring-bpjs-accent/50 bg-gray-50 hover:bg-white" required>
+                </div>
+                </div>
+
+                <!-- Nomor Baris -->
+                <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-stream text-bpjs-primary mr-1"></i>
+                    Nomor Baris <span class="text-red-500">*</span>
+                </label>
+                <div class="relative group">
+                    <i class="fas fa-th-list absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 
+                            group-focus-within:text-bpjs-accent"></i>
+                    <input type="text" name="nomor_baris" placeholder="Contoh: 14"
+                        class="form-input w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 
+                                focus:ring-bpjs-accent/50 bg-gray-50 hover:bg-white" required>
+                </div>
+                </div>
+
                 <!-- Nama Tenaga Kerja -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">

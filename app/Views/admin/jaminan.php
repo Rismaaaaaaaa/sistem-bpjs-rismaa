@@ -231,6 +231,7 @@
                         <th class="p-4 text-left font-semibold">Jumlah Bayar</th>
                         <th class="p-4 text-left font-semibold">Rekening</th>
                         <th class="p-4 text-left font-semibold">Atas Nama</th>
+                        <th class="p-4 text-left font-semibold">Nomor Rak</th>
                         <th class="p-4 text-left font-semibold">Dokumen</th>
                         <th class="p-4 text-left font-semibold">Aksi</th>
                     </tr>
@@ -268,6 +269,9 @@
                                 </td>
                                 <td class="p-4"><?= esc($row['no_rekening']) ?></td>
                                 <td class="p-4"><?= esc($row['atas_nama']) ?></td>
+                                <td class="p-4">
+                                    <?= esc($row['nomor_rak'] ?? '-') ?>
+                                </td>
 
                                 <td class="p-4">
                                     <?php 
@@ -291,7 +295,6 @@
                                 <td class="p-4">
                                     <div class="flex space-x-2">
                                         <!-- Tombol Detail -->
-                                                                            <!-- Tombol Detail -->
                                         <button 
                                             class="p-2 rounded-lg bg-green-100 text-green-600 hover:bg-green-200 transition btn-detail"
                                             data-id="<?= $row['id'] ?>"
@@ -305,30 +308,30 @@
                                             data-jumlah_bayar="<?= esc($row['jumlah_bayar']) ?>"
                                             data-no_rekening="<?= esc($row['no_rekening']) ?>"
                                             data-atas_nama="<?= esc($row['atas_nama']) ?>"
+                                            data-nomor_rak="<?= esc($row['nomor_rak']) ?>"  
                                             data-dokumen="<?= esc($row['dokumen']) ?>"
                                             title="Detail">
                                             <i class="fas fa-eye"></i>
                                         </button>
 
-
                                         <!-- Tombol Edit -->
-                                            <button 
-                                                class="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition btn-edit"
-                                                data-id="<?= $row['id'] ?>"
-                                                data-nomor_penetapan="<?= esc($row['nomor_penetapan']) ?>"
-                                                data-tanggal_transaksi="<?= esc($row['tanggal_transaksi']) ?>"
-                                                data-kode_transaksi="<?= esc($row['kode_transaksi']) ?>"
-                                                data-nomor_kpj="<?= esc($row['nomor_kpj']) ?>"
-                                                data-nama_perusahaan="<?= esc($row['nama_perusahaan']) ?>"
-                                                data-nama_tenaga_kerja="<?= esc($row['nama_tenaga_kerja']) ?>"
-                                                data-pph21="<?= esc($row['pph21']) ?>"
-                                                data-jumlah_bayar="<?= esc($row['jumlah_bayar']) ?>"
-                                                data-no_rekening="<?= esc($row['no_rekening']) ?>"
-                                                data-atas_nama="<?= esc($row['atas_nama']) ?>"
-                                                title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-
+                                        <button 
+                                            class="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition btn-edit"
+                                            data-id="<?= $row['id'] ?>"
+                                            data-nomor_penetapan="<?= esc($row['nomor_penetapan']) ?>"
+                                            data-tanggal_transaksi="<?= esc($row['tanggal_transaksi']) ?>"
+                                            data-kode_transaksi="<?= esc($row['kode_transaksi']) ?>"
+                                            data-nomor_kpj="<?= esc($row['nomor_kpj']) ?>"
+                                            data-nama_perusahaan="<?= esc($row['nama_perusahaan']) ?>"
+                                            data-nama_tenaga_kerja="<?= esc($row['nama_tenaga_kerja']) ?>"
+                                            data-pph21="<?= esc($row['pph21']) ?>"
+                                            data-jumlah_bayar="<?= esc($row['jumlah_bayar']) ?>"
+                                            data-no_rekening="<?= esc($row['no_rekening']) ?>"
+                                            data-atas_nama="<?= esc($row['atas_nama']) ?>"
+                                            data-nomor_rak="<?= esc($row['nomor_rak']) ?>"  
+                                            title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
 
                                         <!-- Tombol Hapus -->
                                         <form action="<?= base_url('admin/jaminan/delete/'.$row['id']) ?>" method="post" onsubmit="return confirm('Yakin mau hapus data ini?')" class="inline">
@@ -338,6 +341,7 @@
                                             </button>
                                         </form>
                                     </div>
+
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -360,97 +364,132 @@
 
    
 
- 
-<!-- Modal Edit -->
-<div id="modalEdit" class="fixed inset-0 hidden bg-black bg-opacity-50 flex items-center justify-center z-50">
-  <div class="bg-white w-full max-w-2xl rounded-xl shadow-lg p-6 relative">
-    
+ <div id="modalEdit" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300 opacity-0 pointer-events-none" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="bg-white w-full max-w-2xl rounded-xl shadow-2xl p-6 relative transform scale-95 transition-transform duration-300 sm:p-8">
     <!-- Tombol Close -->
-    <button type="button" onclick="closeModal()" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800">
-      ✕
+    <button type="button" onclick="closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full p-1" aria-label="Close modal">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
     </button>
-
-    <h2 class="text-xl font-semibold mb-4">Edit Data Jaminan</h2>
-
-    <form action="<?= base_url('admin/jaminan/update') ?>" method="post" enctype="multipart/form-data" class="space-y-4">
+    <h2 id="modal-title" class="text-2xl font-semibold mb-6 text-gray-800">Edit Data Jaminan</h2>
+    <form action="<?= base_url('admin/jaminan/update') ?>" method="post" enctype="multipart/form-data" class="space-y-5">
       <input type="hidden" name="id" id="edit_id">
-
       <div>
-        <label class="block mb-1 font-medium">Nomor Penetapan</label>
-        <input type="text" name="nomor_penetapan" id="edit_nomor_penetapan" 
-               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+        <label for="edit_nomor_penetapan" class="block mb-1 font-medium text-gray-700">Nomor Penetapan</label>
+        <input type="text" name="nomor_penetapan" id="edit_nomor_penetapan" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
       </div>
-
       <div>
-        <label class="block mb-1 font-medium">Tanggal Transaksi</label>
-        <input type="date" name="tanggal_transaksi" id="edit_tanggal_transaksi" 
-               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+        <label for="edit_tanggal_transaksi" class="block mb-1 font-medium text-gray-700">Tanggal Transaksi</label>
+        <input type="date" name="tanggal_transaksi" id="edit_tanggal_transaksi" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
       </div>
-
       <div>
-        <label class="block mb-1 font-medium">Kode Transaksi</label>
-        <input type="text" name="kode_transaksi" id="edit_kode_transaksi" 
-               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+        <label for="edit_kode_transaksi" class="block mb-1 font-medium text-gray-700">Kode Transaksi</label>
+        <input type="text" name="kode_transaksi" id="edit_kode_transaksi" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
       </div>
-
       <div>
-        <label class="block mb-1 font-medium">Nomor KPJ</label>
-        <input type="text" name="nomor_kpj" id="edit_nomor_kpj" 
-               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+        <label for="edit_nomor_kpj" class="block mb-1 font-medium text-gray-700">Nomor KPJ</label>
+        <input type="text" name="nomor_kpj" id="edit_nomor_kpj" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
       </div>
-
       <div>
-        <label class="block mb-1 font-medium">Nama Perusahaan</label>
-        <input type="text" name="nama_perusahaan" id="edit_nama_perusahaan" 
-               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+        <label for="edit_nama_perusahaan" class="block mb-1 font-medium text-gray-700">Nama Perusahaan</label>
+        <input type="text" name="nama_perusahaan" id="edit_nama_perusahaan" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
       </div>
-
-      <!-- 🔥 Tambahan Nama Tenaga Kerja -->
       <div>
-        <label class="block mb-1 font-medium">Nama Tenaga Kerja</label>
-        <input type="text" name="nama_tenaga_kerja" id="edit_nama_tenaga_kerja" 
-               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+        <label for="edit_nama_tenaga_kerja" class="block mb-1 font-medium text-gray-700">Nama Tenaga Kerja</label>
+        <input type="text" name="nama_tenaga_kerja" id="edit_nama_tenaga_kerja" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
       </div>
-
       <div>
-        <label class="block mb-1 font-medium">PPH 21</label>
-        <input type="number" name="pph21" id="edit_pph21" 
-               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+        <label for="edit_pph21" class="block mb-1 font-medium text-gray-700">PPH 21</label>
+        <input type="number" name="pph21" id="edit_pph21" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
       </div>
-
       <div>
-        <label class="block mb-1 font-medium">Jumlah Bayar</label>
-        <input type="number" name="jumlah_bayar" id="edit_jumlah_bayar" 
-               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+        <label for="edit_jumlah_bayar" class="block mb-1 font-medium text-gray-700">Jumlah Bayar</label>
+        <input type="number" name="jumlah_bayar" id="edit_jumlah_bayar" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
       </div>
-
       <div>
-        <label class="block mb-1 font-medium">No Rekening</label>
-        <input type="text" name="no_rekening" id="edit_no_rekening" 
-               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+        <label for="edit_no_rekening" class="block mb-1 font-medium text-gray-700">No Rekening</label>
+        <input type="text" name="no_rekening" id="edit_no_rekening" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
       </div>
-
       <div>
-        <label class="block mb-1 font-medium">Atas Nama</label>
-        <input type="text" name="atas_nama" id="edit_atas_nama" 
-               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+        <label for="edit_atas_nama" class="block mb-1 font-medium text-gray-700">Atas Nama</label>
+        <input type="text" name="atas_nama" id="edit_atas_nama" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
       </div>
-
       <div>
-        <label class="block mb-1 font-medium">Upload Dokumen</label>
-        <input type="file" name="dokumen" 
-               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500">
+        <label for="edit_nomor_rak" class="block mb-1 font-medium text-gray-700">Nomor Rak</label>
+        <input type="text" name="nomor_rak" id="edit_nomor_rak" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required>
       </div>
-
+      <div>
+        <label for="dokumen" class="block mb-1 font-medium text-gray-700">Upload Dokumen</label>
+        <input type="file" name="dokumen" id="dokumen" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+      </div>
       <div class="text-right">
-        <button type="submit" 
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
-          Simpan
-        </button>
+        <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition">Simpan</button>
       </div>
     </form>
   </div>
 </div>
+
+<script>
+  // Function to open modal and populate form fields
+  document.querySelectorAll('.btn-edit').forEach(button => {
+    button.addEventListener('click', function() {
+      // Get data from button's data attributes
+      const id = this.dataset.id;
+      const nomorPenetapan = this.dataset.nomor_penetapan;
+      const tanggalTransaksi = this.dataset.tanggal_transaksi;
+      const kodeTransaksi = this.dataset.kode_transaksi;
+      const nomorKpj = this.dataset.nomor_kpj;
+      const namaPerusahaan = this.dataset.nama_perusahaan;
+      const namaTenagaKerja = this.dataset.nama_tenaga_kerja;
+      const pph21 = this.dataset.pph21;
+      const jumlahBayar = this.dataset.jumlah_bayar;
+      const noRekening = this.dataset.no_rekening;
+      const atasNama = this.dataset.atas_nama;
+      const nomorRak = this.dataset.nomor_rak;
+
+      // Populate form fields
+      document.getElementById('edit_id').value = id;
+      document.getElementById('edit_nomor_penetapan').value = nomorPenetapan;
+      document.getElementById('edit_tanggal_transaksi').value = tanggalTransaksi;
+      document.getElementById('edit_kode_transaksi').value = kodeTransaksi;
+      document.getElementById('edit_nomor_kpj').value = nomorKpj;
+      document.getElementById('edit_nama_perusahaan').value = namaPerusahaan;
+      document.getElementById('edit_nama_tenaga_kerja').value = namaTenagaKerja;
+      document.getElementById('edit_pph21').value = pph21;
+      document.getElementById('edit_jumlah_bayar').value = jumlahBayar;
+      document.getElementById('edit_no_rekening').value = noRekening;
+      document.getElementById('edit_atas_nama').value = atasNama;
+      document.getElementById('edit_nomor_rak').value = nomorRak;
+
+      // Open the modal
+      openModal();
+    });
+  });
+
+  function openModal() {
+    const modal = document.getElementById('modalEdit');
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    modal.classList.add('opacity-100', 'pointer-events-auto');
+    modal.querySelector('.transform').classList.remove('scale-95');
+    modal.querySelector('.transform').classList.add('scale-100');
+  }
+
+  function closeModal() {
+    const modal = document.getElementById('modalEdit');
+    modal.classList.remove('opacity-100', 'pointer-events-auto');
+    modal.classList.add('opacity-0', 'pointer-events-none');
+    modal.querySelector('.transform').classList.remove('scale-100');
+    modal.querySelector('.transform').classList.add('scale-95');
+  }
+
+  // Close modal when clicking outside
+  document.getElementById('modalEdit').addEventListener('click', function(event) {
+    if (event.target === this) {
+      closeModal();
+    }
+  });
+</script>
 <!-- Modal Detail Modern -->
 <div id="modalDetail" 
      class="fixed inset-0 hidden bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity duration-300">
@@ -496,6 +535,11 @@
                     <p class="text-sm text-gray-600 font-medium mb-1">Nama Tenaga Kerja</p>
                     <p class="text-gray-800 font-semibold text-lg" id="detailTenagaKerja">-</p>
                 </div>
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <p class="text-sm text-gray-600 font-medium mb-1">Nomor Rak</p>
+                    <p class="text-gray-800 font-semibold" id="detailNomorRak">-</p>
+                    </div>
+
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">

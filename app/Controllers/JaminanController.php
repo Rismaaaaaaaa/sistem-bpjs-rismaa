@@ -61,57 +61,60 @@ class JaminanController extends BaseController
         return view('/admin/tambah_jaminan', $data);
     }
 
-public function store()
-{
-    $validation = \Config\Services::validation();
-    $validation->setRules([
-        'nomor_penetapan'   => 'required',
-        'tanggal_transaksi' => 'required|valid_date',
-        'kode_transaksi'    => 'required',
-        'nomor_kpj'         => 'required',
-        'nama_tenaga_kerja' => 'required', // <-- tambahin ini
-        'nama_perusahaan'   => 'required',
-        'pph21'             => 'permit_empty|decimal',
-        'jumlah_bayar'      => 'required|decimal',
-        'no_rekening'       => 'required',
-        'atas_nama'         => 'required',
-        'dokumen'           => 'if_exist|is_image[dokumen]|mime_in[dokumen,image/jpg,image/jpeg,image/png]',
-    ]);
+    public function store()
+    {
+        $validation = \Config\Services::validation();
+        $validation->setRules([
+            'nomor_penetapan'   => 'required',
+            'tanggal_transaksi' => 'required|valid_date',
+            'kode_transaksi'    => 'required',
+            'nomor_kpj'         => 'required',
+            'nama_tenaga_kerja' => 'required',
+            'nama_perusahaan'   => 'required',
+            'pph21'             => 'permit_empty|decimal',
+            'jumlah_bayar'      => 'required|decimal',
+            'no_rekening'       => 'required',
+            'atas_nama'         => 'required',
+            'nomor_rak'         => 'required', // <-- tambahin validasi nomor rak
+            'dokumen'           => 'if_exist|is_image[dokumen]|mime_in[dokumen,image/jpg,image/jpeg,image/png]',
+        ]);
 
-    if (!$validation->withRequest($this->request)->run()) {
-        return redirect()->back()->withInput()->with('errors', $validation->getErrors());
-    }
-
-    $file = $this->request->getFile('dokumen');
-    $fileName = null;
-
-    if ($file && $file->isValid() && !$file->hasMoved()) {
-        // Pastikan folder ada
-        $uploadPath = FCPATH . 'uploads/jaminan/';
-        if (!is_dir($uploadPath)) {
-            mkdir($uploadPath, 0777, true);
+        if (!$validation->withRequest($this->request)->run()) {
+            return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
 
-        $fileName = $file->getRandomName();
-        $file->move($uploadPath, $fileName);
+        $file = $this->request->getFile('dokumen');
+        $fileName = null;
+
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            // Pastikan folder ada
+            $uploadPath = FCPATH . 'uploads/jaminan/';
+            if (!is_dir($uploadPath)) {
+                mkdir($uploadPath, 0777, true);
+            }
+
+            $fileName = $file->getRandomName();
+            $file->move($uploadPath, $fileName);
+        }
+
+        $this->jaminanModel->save([
+            'nomor_penetapan'   => $this->request->getPost('nomor_penetapan'),
+            'tanggal_transaksi' => $this->request->getPost('tanggal_transaksi'),
+            'kode_transaksi'    => $this->request->getPost('kode_transaksi'),
+            'nomor_kpj'         => $this->request->getPost('nomor_kpj'),
+            'nama_tenaga_kerja' => $this->request->getPost('nama_tenaga_kerja'),
+            'nama_perusahaan'   => $this->request->getPost('nama_perusahaan'),
+            'pph21'             => $this->request->getPost('pph21'),
+            'jumlah_bayar'      => $this->request->getPost('jumlah_bayar'),
+            'no_rekening'       => $this->request->getPost('no_rekening'),
+            'atas_nama'         => $this->request->getPost('atas_nama'),
+            'nomor_rak'         => $this->request->getPost('nomor_rak'), // <-- simpan nomor rak
+            'dokumen'           => $fileName,
+        ]);
+
+        return redirect()->to('/admin/jaminan')->with('success', 'Data Jaminan berhasil disimpan');
     }
 
-    $this->jaminanModel->save([
-        'nomor_penetapan'   => $this->request->getPost('nomor_penetapan'),
-        'tanggal_transaksi' => $this->request->getPost('tanggal_transaksi'),
-        'kode_transaksi'    => $this->request->getPost('kode_transaksi'),
-        'nomor_kpj'         => $this->request->getPost('nomor_kpj'),
-        'nama_tenaga_kerja' => $this->request->getPost('nama_tenaga_kerja'), // <-- masukin sini
-        'nama_perusahaan'   => $this->request->getPost('nama_perusahaan'),
-        'pph21'             => $this->request->getPost('pph21'),
-        'jumlah_bayar'      => $this->request->getPost('jumlah_bayar'),
-        'no_rekening'       => $this->request->getPost('no_rekening'),
-        'atas_nama'         => $this->request->getPost('atas_nama'),
-        'dokumen'           => $fileName,
-    ]);
-
-    return redirect()->to('/admin/jaminan')->with('success', 'Data Jaminan berhasil disimpan');
-}
 
 
 
@@ -139,7 +142,8 @@ public function store()
             'H1' => 'Jumlah Bayar',
             'I1' => 'No Rekening',
             'J1' => 'Atas Nama',
-            'K1' => 'Dokumen',
+            'K1' => 'Nomor Rak',   // ✅ Tambah nomor rak
+            'L1' => 'Dokumen',
         ];
         foreach ($headers as $col => $text) {
             $sheet->setCellValue($col, $text);
@@ -158,7 +162,8 @@ public function store()
             $sheet->setCellValue('H' . $row, $item['jumlah_bayar']);
             $sheet->setCellValue('I' . $row, $item['no_rekening']);
             $sheet->setCellValue('J' . $row, $item['atas_nama']);
-            $sheet->setCellValue('K' . $row, $item['dokumen']);
+            $sheet->setCellValue('K' . $row, $item['nomor_rak']);  // ✅ isi nomor rak
+            $sheet->setCellValue('L' . $row, $item['dokumen']);
             $row++;
         }
 
@@ -173,6 +178,7 @@ public function store()
         $writer->save('php://output');
         exit;
     }
+
 
 
     public function update()
@@ -202,11 +208,12 @@ public function store()
             'kode_transaksi'    => $this->request->getPost('kode_transaksi'),
             'nomor_kpj'         => $this->request->getPost('nomor_kpj'),
             'nama_perusahaan'   => $this->request->getPost('nama_perusahaan'),
-            'nama_tenaga_kerja' => $this->request->getPost('nama_tenaga_kerja'), // ✅
+            'nama_tenaga_kerja' => $this->request->getPost('nama_tenaga_kerja'),
             'pph21'             => $this->request->getPost('pph21'),
             'jumlah_bayar'      => $this->request->getPost('jumlah_bayar'),
             'no_rekening'       => $this->request->getPost('no_rekening'),
             'atas_nama'         => $this->request->getPost('atas_nama'),
+            'nomor_rak'         => $this->request->getPost('nomor_rak'), // ✅ tambahin nomor rak
         ];
 
         if ($fileName) {
@@ -217,6 +224,7 @@ public function store()
 
         return redirect()->to('/admin/jaminan')->with('success', 'Data Jaminan berhasil diupdate');
     }
+
 
 
     public function delete($id)
@@ -320,79 +328,80 @@ public function viewFile($filename)
         return view('admin/jaminan', $data);
     }
 
-   public function import()
-{
-    $file = $this->request->getFile('file_excel');
+    public function import()
+    {
+        $file = $this->request->getFile('file_excel');
 
-    if (!$file || !$file->isValid()) {
-        return redirect()->back()->with('error', 'File tidak valid atau tidak ditemukan');
-    }
-
-    $ext = strtolower($file->getClientExtension());
-    if (!in_array($ext, ['csv', 'xlsx'])) {
-        return redirect()->back()->with('error', 'Format file tidak didukung. Gunakan CSV atau XLSX.');
-    }
-
-    try {
-        $reader = $ext === 'csv'
-            ? new \PhpOffice\PhpSpreadsheet\Reader\Csv()
-            : new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
-
-        $spreadsheet = $reader->load($file->getTempName());
-        $sheetData   = $spreadsheet->getActiveSheet()->toArray();
-
-        if (empty($sheetData)) {
-            return redirect()->back()->with('error', 'File kosong atau tidak terbaca');
+        if (!$file || !$file->isValid()) {
+            return redirect()->back()->with('error', 'File tidak valid atau tidak ditemukan');
         }
 
-        // Ambil header dari row pertama
-        $headers = array_map('strtolower', $sheetData[0]);
+        $ext = strtolower($file->getClientExtension());
+        if (!in_array($ext, ['csv', 'xlsx'])) {
+            return redirect()->back()->with('error', 'Format file tidak didukung. Gunakan CSV atau XLSX.');
+        }
 
-        $dataInsert = [];
-        foreach ($sheetData as $index => $row) {
-            if ($index == 0) continue; // skip header
+        try {
+            $reader = $ext === 'csv'
+                ? new \PhpOffice\PhpSpreadsheet\Reader\Csv()
+                : new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
 
-            $rowData = array_combine($headers, $row);
+            $spreadsheet = $reader->load($file->getTempName());
+            $sheetData   = $spreadsheet->getActiveSheet()->toArray();
 
-            // Handle tanggal
-            $tanggalTransaksi = null;
-            if (!empty($rowData['tanggal_transaksi'])) {
-                if (is_numeric($rowData['tanggal_transaksi'])) {
-                    $tanggalTransaksi = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject(
-                        $rowData['tanggal_transaksi']
-                    )->format('Y-m-d');
-                } else {
-                    $tanggalTransaksi = date('Y-m-d', strtotime($rowData['tanggal_transaksi']));
-                }
+            if (empty($sheetData)) {
+                return redirect()->back()->with('error', 'File kosong atau tidak terbaca');
             }
 
-           $dataInsert[] = [
-                'nomor_penetapan'   => trim($rowData['nomor_penetapan'] ?? ''),
-                'tanggal_transaksi' => $tanggalTransaksi,
-                'kode_transaksi'    => trim($rowData['kode_transaksi'] ?? ''),
-                'nomor_kpj'         => trim($rowData['nomor_kpj'] ?? ''),
-                'nama_tenaga_kerja' => trim($rowData['nama_tenaga_kerja'] ?? ''), // <<< tambahin ini
-                'nama_perusahaan'   => trim($rowData['nama_perusahaan'] ?? ''),
-                'pph21'             => isset($rowData['pph21']) ? (float) preg_replace('/[^0-9.]/', '', $rowData['pph21']) : 0,
-                'jumlah_bayar'      => isset($rowData['jumlah_bayar']) ? (float) preg_replace('/[^0-9.]/', '', $rowData['jumlah_bayar']) : 0,
-                'no_rekening'       => trim($rowData['no_rekening'] ?? ''),
-                'atas_nama'         => trim($rowData['atas_nama'] ?? ''),
-                'dokumen'           => trim($rowData['dokumen'] ?? ''),
-                'created_at'        => date('Y-m-d H:i:s'),
-                'updated_at'        => date('Y-m-d H:i:s'),
-            ];
+            // Ambil header dari row pertama
+            $headers = array_map('strtolower', $sheetData[0]);
 
+            $dataInsert = [];
+            foreach ($sheetData as $index => $row) {
+                if ($index == 0) continue; // skip header
+
+                $rowData = array_combine($headers, $row);
+
+                // Handle tanggal
+                $tanggalTransaksi = null;
+                if (!empty($rowData['tanggal_transaksi'])) {
+                    if (is_numeric($rowData['tanggal_transaksi'])) {
+                        $tanggalTransaksi = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject(
+                            $rowData['tanggal_transaksi']
+                        )->format('Y-m-d');
+                    } else {
+                        $tanggalTransaksi = date('Y-m-d', strtotime($rowData['tanggal_transaksi']));
+                    }
+                }
+
+                $dataInsert[] = [
+                    'nomor_penetapan'   => trim($rowData['nomor_penetapan'] ?? ''),
+                    'tanggal_transaksi' => $tanggalTransaksi,
+                    'kode_transaksi'    => trim($rowData['kode_transaksi'] ?? ''),
+                    'nomor_kpj'         => trim($rowData['nomor_kpj'] ?? ''),
+                    'nama_tenaga_kerja' => trim($rowData['nama_tenaga_kerja'] ?? ''),
+                    'nama_perusahaan'   => trim($rowData['nama_perusahaan'] ?? ''),
+                    'pph21'             => isset($rowData['pph21']) ? (float) preg_replace('/[^0-9.]/', '', $rowData['pph21']) : 0,
+                    'jumlah_bayar'      => isset($rowData['jumlah_bayar']) ? (float) preg_replace('/[^0-9.]/', '', $rowData['jumlah_bayar']) : 0,
+                    'no_rekening'       => trim($rowData['no_rekening'] ?? ''),
+                    'atas_nama'         => trim($rowData['atas_nama'] ?? ''),
+                    'nomor_rak'         => trim($rowData['nomor_rak'] ?? ''), // ✅ tambahin nomor rak
+                    'dokumen'           => trim($rowData['dokumen'] ?? ''),
+                    'created_at'        => date('Y-m-d H:i:s'),
+                    'updated_at'        => date('Y-m-d H:i:s'),
+                ];
+            }
+
+            if (!empty($dataInsert)) {
+                $this->jaminanModel->insertBatch($dataInsert);
+            }
+
+            return redirect()->to('/admin/jaminan')->with('success', 'Data berhasil diimport!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal import: ' . $e->getMessage());
         }
-
-        if (!empty($dataInsert)) {
-            $this->jaminanModel->insertBatch($dataInsert);
-        }
-
-        return redirect()->to('/admin/jaminan')->with('success', 'Data berhasil diimport!');
-    } catch (\Exception $e) {
-        return redirect()->back()->with('error', 'Gagal import: ' . $e->getMessage());
     }
-}
+
 
 
 
