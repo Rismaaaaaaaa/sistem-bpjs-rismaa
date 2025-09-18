@@ -17,10 +17,27 @@ class JaminanController extends BaseController
     {
         $this->jaminanModel = new JaminanModel();
     }
+    public function create()
+    {
+        $data = [
+            'title' => 'Tambah Jaminan',
+            'active_menu' => 'jaminan',
+        ];
+
+        return view('/admin/tambah_jaminan', $data);
+    }
 
     public function index()
     {
         $jaminan = $this->jaminanModel->orderBy('tanggal_transaksi', 'DESC')->findAll();
+
+        $dokumenModel = new \App\Models\JaminanDokumenModel();
+
+        foreach ($jaminan as &$row) {
+            $row['dokumen_list'] = $dokumenModel
+                ->where('jaminan_id', $row['id'])
+                ->findAll();
+        }
 
         $totalData = $this->jaminanModel->countAll();
         $totalNilai = $this->jaminanModel->selectSum('jumlah_bayar')->first()['jumlah_bayar'];
@@ -51,15 +68,6 @@ class JaminanController extends BaseController
         return view('admin/jaminan', $data);
     }
 
-    public function create()
-    {
-        $data = [
-            'title' => 'Tambah Jaminan',
-            'active_menu' => 'jaminan',
-        ];
-
-        return view('/admin/tambah_jaminan', $data);
-    }
 
     public function store()
     {
@@ -75,30 +83,17 @@ class JaminanController extends BaseController
             'jumlah_bayar'      => 'required|decimal',
             'no_rekening'       => 'required',
             'atas_nama'         => 'required',
-            'nomor_rak'         => 'required',   // ✅ validasi nomor rak
-            'nomor_baris'       => 'required',   // ✅ validasi nomor baris
-            'dokumen'           => 'if_exist|is_image[dokumen]|mime_in[dokumen,image/jpg,image/jpeg,image/png]',
+            'nomor_rak'         => 'required',
+            'nomor_baris'       => 'required',
+            'dokumen.*'         => 'if_exist|is_image[dokumen.*]|mime_in[dokumen.*,image/jpg,image/jpeg,image/png]',
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
             return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
 
-        $file = $this->request->getFile('dokumen');
-        $fileName = null;
-
-        if ($file && $file->isValid() && !$file->hasMoved()) {
-            // Pastikan folder ada
-            $uploadPath = FCPATH . 'uploads/jaminan/';
-            if (!is_dir($uploadPath)) {
-                mkdir($uploadPath, 0777, true);
-            }
-
-            $fileName = $file->getRandomName();
-            $file->move($uploadPath, $fileName);
-        }
-
-        $this->jaminanModel->save([
+        // Simpan data jaminan
+        $jaminanId = $this->jaminanModel->insert([
             'nomor_penetapan'   => $this->request->getPost('nomor_penetapan'),
             'tanggal_transaksi' => $this->request->getPost('tanggal_transaksi'),
             'kode_transaksi'    => $this->request->getPost('kode_transaksi'),
@@ -109,13 +104,37 @@ class JaminanController extends BaseController
             'jumlah_bayar'      => $this->request->getPost('jumlah_bayar'),
             'no_rekening'       => $this->request->getPost('no_rekening'),
             'atas_nama'         => $this->request->getPost('atas_nama'),
-            'nomor_rak'         => $this->request->getPost('nomor_rak'),   // ✅ simpan nomor rak
-            'nomor_baris'       => $this->request->getPost('nomor_baris'), // ✅ simpan nomor baris
-            'dokumen'           => $fileName,
+            'nomor_rak'         => $this->request->getPost('nomor_rak'),
+            'nomor_baris'       => $this->request->getPost('nomor_baris'),
         ]);
+
+        // Upload multiple dokumen
+        $files = $this->request->getFiles();
+        if ($files && isset($files['dokumen'])) {
+            $uploadPath = FCPATH . 'uploads/jaminan/';
+            if (!is_dir($uploadPath)) {
+                mkdir($uploadPath, 0777, true);
+            }
+
+            $dokumenModel = new \App\Models\JaminanDokumenModel();
+
+            foreach ($files['dokumen'] as $file) {
+                if ($file->isValid() && !$file->hasMoved()) {
+                    $fileName = $file->getRandomName();
+                    $file->move($uploadPath, $fileName);
+
+                    // simpan ke tabel jaminan_dokumen
+                    $dokumenModel->insert([
+                        'jaminan_id' => $jaminanId,
+                        'file_path'  => $fileName
+                    ]);
+                }
+            }
+        }
 
         return redirect()->to('/admin/jaminan')->with('success', 'Data Jaminan berhasil disimpan');
     }
+
 
 
 
@@ -188,23 +207,7 @@ class JaminanController extends BaseController
     {
         $id = $this->request->getPost('id');
 
-        $file = $this->request->getFile('dokumen');
-        $fileName = null;
-
-        if ($file && $file->isValid() && !$file->hasMoved()) {
-            $fileName = $file->getRandomName();
-            $file->move(FCPATH . 'uploads/jaminan/', $fileName);
-
-            // hapus file lama
-            $oldData = $this->jaminanModel->find($id);
-            if ($oldData && !empty($oldData['dokumen'])) {
-                $oldPath = FCPATH . 'uploads/jaminan/' . $oldData['dokumen'];
-                if (file_exists($oldPath)) {
-                    unlink($oldPath);
-                }
-            }
-        }
-
+        // update data utama jaminan
         $data = [
             'nomor_penetapan'   => $this->request->getPost('nomor_penetapan'),
             'tanggal_transaksi' => $this->request->getPost('tanggal_transaksi'),
@@ -216,15 +219,45 @@ class JaminanController extends BaseController
             'jumlah_bayar'      => $this->request->getPost('jumlah_bayar'),
             'no_rekening'       => $this->request->getPost('no_rekening'),
             'atas_nama'         => $this->request->getPost('atas_nama'),
-            'nomor_rak'         => $this->request->getPost('nomor_rak'),   // ✅ simpan nomor rak
-            'nomor_baris'       => $this->request->getPost('nomor_baris'), // ✅ simpan nomor baris
+            'nomor_rak'         => $this->request->getPost('nomor_rak'),
+            'nomor_baris'       => $this->request->getPost('nomor_baris'),
         ];
 
-        if ($fileName) {
-            $data['dokumen'] = $fileName;
-        }
-
         $this->jaminanModel->update($id, $data);
+
+        // cek apakah ada dokumen baru yang diupload
+        $files = $this->request->getFiles();
+        if ($files && isset($files['dokumen'])) {
+            $uploadPath = FCPATH . 'uploads/jaminan/';
+            if (!is_dir($uploadPath)) {
+                mkdir($uploadPath, 0777, true);
+            }
+
+            $dokumenModel = new \App\Models\JaminanDokumenModel();
+
+            // hapus semua file lama (fisik + DB)
+            $oldFiles = $dokumenModel->where('jaminan_id', $id)->findAll();
+            foreach ($oldFiles as $old) {
+                $oldPath = $uploadPath . $old['file_path'];
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
+            }
+            $dokumenModel->where('jaminan_id', $id)->delete();
+
+            // simpan dokumen baru
+            foreach ($files['dokumen'] as $file) {
+                if ($file->isValid() && !$file->hasMoved()) {
+                    $fileName = $file->getRandomName();
+                    $file->move($uploadPath, $fileName);
+
+                    $dokumenModel->insert([
+                        'jaminan_id' => $id,
+                        'file_path'  => $fileName,
+                    ]);
+                }
+            }
+        }
 
         return redirect()->to('/admin/jaminan')->with('success', 'Data Jaminan berhasil diupdate');
     }
@@ -232,28 +265,48 @@ class JaminanController extends BaseController
 
 
 
-    public function delete($id)
+
+   public function delete($id)
 {
-    $data = $this->jaminanModel->find($id);
-    if ($data && !empty($data['dokumen'])) {
-        $path = FCPATH . 'uploads/jaminan/' . $data['dokumen'];
-        if (file_exists($path)) {
-            unlink($path);
+    // Cari data jaminan induk
+    $jaminan = $this->jaminanModel->find($id);
+
+    if ($jaminan) {
+        // Ambil semua dokumen terkait dari tabel jaminan_dokumen
+        $dokumenModel = new \App\Models\JaminanDokumenModel();
+        $dokumens = $dokumenModel->where('jaminan_id', $id)->findAll();
+
+        // Hapus file fisik
+        foreach ($dokumens as $doc) {
+            $path = FCPATH . 'uploads/jaminan/' . $doc['file_path'];
+            if (file_exists($path)) {
+                unlink($path);
+            }
         }
+
+        // Hapus record dokumen dari DB
+        $dokumenModel->where('jaminan_id', $id)->delete();
+
+        // Hapus data induk jaminan
+        $this->jaminanModel->delete($id);
+
+        return redirect()->to('/admin/jaminan')
+            ->with('success', 'Data Jaminan dan semua dokumen berhasil dihapus');
     }
 
-    $this->jaminanModel->delete($id);
-    return redirect()->to('/admin/jaminan')->with('success', 'Data Jaminan berhasil dihapus');
+    return redirect()->to('/admin/jaminan')
+        ->with('error', 'Data Jaminan tidak ditemukan');
 }
 
-public function viewFile($filename)
-{
-    $path = FCPATH . 'uploads/jaminan/' . $filename;
-    if (!file_exists($path)) {
-        throw new \CodeIgniter\Exceptions\PageNotFoundException("File tidak ditemukan");
+
+    public function viewFile($filename)
+    {
+        $path = FCPATH . 'uploads/jaminan/' . $filename;
+        if (!file_exists($path)) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException("File tidak ditemukan");
+        }
+        return $this->response->download($path, null)->setFileName($filename);
     }
-    return $this->response->download($path, null)->setFileName($filename);
-}
 
 
     public function filter()

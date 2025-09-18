@@ -15,14 +15,14 @@ class JaminanModel extends Model
         'nomor_kpj',
         'nama_perusahaan',
         'nama_tenaga_kerja',
-        'pph21','nomor_rak',
+        'pph21',
+        'nomor_rak',
         'nomor_baris',
         'jumlah_bayar',
         'no_rekening',
         'atas_nama',
-        'dokumen',
     ];
-    protected $useTimestamps = true; // supaya created_at & updated_at otomatis keisi
+    protected $useTimestamps = true; // otomatis isi created_at & updated_at
 
     public function getFilteredData($search = null, $date = 'all', $sortBy = 'newest')
     {
@@ -61,5 +61,4 @@ class JaminanModel extends Model
 
         return $builder->get()->getResultArray();
     }
-
 }

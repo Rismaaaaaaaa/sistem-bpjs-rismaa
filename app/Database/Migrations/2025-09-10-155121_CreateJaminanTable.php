@@ -55,12 +55,7 @@ class CreateJaminanTable extends Migration
                 'type'       => 'VARCHAR',
                 'constraint' => 100,
             ],
-            'dokumen'           => [
-                'type'       => 'VARCHAR',
-                'constraint' => 255,
-                'null'       => true, 
-            ],
-            'nomor_rak'         => [ // <-- field baru
+            'nomor_rak'         => [
                 'type'       => 'VARCHAR',
                 'constraint' => 50,
                 'null'       => true,

@@ -220,7 +220,7 @@
                     </div>
                 </div>
                                 <!-- Upload Dokumen -->
-                    <div class="md:col-span-2">
+                <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         <i class="fas fa-file-upload text-bpjs-primary mr-1"></i>
                         Upload Dokumen (PNG/JPG) <span class="text-red-500">*</span>
@@ -232,13 +232,14 @@
                         <p class="text-sm text-gray-600 mb-1">Klik untuk upload atau drag & drop file di sini</p>
                         <p class="text-xs text-gray-500">Format: PNG, JPG, JPEG (Maks. 5MB)</p>
 
-                        <!-- input file tetap ada -->
-                        <input type="file" name="dokumen" accept=".png,.jpg,.jpeg" class="hidden" id="fileInput">
+                        <!-- multiple file input -->
+                        <input type="file" name="dokumen[]" accept=".png,.jpg,.jpeg" class="hidden" id="fileInput" multiple>
                     </div>
 
                     <!-- Preview nama file -->
-                    <div id="fileName" class="text-sm text-gray-600 mt-2 hidden"></div>
-                    </div>
+                    <div id="filePreview" class="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3 hidden"></div>
+                </div>
+
 
                 <!-- Form Actions -->
                 <div class="md:col-span-2 flex justify-end gap-4 pt-6 border-t border-gray-200 mt-4">
@@ -273,110 +274,72 @@
         </div>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // File upload interaction
-            const fileInput = document.getElementById('fileInput');
-            const fileUploadArea = document.querySelector('.file-upload');
-            const fileName = document.getElementById('fileName');
-           
-            fileUploadArea.addEventListener('click', function() {
-                fileInput.click();
-            });
-           
-            fileInput.addEventListener('change', function() {
-                if (this.files.length > 0) {
-                    fileName.textContent = 'File terpilih: ' + this.files[0].name;
-                    fileName.classList.remove('hidden');
-                    fileUploadArea.classList.add('border-green-400', 'bg-green-50');
+       document.addEventListener('DOMContentLoaded', function () {
+    const fileInput = document.getElementById('fileInput');
+    const fileUploadArea = document.querySelector('.file-upload');
+    const filePreview = document.getElementById('filePreview');
 
-                    // Jangan hapus input! cukup tambahin ikon + teks status
-                    fileUploadArea.querySelector('i').className = "fas fa-check-circle text-3xl text-green-500 mb-3";
-                    fileUploadArea.querySelector('p.text-sm').textContent = "File berhasil dipilih";
-                    fileUploadArea.querySelector('p.text-xs').textContent = this.files[0].name;
-                }
-            });
+    fileUploadArea.addEventListener('click', () => fileInput.click());
 
-           
-            // Drag and drop for file upload
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                fileUploadArea.addEventListener(eventName, preventDefaults, false);
-            });
-           
-            function preventDefaults(e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-           
-            ['dragenter', 'dragover'].forEach(eventName => {
-                fileUploadArea.addEventListener(eventName, highlight, false);
-            });
-           
-            ['dragleave', 'drop'].forEach(eventName => {
-                fileUploadArea.addEventListener(eventName, unhighlight, false);
-            });
-           
-            function highlight() {
-                fileUploadArea.classList.add('border-bpjs-primary', 'bg-blue-100');
-            }
-           
-            function unhighlight() {
-                fileUploadArea.classList.remove('border-bpjs-primary', 'bg-blue-100');
-            }
-           
-            fileUploadArea.addEventListener('drop', handleDrop, false);
-           
-            function handleDrop(e) {
-                const dt = e.dataTransfer;
-                const files = dt.files;
-                fileInput.files = files;
-               
-                if (files.length > 0) {
-                    fileName.textContent = 'File terpilih: ' + files[0].name;
-                    fileName.classList.remove('hidden');
-                    fileUploadArea.classList.add('border-green-400', 'bg-green-50');
-                    fileUploadArea.innerHTML = `
-                        <i class="fas fa-check-circle text-3xl text-green-500 mb-3"></i>
-                        <p class="text-sm text-green-600 mb-1">File berhasil diupload</p>
-                        <p class="text-xs text-green-500">${files[0].name}</p>
+    fileInput.addEventListener('change', handleFiles);
+
+    function handleFiles() {
+        if (fileInput.files.length > 0) {
+            filePreview.innerHTML = '';
+            filePreview.classList.remove('hidden');
+
+            Array.from(fileInput.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const div = document.createElement('div');
+                    div.className = "border rounded-lg p-2 bg-white shadow flex flex-col items-center";
+                    div.innerHTML = `
+                        <img src="${e.target.result}" alt="${file.name}" class="w-full h-24 object-cover rounded mb-2">
+                        <p class="text-xs text-gray-600 truncate w-full text-center">${file.name}</p>
                     `;
-                }
-            }
-           
-            // Form validation
-            const form = document.querySelector('form');
-            const inputs = form.querySelectorAll('input[required]');
-           
-           form.addEventListener('submit', function(e) {
-    let valid = true;
+                    filePreview.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
 
-    // Daftar field yang wajib diisi
-    const requiredFields = ['voucher', 'program', 'jumlah_rupiah'];
-
-    inputs.forEach(input => {
-        if (requiredFields.includes(input.name)) {
-            if (!input.value.trim()) {
-                input.classList.add('border-red-500');
-                valid = false;
-            } else {
-                input.classList.remove('border-red-500');
-            }
+            // Ubah icon + teks status di upload area
+            fileUploadArea.querySelector('i').className = "fas fa-check-circle text-3xl text-green-500 mb-3";
+            fileUploadArea.querySelector('p.text-sm').textContent = "File berhasil dipilih";
+            fileUploadArea.querySelector('p.text-xs').textContent = `${fileInput.files.length} file dipilih`;
+            fileUploadArea.classList.add('border-green-400', 'bg-green-50');
         }
-    });
-
-    // Dokumen / foto boleh kosong → jangan blok submit
-    if (!fileInput.files.length) {
-        fileUploadArea.classList.remove('border-red-500');
-    } else {
-        fileUploadArea.classList.remove('border-red-500');
     }
 
-    if (!valid) {
-        e.preventDefault();
-        alert('Harap lengkapi semua field yang wajib diisi!');
-        }
+    // drag & drop handler
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        fileUploadArea.addEventListener(eventName, preventDefaults, false);
     });
 
-        });
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        fileUploadArea.addEventListener(eventName, () => {
+            fileUploadArea.classList.add('border-bpjs-primary', 'bg-blue-100');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        fileUploadArea.addEventListener(eventName, () => {
+            fileUploadArea.classList.remove('border-bpjs-primary', 'bg-blue-100');
+        }, false);
+    });
+
+    fileUploadArea.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        fileInput.files = e.dataTransfer.files;
+        handleFiles();
+    }
+});
+
     </script>
 </div>
 </html>

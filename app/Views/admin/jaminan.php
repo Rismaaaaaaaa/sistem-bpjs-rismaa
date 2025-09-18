@@ -278,16 +278,25 @@
                                 </td>
 
                                 <td class="p-4">
-                                    <?php 
-                                        $filePath = FCPATH . 'uploads/jaminan/' . ($row['dokumen'] ?? '');
-                                        if (!empty($row['dokumen']) && file_exists($filePath)): 
-                                            $fileUrl = base_url('uploads/jaminan/' . $row['dokumen']);
-                                    ?>
-                                        <button type="button" 
-                                            onclick="showImageModal('<?= $fileUrl ?>', '<?= $row['dokumen'] ?>', 'Ukuran otomatis')"
-                                            class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
-                                            <i class="fas fa-image mr-2"></i> Lihat
-                                        </button>
+                                    <?php if (!empty($row['dokumen_list'])): ?>
+                                        <?php 
+                                            // Cek minimal ada 1 file valid
+                                            $validDocs = array_filter($row['dokumen_list'], function($doc) {
+                                                return file_exists(FCPATH . 'uploads/jaminan/' . $doc['file_path']);
+                                            });
+                                        ?>
+                                        <?php if (!empty($validDocs)): ?>
+                                            <button type="button" 
+                                                onclick='showImageModal(<?= htmlspecialchars(json_encode(array_map(fn($d) => [
+                                                    "url" => base_url("uploads/jaminan/" . $d["file_path"]),
+                                                    "name" => $d["file_path"]
+                                                ], $validDocs)), ENT_QUOTES, "UTF-8") ?>)'
+                                                class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
+                                                <i class="fas fa-images mr-2"></i> Lihat Semua (<?= count($validDocs) ?>)
+                                            </button>
+                                        <?php else: ?>
+                                            <span class="text-gray-400 italic">File hilang</span>
+                                        <?php endif; ?>
                                     <?php else: ?>
                                         <button type="button" onclick="showNoFileToast()" 
                                             class="inline-flex items-center px-3 py-2 rounded-lg bg-gray-100 text-gray-600">
@@ -295,6 +304,7 @@
                                         </button>
                                     <?php endif; ?>
                                 </td>
+
 
                                 <td class="p-4">
                                     <div class="flex space-x-2">
@@ -313,11 +323,13 @@
                                             data-no_rekening="<?= esc($row['no_rekening']) ?>"
                                             data-atas_nama="<?= esc($row['atas_nama']) ?>"
                                             data-nomor_rak="<?= esc($row['nomor_rak']) ?>"
-                                            data-nomor_baris="<?= esc($row['nomor_baris']) ?>"  
-                                            data-dokumen="<?= esc($row['dokumen']) ?>"
+                                            data-nomor_baris="<?= esc($row['nomor_baris']) ?>"
+                                            data-dokumen-list="<?= htmlspecialchars(json_encode($row['dokumen_list'] ?? []), ENT_QUOTES, 'UTF-8') ?>"
                                             title="Detail">
                                             <i class="fas fa-eye"></i>
                                         </button>
+
+
 
 
                                         <!-- Tombol Edit -->
@@ -580,64 +592,59 @@
     </div>
 
     <!-- Modal Preview Foto Modern -->
-    <div id="imagePreviewModal" class="fixed inset-0 hidden items-center justify-center z-50">
-        <!-- Overlay -->
-        <div id="modalOverlay" class="absolute inset-0 bg-black bg-opacity-70 glass-effect backdrop-blur-sm" onclick="closeImageModal()"></div>
+<div id="imagePreviewModal" class="fixed inset-0 hidden items-center justify-center z-50">
+    <!-- Overlay -->
+    <div id="modalOverlay" class="absolute inset-0 bg-black bg-opacity-70 backdrop-blur-sm" onclick="closeImageModal()"></div>
+    
+    <!-- Konten Modal -->
+    <div id="modalContent" class="bg-white/95 rounded-2xl shadow-2xl max-w-4xl w-full mx-4 p-6 relative transform transition-all duration-300 scale-95 opacity-0">
+        <!-- Tombol Close -->
+        <button onclick="closeImageModal()" 
+            class="absolute top-4 right-4 bg-gray-100 hover:bg-red-100 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 group">
+            <i class="fas fa-times text-xl text-gray-600 group-hover:text-red-600"></i>
+        </button>
         
-        <!-- Konten Modal -->
-        <div id="modalContent" class="bg-white/95 rounded-2xl shadow-2xl max-w-3xl w-full mx-4 p-6 relative transform transition-all duration-300 scale-95 opacity-0">
-            <!-- Tombol Close -->
-            <button onclick="closeImageModal()" 
-                class="absolute top-4 right-4 bg-gray-100 hover:bg-red-100 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 group">
-                <i class="fas fa-times text-xl text-gray-600 group-hover:text-red-600"></i>
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">Pratinjau Dokumen Jaminan BPJS</h3>
+            <p class="text-sm text-gray-500 mt-1">Geser untuk melihat dokumen lainnya</p>
+        </div>
+        
+        <!-- Container Scroll -->
+        <div class="relative">
+            <div id="imageContainer" 
+                class="flex space-x-4 overflow-x-auto snap-x snap-mandatory pb-4">
+                <!-- Gambar akan diinject via JS -->
+            </div>
+
+            <!-- Tombol navigasi -->
+            <button onclick="scrollImages('left')" 
+                class="absolute left-0 top-1/2 -translate-y-1/2 bg-gray-100 p-3 rounded-full shadow hover:bg-gray-200">
+                <i class="fas fa-chevron-left"></i>
             </button>
-            
-            <!-- Header -->
-            <div class="text-center mb-4">
-                <h3 class="text-xl font-semibold text-gray-800">Pratinjau Dokumen Jaminan BPJS</h3>
-                <p class="text-sm text-gray-500 mt-1">Pastikan dokumen sudah sesuai sebelum diunduh</p>
-            </div>
-            
-            <!-- Gambar -->
-            <div class="flex justify-center relative">
-                <img id="modalImage" src="" alt="Preview Dokumen" class="rounded-xl max-h-[60vh] object-contain shadow-lg">
-                
-                <!-- Loading indicator -->
-                <div id="loadingIndicator" class="absolute inset-0 flex items-center justify-center hidden">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-bpjs-primary"></div>
-                </div>
-            </div>
+            <button onclick="scrollImages('right')" 
+                class="absolute right-0 top-1/2 -translate-y-1/2 bg-gray-100 p-3 rounded-full shadow hover:bg-gray-200">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
 
-            <!-- Informasi File -->
-            <div class="mt-4 flex justify-between items-center text-sm text-gray-500 bg-gray-50 p-3 rounded-lg">
-                <div class="flex items-center">
-                    <i class="far fa-file-image text-bpjs-primary mr-2"></i>
-                    <span id="fileName">document.jpg</span>
-                </div>
-                <div id="fileSize" class="text-gray-400">2.4 MB</div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="mt-6 flex justify-center space-x-3">
-                <a id="downloadLink" href="#" download 
-                class="px-6 py-3 bg-bpjs-primary text-white rounded-xl shadow hover:bg-bpjs-darkblue transition-all duration-300 flex items-center group">
-                    <i class="fas fa-download mr-2 group-hover:animate-bounce"></i> Download
-                </a>
-                
+        <!-- Action Buttons -->
+        <div class="mt-6 flex justify-center space-x-3">
+            <a id="downloadLink" href="#" download 
+            class="px-6 py-3 bg-bpjs-primary text-white rounded-xl shadow hover:bg-bpjs-darkblue transition-all duration-300 flex items-center group">
+                <i class="fas fa-download mr-2 group-hover:animate-bounce"></i> Download
+            </a>
+            
             <button onclick="closeImageModal()" 
-                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-                    Tutup
-                </button>
-            </div>
+                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                Tutup
+            </button>
         </div>
     </div>
+</div>
+
 
 <style>
-.glass-effect {
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-}
-
 #imagePreviewModal.active {
     display: flex;
     animation: fadeIn 0.3s ease-out;
@@ -647,26 +654,32 @@
     animation: slideUp 0.4s ease-out forwards;
 }
 
+/* Animasi closing */
+#modalContent.closing {
+    animation: slideDown 0.3s ease-in forwards;
+}
+
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
 }
 
 @keyframes slideUp {
-    from { 
-        transform: translateY(20px) scale(0.95);
-        opacity: 0;
-    }
-    to { 
-        transform: translateY(0) scale(1);
-        opacity: 1;
-    }
+    from { transform: translateY(20px) scale(0.95); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
 }
+
+@keyframes slideDown {
+    from { transform: translateY(0) scale(1); opacity: 1; }
+    to { transform: translateY(20px) scale(0.95); opacity: 0; }
+}
+
 </style>
 
 
 <script>
   // Function to open modal and populate form fields
+  
   // Function to open modal and populate form fields
     document.querySelectorAll('.btn-edit').forEach(button => {
     button.addEventListener('click', function() {
@@ -731,49 +744,100 @@
 </script>
 
 <script>
-function showImageModal(imageSrc, fileName, fileSize) {
+   function showImageModal(images) {
+    console.log("✅ showImageModal terpanggil", images);
+
     const modal = document.getElementById('imagePreviewModal');
-    const modalImage = document.getElementById('modalImage');
+    const modalContent = document.getElementById('modalContent');
+    const container = document.getElementById('imageContainer');
     const downloadLink = document.getElementById('downloadLink');
     const fileNameEl = document.getElementById('fileName');
     const fileSizeEl = document.getElementById('fileSize');
-    const loadingIndicator = document.getElementById('loadingIndicator');
-    
-    // Tampilkan loading indicator
-    loadingIndicator.classList.remove('hidden');
-    
-    // Set data gambar
-    modalImage.onload = function() {
-        loadingIndicator.classList.add('hidden');
-    };
-    
-    modalImage.src = imageSrc;
-    downloadLink.href = imageSrc;
-    
-    if (fileName) fileNameEl.textContent = fileName;
-    if (fileSize) fileSizeEl.textContent = fileSize;
-    
-    // Tampilkan modal
-    modal.classList.remove('hidden');
-    setTimeout(() => {
-        modal.classList.add('active');
-    }, 10);
-}
 
-function closeImageModal() {
-    const modal = document.getElementById('imagePreviewModal');
-    modal.classList.remove('active');
-    setTimeout(() => {
-        modal.classList.add('hidden');
-    }, 300);
-}
-
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeImageModal();
+    if (!images || images.length === 0) {
+        console.error("❌ Tidak ada gambar untuk ditampilkan!");
+        return;
     }
-});
+
+    container.innerHTML = "";
+
+    images.forEach((img, index) => {
+        console.log("➕ Inject gambar:", img);
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "snap-center flex-shrink-0 flex flex-col items-center";
+
+        const imgElem = document.createElement("img");
+        imgElem.src = img.url;
+        imgElem.alt = img.name;
+        imgElem.className = "rounded-xl max-h-[60vh] object-contain shadow-lg cursor-pointer";
+
+        imgElem.onclick = () => {
+            console.log("👉 Klik gambar:", img.name);
+            downloadLink.href = img.url;
+            downloadLink.download = img.name;
+            if (fileNameEl) fileNameEl.textContent = img.name;
+            if (fileSizeEl) fileSizeEl.textContent = img.size ?? '';
+        };
+
+        wrapper.appendChild(imgElem);
+        container.appendChild(wrapper);
+
+        if (index === 0) {
+            console.log("🎯 Set default gambar:", img.name);
+            downloadLink.href = img.url;
+            downloadLink.download = img.name;
+            if (fileNameEl) fileNameEl.textContent = img.name;
+            if (fileSizeEl) fileSizeEl.textContent = img.size ?? '';
+        }
+    });
+
+    // Buka modal
+    modal.classList.remove('hidden');
+    requestAnimationFrame(() => {
+        console.log("🔔 Aktifkan modal...");
+        modal.classList.add("active");
+        modalContent.classList.remove("opacity-0", "scale-95");
+    });
+}
+
+
+    function closeImageModal() {
+        const modal = document.getElementById('imagePreviewModal');
+        const modalContent = document.getElementById('modalContent');
+
+        modalContent.classList.add("closing");
+        setTimeout(() => {
+            modal.classList.remove("active");
+            modal.classList.add("hidden");
+            modalContent.classList.remove("closing");
+        }, 300); // sama dengan durasi animasi CSS
+    }
+
+    // Navigasi pakai tombol keyboard
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeImageModal();
+        }
+        if (e.key === 'ArrowLeft') {
+            scrollImages('left');
+        }
+        if (e.key === 'ArrowRight') {
+            scrollImages('right');
+        }
+    });
+
+    function scrollImages(direction) {
+        const container = document.getElementById("imageContainer");
+        const scrollAmount = container.clientWidth; 
+        container.scrollBy({
+            left: direction === "left" ? -scrollAmount : scrollAmount,
+            behavior: "smooth"
+        });
+    }
 </script>
+
+
 
 
 <style>
@@ -949,66 +1013,88 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-    const modalDetail = document.getElementById("modalDetail");
-    const closeModalDetail = document.getElementById("closeModalDetail");
+        const modalDetail = document.getElementById("modalDetail");
+        const closeModalDetail = document.getElementById("closeModalDetail");
 
-    document.querySelectorAll(".btn-detail").forEach(btn => {
-        btn.addEventListener("click", function() {
-            document.getElementById("detailNomorPenetapan").textContent = this.dataset.nomor_penetapan;
-            document.getElementById("detailTanggal").textContent = this.dataset.tanggal_transaksi;
-            document.getElementById("detailKode").textContent = this.dataset.kode_transaksi;
-            document.getElementById("detailKpj").textContent = this.dataset.nomor_kpj;
-            document.getElementById("detailPerusahaan").textContent = this.dataset.nama_perusahaan;
+        document.querySelectorAll(".btn-detail").forEach(btn => {
+            btn.addEventListener("click", function() {
+                // isi data text
+                document.getElementById("detailNomorPenetapan").textContent = this.dataset.nomor_penetapan;
+                document.getElementById("detailTanggal").textContent = this.dataset.tanggal_transaksi;
+                document.getElementById("detailKode").textContent = this.dataset.kode_transaksi;
+                document.getElementById("detailKpj").textContent = this.dataset.nomor_kpj;
+                document.getElementById("detailPerusahaan").textContent = this.dataset.nama_perusahaan;
+                document.getElementById("detailTenagaKerja").textContent = this.dataset.nama_tenaga_kerja || "-";
 
-            // === tambahan: nama tenaga kerja ===
-            document.getElementById("detailTenagaKerja").textContent = this.dataset.nama_tenaga_kerja || "-";
+                let nomorRak = this.dataset.nomor_rak || "-";
+                let nomorBaris = this.dataset.nomor_baris || "-";
+                document.getElementById("detailLokasiRak").textContent =
+                    (nomorRak !== "-" && nomorBaris !== "-")
+                    ? `NR - ${nomorRak} - BARIS ${nomorBaris}`
+                    : "-";
 
-            // === tambahan: lokasi rak & baris ===
-            let nomorRak = this.dataset.nomor_rak || "-";
-            let nomorBaris = this.dataset.nomor_baris || "-";
-            document.getElementById("detailLokasiRak").textContent = 
-                (nomorRak !== "-" && nomorBaris !== "-") 
-                ? `NR - ${nomorRak} - BARIS ${nomorBaris}` 
-                : "-";
+                document.getElementById("detailPph21").textContent = this.dataset.pph21;
+                document.getElementById("detailJumlah").textContent = this.dataset.jumlah_bayar;
+                document.getElementById("detailRekening").textContent = this.dataset.no_rekening;
+                document.getElementById("detailAtasNama").textContent = this.dataset.atas_nama;
 
-            document.getElementById("detailPph21").textContent = this.dataset.pph21;
-            document.getElementById("detailJumlah").textContent = this.dataset.jumlah_bayar;
-            document.getElementById("detailRekening").textContent = this.dataset.no_rekening;
-            document.getElementById("detailAtasNama").textContent = this.dataset.atas_nama;
+                // === handle multiple dokumen ===
+                const dokumenContainer = document.getElementById("detailDokumen");
+                dokumenContainer.innerHTML = '';
 
-            if (this.dataset.dokumen) {
-                let fileUrl = "<?= base_url('uploads/jaminan/') ?>" + this.dataset.dokumen;
-                let ext = this.dataset.dokumen.split('.').pop().toLowerCase();
-
-                if (['jpg','jpeg','png','gif'].includes(ext)) {
-                    document.getElementById("detailDokumen").innerHTML = `
-                        <img src="${fileUrl}" alt="Dokumen" class="max-h-64 rounded border">
-                    `;
-                } else if (ext === 'pdf') {
-                    document.getElementById("detailDokumen").innerHTML = `
-                        <iframe src="${fileUrl}" class="w-full h-64 border rounded"></iframe>
-                    `;
-                } else {
-                    document.getElementById("detailDokumen").innerHTML = `
-                        <a href="${fileUrl}" target="_blank" class="text-blue-600 hover:underline">
-                            Lihat Dokumen
-                        </a>
-                    `;
+                let docs = [];
+                if (this.dataset.dokumenList) {
+                    try {
+                        docs = JSON.parse(this.dataset.dokumenList);
+                    } catch (e) {
+                        docs = [];
+                    }
                 }
-            } else {
-                document.getElementById("detailDokumen").textContent = "Tidak ada dokumen";
-            }
 
-            modalDetail.classList.remove("hidden");
+                if (docs.length > 0) {
+                    const baseUrl = "<?= base_url('uploads/jaminan/') ?>";
+                    const grid = document.createElement('div');
+                    grid.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3";
+
+                    docs.forEach(filename => {
+                        const col = document.createElement('div');
+                        col.className = "p-2 border rounded bg-white flex flex-col items-center";
+
+                        let ext = (filename.split('.').pop() || '').toLowerCase();
+                        if (['jpg','jpeg','png','gif'].includes(ext)) {
+                            col.innerHTML = `
+                            <img src="${baseUrl}${filename}" alt="${filename}" class="w-full h-36 object-cover rounded mb-2">
+                            <p class="text-xs text-gray-600 truncate">${filename}</p>
+                            `;
+                        } else if (ext === 'pdf') {
+                            col.innerHTML = `
+                            <a href="${baseUrl}${filename}" target="_blank" class="text-blue-600 hover:underline">Lihat PDF</a>
+                            <p class="text-xs text-gray-600 truncate">${filename}</p>
+                            `;
+                        } else {
+                            col.innerHTML = `
+                            <a href="${baseUrl}${filename}" target="_blank" class="text-blue-600 hover:underline">${filename}</a>
+                            `;
+                        }
+
+                        grid.appendChild(col);
+                    });
+
+                    dokumenContainer.appendChild(grid);
+                } else {
+                    dokumenContainer.textContent = "Tidak ada dokumen";
+                }
+
+                modalDetail.classList.remove("hidden");
+            });
         });
-    });
 
         closeModalDetail.addEventListener("click", () => {
             modalDetail.classList.add("hidden");
         });
     });
-
 </script>
+
 
 
 <?= $this->endSection() ?>
