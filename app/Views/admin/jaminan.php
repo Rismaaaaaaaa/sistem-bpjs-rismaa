@@ -482,11 +482,20 @@
         </div>
 
         <!-- Upload Dokumen -->
+                <!-- Upload Dokumen -->
         <div>
-            <label for="dokumen" class="block mb-1 font-medium text-gray-700">Upload Dokumen</label>
-            <input type="file" name="dokumen" id="dokumen" 
-                class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 transition">
+        <label for="dokumen" class="block mb-1 font-medium text-gray-700">Upload Dokumen</label>
+        <input 
+            type="file" 
+            name="dokumen[]" 
+            id="dokumen" 
+            multiple
+            accept=".jpg,.jpeg,.png,.gif,.webp,.pdf"
+            class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 transition"
+        >
+        <small class="text-gray-500">Bisa pilih lebih dari satu file (gambar/pdf)</small>
         </div>
+
 
         <!-- Button -->
         <div class="text-right">
@@ -580,9 +589,10 @@
                     </div>
                     
                     <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                        <p class="text-sm text-purple-600 font-medium mb-1">Dokumen</p>
-                        <p class="text-gray-800 font-semibold" id="detailDokumen">-</p>
+                        <p class="text-sm text-purple-600 font-medium mb-3">Dokumen</p>
+                        <div id="detailDokumen" class="space-y-2"></div>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -1012,87 +1022,110 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const modalDetail = document.getElementById("modalDetail");
-        const closeModalDetail = document.getElementById("closeModalDetail");
+document.addEventListener("DOMContentLoaded", function() {
+    const modalDetail = document.getElementById("modalDetail");
+    const closeModalDetail = document.getElementById("closeModalDetail");
 
-        document.querySelectorAll(".btn-detail").forEach(btn => {
-            btn.addEventListener("click", function() {
-                // isi data text
-                document.getElementById("detailNomorPenetapan").textContent = this.dataset.nomor_penetapan;
-                document.getElementById("detailTanggal").textContent = this.dataset.tanggal_transaksi;
-                document.getElementById("detailKode").textContent = this.dataset.kode_transaksi;
-                document.getElementById("detailKpj").textContent = this.dataset.nomor_kpj;
-                document.getElementById("detailPerusahaan").textContent = this.dataset.nama_perusahaan;
-                document.getElementById("detailTenagaKerja").textContent = this.dataset.nama_tenaga_kerja || "-";
+    document.querySelectorAll(".btn-detail").forEach(btn => {
+        btn.addEventListener("click", function() {
+            console.log("🔍 Detail button diklik!");
+            console.log("📂 Dokumen List (raw):", this.dataset.dokumenList);
 
-                let nomorRak = this.dataset.nomor_rak || "-";
-                let nomorBaris = this.dataset.nomor_baris || "-";
-                document.getElementById("detailLokasiRak").textContent =
-                    (nomorRak !== "-" && nomorBaris !== "-")
-                    ? `NR - ${nomorRak} - BARIS ${nomorBaris}`
-                    : "-";
+            // isi data text
+            document.getElementById("detailNomorPenetapan").textContent = this.dataset.nomor_penetapan;
+            document.getElementById("detailTanggal").textContent = this.dataset.tanggal_transaksi;
+            document.getElementById("detailKode").textContent = this.dataset.kode_transaksi;
+            document.getElementById("detailKpj").textContent = this.dataset.nomor_kpj;
+            document.getElementById("detailPerusahaan").textContent = this.dataset.nama_perusahaan;
+            document.getElementById("detailTenagaKerja").textContent = this.dataset.nama_tenaga_kerja || "-";
 
-                document.getElementById("detailPph21").textContent = this.dataset.pph21;
-                document.getElementById("detailJumlah").textContent = this.dataset.jumlah_bayar;
-                document.getElementById("detailRekening").textContent = this.dataset.no_rekening;
-                document.getElementById("detailAtasNama").textContent = this.dataset.atas_nama;
+            let nomorRak = this.dataset.nomor_rak || "-";
+            let nomorBaris = this.dataset.nomor_baris || "-";
+            document.getElementById("detailLokasiRak").textContent =
+                (nomorRak !== "-" && nomorBaris !== "-")
+                ? `NR - ${nomorRak} - BARIS ${nomorBaris}`
+                : "-";
 
-                // === handle multiple dokumen ===
-                const dokumenContainer = document.getElementById("detailDokumen");
-                dokumenContainer.innerHTML = '';
+            document.getElementById("detailPph21").textContent = this.dataset.pph21;
+            document.getElementById("detailJumlah").textContent = this.dataset.jumlah_bayar;
+            document.getElementById("detailRekening").textContent = this.dataset.no_rekening;
+            document.getElementById("detailAtasNama").textContent = this.dataset.atas_nama;
 
-                let docs = [];
-                if (this.dataset.dokumenList) {
-                    try {
-                        docs = JSON.parse(this.dataset.dokumenList);
-                    } catch (e) {
-                        docs = [];
-                    }
+            // === handle multiple dokumen ===
+            const dokumenContainer = document.getElementById("detailDokumen");
+            dokumenContainer.innerHTML = '';
+
+            let docs = [];
+            if (this.dataset.dokumenList) {
+                try {
+                    docs = JSON.parse(this.dataset.dokumenList);
+                    console.log("✅ Parsed dokumen:", docs);
+                } catch (e) {
+                    console.error("❌ Gagal parse dokumenList:", e);
                 }
+            }
 
-                if (docs.length > 0) {
-                    const baseUrl = "<?= base_url('uploads/jaminan/') ?>";
-                    const grid = document.createElement('div');
-                    grid.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3";
+            if (docs.length > 0) {
+                const baseUrl = "<?= base_url('uploads/jaminan/') ?>";
+                const grid = document.createElement('div');
+                grid.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3";
 
-                    docs.forEach(filename => {
-                        const col = document.createElement('div');
-                        col.className = "p-2 border rounded bg-white flex flex-col items-center";
+                docs.forEach(doc => {
+                let filename = doc.file_path; // ambil path asli
+                console.log("🖼️ Inject file:", filename);
 
-                        let ext = (filename.split('.').pop() || '').toLowerCase();
-                        if (['jpg','jpeg','png','gif'].includes(ext)) {
-                            col.innerHTML = `
-                            <img src="${baseUrl}${filename}" alt="${filename}" class="w-full h-36 object-cover rounded mb-2">
-                            <p class="text-xs text-gray-600 truncate">${filename}</p>
-                            `;
-                        } else if (ext === 'pdf') {
-                            col.innerHTML = `
-                            <a href="${baseUrl}${filename}" target="_blank" class="text-blue-600 hover:underline">Lihat PDF</a>
-                            <p class="text-xs text-gray-600 truncate">${filename}</p>
-                            `;
-                        } else {
-                            col.innerHTML = `
-                            <a href="${baseUrl}${filename}" target="_blank" class="text-blue-600 hover:underline">${filename}</a>
-                            `;
-                        }
+                const col = document.createElement('div');
+                col.className = "p-2 border rounded bg-white flex flex-col items-center hover:shadow-lg transition";
 
-                        grid.appendChild(col);
-                    });
+                let ext = (filename.split('.').pop() || '').toLowerCase();
 
-                    dokumenContainer.appendChild(grid);
+                if (['jpg','jpeg','png','gif','webp'].includes(ext)) {
+                    col.innerHTML = `
+                        <a href="${baseUrl}${filename}" target="_blank">
+                            <img src="${baseUrl}${filename}" 
+                                alt="${filename}" 
+                                class="w-full h-40 object-cover rounded mb-2 hover:opacity-80 transition">
+                        </a>
+                        <p class="text-xs text-gray-600 truncate w-full text-center" title="${filename}">
+                            ${filename}
+                        </p>
+                    `;
+                } else if (ext === 'pdf') {
+                    col.innerHTML = `
+                        <a href="${baseUrl}${filename}" target="_blank" 
+                        class="flex flex-col items-center text-red-600 hover:underline">
+                            <i class="fas fa-file-pdf text-4xl mb-1"></i>
+                            <span class="text-xs truncate w-full text-center">${filename}</span>
+                        </a>
+                    `;
                 } else {
-                    dokumenContainer.textContent = "Tidak ada dokumen";
+                    col.innerHTML = `
+                        <a href="${baseUrl}${filename}" target="_blank" 
+                        class="flex flex-col items-center text-blue-600 hover:underline">
+                            <i class="fas fa-file-alt text-4xl mb-1"></i>
+                            <span class="text-xs truncate w-full text-center">${filename}</span>
+                        </a>
+                    `;
                 }
 
-                modalDetail.classList.remove("hidden");
+                grid.appendChild(col);
             });
-        });
 
-        closeModalDetail.addEventListener("click", () => {
-            modalDetail.classList.add("hidden");
+
+                dokumenContainer.appendChild(grid);
+            } else {
+                dokumenContainer.textContent = "Tidak ada dokumen";
+            }
+
+            // 🔔 buka modal
+            modalDetail.classList.remove("hidden");
         });
     });
+
+    closeModalDetail.addEventListener("click", () => {
+        modalDetail.classList.add("hidden");
+    });
+});
 </script>
 
 
