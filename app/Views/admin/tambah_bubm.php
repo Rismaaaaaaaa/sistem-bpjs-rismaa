@@ -32,20 +32,22 @@
         </div>
 
         <!-- Form Content -->
-       <form action="<?= site_url('admin/bubm/store') ?>" method="post" enctype="multipart/form-data" 
+    <form action="<?= site_url('admin/bubm/store') ?>" method="post" enctype="multipart/form-data" 
         class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
         <?= csrf_field() ?>
 
-        <!-- Voucher -->
+        <!-- Nomor Voucher -->
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
                 <i class="fas fa-ticket-alt text-bpjs-primary mr-1"></i>
                 Nomor Voucher <span class="text-red-500">*</span>
             </label>
-            <div class="relative">
-                <i class="fas fa-barcode absolute left-3 top-3.5 text-gray-400"></i>
+            <div class="relative group">
+                <i class="fas fa-barcode absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 
+                    group-focus-within:text-bpjs-accent"></i>
                 <input type="text" name="voucher" 
-                    class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition"
+                    class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl 
+                    focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white" 
                     placeholder="Contoh: RB018 01" required>
             </div>
             <p class="text-xs text-gray-500 mt-2 ml-1">
@@ -60,37 +62,28 @@
                 <i class="fas fa-list-alt text-bpjs-primary mr-1"></i>
                 Program <span class="text-red-500">*</span>
             </label>
-        <div class="relative">
-                <i class="fas fa-project-diagram absolute left-3 top-3.5 text-gray-400"></i>
+            <div class="relative group">
+                <i class="fas fa-project-diagram absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 
+                    group-focus-within:text-bpjs-accent"></i>
                 <select name="program" id="programSelect"
-                        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition appearance-none">
+                    class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl 
+                    focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition appearance-none bg-gray-50 hover:bg-white">
                     <option value="">-- Pilih Program --</option>
-                    <option value="BUBM">BUBM </option>
+                    <option value="BUBM">BUBM</option>
                     <option value="lainnya">Lainnya...</option>
                 </select>
-                <i class="fas fa-chevron-down absolute right-3 top-3.5 text-gray-400 pointer-events-none"></i>
+                <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 
+                    pointer-events-none group-focus-within:text-bpjs-accent"></i>
             </div>
 
             <!-- Input manual program -->
             <div class="relative mt-3 hidden" id="programInputWrapper">
-                <i class="fas fa-keyboard absolute left-3 top-3.5 text-gray-400"></i>
+                <i class="fas fa-keyboard absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 
+                    group-focus-within:text-bpjs-accent"></i>
                 <input type="text" name="program_manual" id="programInput"
-                    placeholder="Masukkan program lain..."
-                    class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition">
-            </div>
-
-            <!-- Custom Program -->
-            <div id="programCustomContainer" class="mt-3 hidden">
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-pen text-bpjs-primary mr-1"></i>
-                    Nama Program Lainnya
-                </label>
-                <div class="relative">
-                    <i class="fas fa-keyboard absolute left-3 top-3.5 text-gray-400"></i>
-                    <input type="text" name="program_custom" id="programCustom"
-                        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition"
-                        placeholder="Masukkan nama program lainnya">
-                </div>
+                    class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl 
+                    focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white"
+                    placeholder="Masukkan program lain...">
             </div>
         </div>
 
@@ -100,11 +93,12 @@
                 <i class="fas fa-money-bill-wave text-bpjs-primary mr-1"></i>
                 Jumlah Rupiah (Rp) <span class="text-red-500">*</span>
             </label>
-            <div class="relative">
-                <i class="fas fa-calculator absolute left-3 top-3.5 text-gray-400"></i>
+            <div class="relative group">
+                <i class="fas fa-calculator absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 
+                    group-focus-within:text-bpjs-accent"></i>
                 <input type="text" id="jumlahRupiah"
-                    class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl 
-                            focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition"
+                    class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl 
+                    focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white" 
                     placeholder="0" required oninput="formatCurrency(this)">
                 <input type="hidden" name="jumlah_rupiah" id="jumlahRupiahRaw">
             </div>
@@ -114,12 +108,47 @@
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
                 <i class="fas fa-calendar-day text-bpjs-primary mr-1"></i>
-                Tanggal Input
+                Tanggal Input <span class="text-red-500">*</span>
             </label>
-            <div class="relative">
-                <i class="fas fa-calendar-check absolute left-3 top-3.5 text-gray-400"></i>
-                <input type="text" value="<?= date('d F Y') ?>" 
-                    class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-100 text-gray-600" readonly>
+            <div class="relative group">
+                <i class="fas fa-calendar-check absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 
+                    group-focus-within:text-bpjs-accent"></i>
+                <input type="date" name="tanggal_input" 
+                    value="<?= date('Y-m-d') ?>" 
+                    class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl 
+                    focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white" required>
+            </div>
+        </div>
+
+        <!-- Nomor Rak -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-archive text-bpjs-primary mr-1"></i>
+                Nomor Rak <span class="text-red-500">*</span>
+            </label>
+            <div class="relative group">
+                <i class="fas fa-box absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 
+                    group-focus-within:text-bpjs-accent"></i>
+                <input type="text" name="nomor_rak" 
+                    placeholder="Contoh: 14"
+                    class="form-input w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 
+                    focus:ring-bpjs-accent/50 bg-gray-50 hover:bg-white" required>
+            </div>
+        </div>
+
+        <!-- Nomor Baris -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-stream text-bpjs-primary mr-1"></i>
+                Nomor Baris <span class="text-red-500">*</span>
+            </label>
+            <div class="relative group">
+                <i class="fas fa-th-list absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 
+                    group-focus-within:text-bpjs-accent"></i>
+                <input type="text" name="nomor_baris" 
+                    placeholder="Contoh: 14"
+                    class="form-input w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 
+                    focus:ring-bpjs-accent/50 bg-gray-50 hover:bg-white" required>
             </div>
         </div>
 
@@ -129,11 +158,12 @@
                 <i class="fas fa-file-alt text-bpjs-primary mr-1"></i>
                 Keterangan
             </label>
-            <div class="relative">
-                <i class="fas fa-comment absolute left-3 top-3.5 text-gray-400"></i>
+            <div class="relative group">
+                <i class="fas fa-comment absolute left-3 top-3.5 text-gray-400 group-focus-within:text-bpjs-accent"></i>
                 <textarea name="keterangan" rows="3"
-                        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition"
-                        placeholder="Tambahkan keterangan (opsional)"></textarea>
+                    class="form-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl 
+                    focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white"
+                    placeholder="Tambahkan keterangan (opsional)"></textarea>
             </div>
         </div>
 
@@ -141,29 +171,26 @@
         <div class="md:col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-2">
                 <i class="fas fa-file-upload text-bpjs-primary mr-1"></i>
-                Upload Dokumen Pendukung
+                Upload Dokumen (PNG/JPG/PDF) <span class="text-red-500">*</span>
             </label>
-            <div class="file-upload border-2 border-dashed border-gray-300 rounded-xl p-5 text-center transition cursor-pointer hover:border-bpjs-primary hover:bg-blue-50" 
-                onclick="document.getElementById('fileInput').click()">
-                <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-3"></i>
+            <div id="fileUploadArea"
+                class="file-upload border-2 border-dashed border-gray-300 rounded-xl p-5 text-center transition cursor-pointer hover:border-bpjs-primary hover:bg-blue-50 group">
+                <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-3 group-hover:text-bpjs-accent"></i>
                 <p class="text-sm text-gray-600 mb-1">Klik untuk upload atau drag & drop file di sini</p>
-                <p class="text-xs text-gray-500">Format: PNG, JPG, PDF (Maks. 5MB)</p>
+                <p class="text-xs text-gray-500">Format: PNG, JPG, JPEG, PDF (Maks. 5MB)</p>
+                <input type="file" name="dokumen[]" accept=".png,.jpg,.jpeg,.pdf" id="fileInput" class="hidden" multiple>
             </div>
-
-            <!-- taro input di luar -->
-            <input type="file" name="dokumen" accept=".png,.jpg,.jpeg,.pdf" id="fileInput" class="hidden">
-            <div id="fileName" class="text-sm text-gray-600 mt-2 hidden"></div>
-
+            <div id="filePreview" class="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3 hidden"></div>
         </div>
 
         <!-- Form Actions -->
         <div class="md:col-span-2 flex justify-end gap-4 pt-6 border-t border-gray-200 mt-4">
             <button type="reset" 
-                    class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition flex items-center gap-2">
+                class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition flex items-center gap-2">
                 <i class="fas fa-redo"></i> Reset Form
             </button>
             <button type="submit" 
-                    class="btn-submit flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-bpjs-accent to-orange-500 text-white font-semibold hover:opacity-90 shadow-lg transition">
+                class="btn-submit flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-bpjs-accent to-orange-500 text-white font-semibold hover:opacity-90 shadow-lg transition transform hover:scale-105">
                 <i class="fas fa-save"></i> Simpan Data BUBM
             </button>
         </div>

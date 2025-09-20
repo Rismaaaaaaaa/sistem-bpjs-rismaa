@@ -19,7 +19,8 @@ class BubmModel extends Model
         'program',
         'jumlah_rupiah',
         'keterangan',
-        'dokumen',
+        'nomor_rak',
+        'nomor_baris',
         'tanggal_transaksi',
         'created_at',
         'updated_at'
@@ -37,7 +38,8 @@ class BubmModel extends Model
         'program'        => 'required|max_length[100]',
         'jumlah_rupiah'  => 'required|decimal',
         'keterangan'     => 'permit_empty|string',
-        'dokumen'        => 'permit_empty|max_length[255]',
+        'nomor_rak'      => 'permit_empty|max_length[50]',
+        'nomor_baris'    => 'permit_empty|max_length[50]',
     ];
 
     protected $validationMessages = [

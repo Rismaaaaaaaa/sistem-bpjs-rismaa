@@ -10,7 +10,8 @@ use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
-
+use App\Controllers\BaseController;
+use App\Models\BubmDokumenModel;
 
 class BubmController extends BaseController
 {
@@ -45,7 +46,7 @@ class BubmController extends BaseController
                 $query = $query->where('YEARWEEK(tanggal_transaksi, 1)', date('oW'));
             } elseif ($date === 'month') {
                 $query = $query->where('MONTH(tanggal_transaksi)', date('m'))
-                            ->where('YEAR(tanggal_transaksi)', date('Y'));
+                               ->where('YEAR(tanggal_transaksi)', date('Y'));
             } elseif ($date === 'year') {
                 $query = $query->where('YEAR(tanggal_transaksi)', date('Y'));
             }
@@ -67,18 +68,23 @@ class BubmController extends BaseController
 
         $bubm = $query->findAll();
 
-        // ✅ Hitung total rupiah
-        $totalRupiah = 0;
-        if (!empty($bubm)) {
-            $totalRupiah = array_sum(array_map(fn($r) => (float)($r['jumlah_rupiah'] ?? 0), $bubm));
+        // Ambil dokumen untuk tiap transaksi
+        $dokumenModel = new BubmDokumenModel();
+        foreach ($bubm as &$row) {
+            $row['dokumen_list'] = $dokumenModel->where('bubm_id', $row['id'])->findAll();
         }
+
+        // Hitung total rupiah
+        $totalRupiah = !empty($bubm)
+            ? array_sum(array_map(fn($r) => (float)($r['jumlah_rupiah'] ?? 0), $bubm))
+            : 0;
 
         $data = [
             'title'       => 'Data BUBM',
             'active_menu' => 'bubm',
             'bubm'        => $bubm,
             'totalData'   => count($bubm),
-            'totalRupiah' => $totalRupiah,   // <-- kirim ke view
+            'totalRupiah' => $totalRupiah,
             'search'      => $search,
             'date'        => $date,
             'sortBy'      => $sortBy,
@@ -158,32 +164,43 @@ public function exportExcel()
         $today         = date('d/m/Y');
         $kodeTransaksi = $today . ' - ' . $voucher;
 
-        $file     = $this->request->getFile('dokumen');
-        $fileName = null;
-
-        // Pastikan folder public/uploads/bubm ada
-        $uploadPath = FCPATH . 'uploads/bubm';
-        if (!is_dir($uploadPath)) {
-            mkdir($uploadPath, 0777, true);
-        }
-
-        // Upload file
-        if ($file && $file->isValid() && !$file->hasMoved()) {
-            $fileName = $file->getRandomName();
-            $file->move($uploadPath, $fileName);
-        }
-
         // Ambil jumlah_rupiah dan bersihkan
         $jumlahRupiah = preg_replace('/[^0-9]/', '', $this->request->getPost('jumlah_rupiah'));
 
-        $this->bubmModel->save([
+        // Simpan data utama
+        $bubmId = $this->bubmModel->insert([
             'kode_transaksi' => $kodeTransaksi,
             'voucher'        => $voucher,
             'program'        => $this->request->getPost('program') ?? 'BUBM',
             'jumlah_rupiah'  => $jumlahRupiah,
             'keterangan'     => $this->request->getPost('keterangan'),
-            'dokumen'        => $fileName,
+            'nomor_rak'      => $this->request->getPost('nomor_rak'),
+            'nomor_baris'    => $this->request->getPost('nomor_baris'),
         ]);
+
+        // Upload multiple dokumen
+        $files = $this->request->getFiles();
+        if ($files && isset($files['dokumen'])) {
+            $uploadPath = FCPATH . 'uploads/bubm/';
+            if (!is_dir($uploadPath)) {
+                mkdir($uploadPath, 0777, true);
+            }
+
+            $dokumenModel = new BubmDokumenModel();
+
+            foreach ($files['dokumen'] as $file) {
+                if ($file->isValid() && !$file->hasMoved()) {
+                    $fileName = $file->getRandomName();
+                    $file->move($uploadPath, $fileName);
+
+                    $dokumenModel->insert([
+                        'bubm_id'   => $bubmId,
+                        'file_name' => $file->getClientName(),
+                        'file_path' => $fileName,
+                    ]);
+                }
+            }
+        }
 
         return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil disimpan');
     }
@@ -196,33 +213,40 @@ public function exportExcel()
             return redirect()->to('/admin/bubm')->with('error', 'Data tidak ditemukan');
         }
 
-        $file     = $this->request->getFile('dokumen');
-        $fileName = $data['dokumen']; // default: file lama
-
-        $uploadPath = FCPATH . 'uploads/bubm';
-        if (!is_dir($uploadPath)) {
-            mkdir($uploadPath, 0777, true);
-        }
-
-        // Jika ada file baru, replace
-        if ($file && $file->isValid() && !$file->hasMoved()) {
-            // Hapus file lama
-            if (!empty($data['dokumen']) && file_exists($uploadPath . '/' . $data['dokumen'])) {
-                unlink($uploadPath . '/' . $data['dokumen']);
-            }
-
-            $fileName = $file->getRandomName();
-            $file->move($uploadPath, $fileName);
-        }
-
+        // Bersihkan jumlah_rupiah
         $jumlahRupiah = preg_replace('/[^0-9]/', '', $this->request->getPost('jumlah_rupiah'));
 
         $this->bubmModel->update($id, [
             'voucher'       => $this->request->getPost('voucher'),
             'jumlah_rupiah' => $jumlahRupiah,
             'keterangan'    => $this->request->getPost('keterangan'),
-            'dokumen'       => $fileName,
+            'nomor_rak'     => $this->request->getPost('nomor_rak'),
+            'nomor_baris'   => $this->request->getPost('nomor_baris'),
         ]);
+
+        // 🔄 Upload dokumen tambahan (tidak replace, tapi nambah ke tabel bubm_dokumen)
+        $files = $this->request->getFiles();
+        if ($files && isset($files['dokumen'])) {
+            $uploadPath = FCPATH . 'uploads/bubm/';
+            if (!is_dir($uploadPath)) {
+                mkdir($uploadPath, 0777, true);
+            }
+
+            $dokumenModel = new BubmDokumenModel();
+
+            foreach ($files['dokumen'] as $file) {
+                if ($file->isValid() && !$file->hasMoved()) {
+                    $fileName = $file->getRandomName();
+                    $file->move($uploadPath, $fileName);
+
+                    $dokumenModel->insert([
+                        'bubm_id'   => $id,
+                        'file_name' => $file->getClientName(),
+                        'file_path' => $fileName,
+                    ]);
+                }
+            }
+        }
 
         return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil diperbarui');
     }
@@ -235,17 +259,21 @@ public function exportExcel()
             return redirect()->to('/admin/bubm')->with('error', 'Data BUBM tidak ditemukan');
         }
 
-        $uploadPath = FCPATH . 'uploads/bubm';
+        $uploadPath   = FCPATH . 'uploads/bubm/';
+        $dokumenModel = new BubmDokumenModel();
 
-        // Hapus file dokumen kalau ada
-        if (!empty($data['dokumen'])) {
-            $filePath = $uploadPath . '/' . $data['dokumen'];
+        // Ambil semua dokumen terkait BUBM ini
+        $dokumens = $dokumenModel->where('bubm_id', $id)->findAll();
+
+        foreach ($dokumens as $doc) {
+            $filePath = $uploadPath . $doc['file_path'];
             if (is_file($filePath)) {
                 unlink($filePath);
             }
+            $dokumenModel->delete($doc['id']);
         }
 
-        // Hapus data dari database
+        // Hapus data utama
         $this->bubmModel->delete($id);
 
         return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil dihapus');

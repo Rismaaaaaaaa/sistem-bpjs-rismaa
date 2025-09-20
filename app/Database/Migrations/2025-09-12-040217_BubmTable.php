@@ -52,6 +52,15 @@ class CreateBubmTable extends Migration
                 'constraint' => '255',
                 'null'       => true,
             ],
+            'nomor_rak'         => [
+                'type'       => 'VARCHAR',
+                'constraint' => 50,
+                'null'       => true,
+            ],
+            'nomor_baris' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 50,
+            ],
             'created_at' => [
                 'type' => 'DATETIME',
                 'null' => true,

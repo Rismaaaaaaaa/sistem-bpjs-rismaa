@@ -213,6 +213,8 @@
                         <th class="p-4 text-left font-semibold">#</th>
                         <th class="p-4 text-left font-semibold">Kode Transaksi Voucher</th>
                         <th class="p-4 text-left font-semibold">Program</th>
+                        <th class="p-4 text-left font-semibold">Nomor Rak</th>
+                        <th class="p-4 text-left font-semibold">Nomor Baris</th>
                         <th class="p-4 text-left font-semibold">Jumlah Rupiah</th>
                         <th class="p-4 text-left font-semibold">Keterangan Transaksi</th>
                         <th class="p-4 text-left font-semibold">Dokumen</th>
@@ -233,6 +235,8 @@
                                         <?= esc($row['program']) ?>
                                     </div>
                                 </td>
+                                <td class="p-4"><?= esc($row['nomor_rak']) ?></td>
+                                <td class="p-4"><?= esc($row['nomor_baris']) ?></td>
                                 <td class="p-4">
                                     <span class="px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium">
                                         Rp <?= number_format($row['jumlah_rupiah'], 0, ',', '.') ?>
@@ -249,9 +253,9 @@
                                 </td>
                                 <td class="p-4">
                                     <?php 
-                                        $filePath = FCPATH . 'uploads/bubm/' . ($row['dokumen'] ?? '');
+                                        $filePath = FCPATH . 'Uploads/bubm/' . ($row['dokumen'] ?? '');
                                         if (!empty($row['dokumen']) && file_exists($filePath)): 
-                                            $fileUrl = base_url('uploads/bubm/' . $row['dokumen']);
+                                            $fileUrl = base_url('Uploads/bubm/' . $row['dokumen']);
                                     ?>
                                         <button type="button" 
                                                 onclick="showBubmImageModal('<?= $fileUrl ?>', '<?= $row['dokumen'] ?>')" 
@@ -265,14 +269,9 @@
                                         </button>
                                     <?php endif; ?>
                                 </td>
-
-
-    
-
-                                <td class="p-4">
+                               <td class="p-4">
                                     <div class="flex space-x-2">
                                         <!-- Tombol Detail -->
-                                      <!-- Tombol Detail BUBM -->
                                         <button 
                                             type="button"
                                             class="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition btn-detail-bubm"
@@ -280,46 +279,47 @@
                                             data-kode_transaksi="<?= esc($row['kode_transaksi']) ?>"
                                             data-voucher="<?= esc($row['voucher']) ?>"
                                             data-program="<?= esc($row['program']) ?>"
+                                            data-nomor_rak="<?= esc($row['nomor_rak']) ?>"
+                                            data-nomor_baris="<?= esc($row['nomor_baris']) ?>"
                                             data-jumlah_rupiah="<?= esc(number_format($row['jumlah_rupiah'], 0, ',', '.')) ?>"
                                             data-keterangan="<?= esc($row['keterangan']) ?>"
-                                            data-dokumen="<?= esc($row['dokumen']) ?>"
+                                            data-dokumen="<?= !empty($row['dokumen']) ? esc(base_url('uploads/bubm/' . $row['dokumen'])) : '' ?>"
                                             data-tanggal_transaksi="<?= esc($row['tanggal_transaksi']) ?>"
-                                            title="Lihat Detail"
+                                            title="Lihat Detail Data BUBM"
                                         >
                                             <i class="fas fa-eye"></i>
                                         </button>
-
-
                                         <!-- Tombol Edit -->
                                         <button 
-                                            class="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition btn-edit-bubm"
+                                            class="p-2 rounded-lg bg-yellow-100 text-yellow-600 hover:bg-yellow-200 transition btn-edit-bubm"
                                             data-id="<?= $row['id'] ?>"
                                             data-kode_transaksi="<?= esc($row['kode_transaksi']) ?>"
                                             data-voucher="<?= esc($row['voucher']) ?>"
                                             data-program="<?= esc($row['program']) ?>"
+                                            data-nomor_rak="<?= esc($row['nomor_rak']) ?>"
+                                            data-nomor_baris="<?= esc($row['nomor_baris']) ?>"
                                             data-jumlah_rupiah="<?= esc($row['jumlah_rupiah']) ?>"
                                             data-keterangan="<?= esc($row['keterangan']) ?>"
-                                            data-dokumen="<?= esc($row['dokumen']) ?>"
+                                            data-dokumen="<?= !empty($row['dokumen']) ? esc(base_url('uploads/bubm/' . $row['dokumen'])) : '' ?>"
                                             data-tanggal_transaksi="<?= esc($row['tanggal_transaksi']) ?>"
-                                            title="Edit">
+                                            title="Edit Data BUBM"
+                                        >
                                             <i class="fas fa-edit"></i>
                                         </button>
-
                                         <!-- Tombol Hapus -->
-                                        <form action="<?= base_url('admin/bubm/delete/'.$row['id']) ?>" method="post" onsubmit="return confirm('Yakin mau hapus data ini?')" class="inline">
+                                        <form action="<?= base_url('admin/bubm/delete/' . $row['id']) ?>" method="post" onsubmit="return confirm('Yakin ingin menghapus data ini?')" class="inline">
                                             <?= csrf_field() ?>
-                                            <button type="submit" class="p-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition" title="Hapus">
+                                            <button type="submit" class="p-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition" title="Hapus Data BUBM">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
                                     </div>
                                 </td>
-
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="8" class="p-8 text-center">
+                            <td colspan="9" class="p-8 text-center">
                                 <div class="flex flex-col items-center justify-center text-gray-400 py-8">
                                     <i class="fas fa-inbox text-4xl mb-3"></i>
                                     <p class="text-lg">Tidak ada data BUBM</p>
@@ -368,6 +368,14 @@
                       <p class="text-sm text-gray-600 font-medium mb-1">Program</p>
                       <p id="detail_program" class="text-gray-800 font-semibold">-</p>
                   </div>
+                  <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                      <p class="text-sm text-gray-600 font-medium mb-1">Nomor Rak</p>
+                      <p id="detail_nomor_rak" class="text-gray-800 font-semibold">-</p>
+                  </div>
+                  <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                      <p class="text-sm text-gray-600 font-medium mb-1">Nomor Baris</p>
+                      <p id="detail_nomor_baris" class="text-gray-800 font-semibold">-</p>
+                  </div>
                   <div class="bg-green-50 p-4 rounded-lg border border-green-200">
                       <p class="text-sm text-green-600 font-medium mb-1">Jumlah Rupiah</p>
                       <p id="detail_jumlah_rupiah" class="text-green-700 font-bold text-lg">-</p>
@@ -394,7 +402,6 @@
       <!-- Footer -->
   </div>
 </div>
-
 <!-- Modal Preview BUBM -->
 <div id="bubmImagePreviewModal" class="fixed inset-0 hidden items-center justify-center z-50">
     <!-- Overlay -->
@@ -440,7 +447,7 @@
     </div>
 </div>
 
- <!-- Modal Edit BUBM -->
+<!-- Modal Edit BUBM -->
 <div id="modalEditBubm" class="fixed inset-0 hidden bg-black bg-opacity-50 flex items-center justify-center z-50">
   <div class="bg-white w-full max-w-2xl rounded-xl shadow-lg p-6 relative">
     
@@ -459,34 +466,68 @@
 
         <div class="grid grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium">Kode Transaksi</label>
-                <input type="text" name="kode_transaksi" id="edit_kode_transaksi" 
-                       class="w-full border rounded-lg p-2 mt-1" readonly>
+                <label class="block text-sm font-medium text-gray-700">Kode Transaksi</label>
+                <div class="relative group">
+                    <i class="fas fa-barcode absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-bpjs-accent"></i>
+                    <input type="text" name="kode_transaksi" id="edit_kode_transaksi" 
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white" readonly>
+                </div>
             </div>
             <div>
-                <label class="block text-sm font-medium">Voucher</label>
-                <input type="text" name="voucher" id="edit_voucher" 
-                       class="w-full border rounded-lg p-2 mt-1">
+                <label class="block text-sm font-medium text-gray-700">Voucher</label>
+                <div class="relative group">
+                    <i class="fas fa-ticket-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-bpjs-accent"></i>
+                    <input type="text" name="voucher" id="edit_voucher" 
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white">
+                </div>
             </div>
             <div>
-                <label class="block text-sm font-medium">Program</label>
-                <input type="text" name="program" id="edit_program" 
-                       class="w-full border rounded-lg p-2 mt-1" readonly>
+                <label class="block text-sm font-medium text-gray-700">Program</label>
+                <div class="relative group">
+                    <i class="fas fa-list-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-bpjs-accent"></i>
+                    <input type="text" name="program" id="edit_program" 
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white" readonly>
+                </div>
             </div>
             <div>
-                <label class="block text-sm font-medium">Jumlah Rupiah</label>
-                <input type="number" name="jumlah_rupiah" id="edit_jumlah_rupiah" 
-                       class="w-full border rounded-lg p-2 mt-1">
+                <label class="block text-sm font-medium text-gray-700">Nomor Rak</label>
+                <div class="relative group">
+                    <i class="fas fa-box absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-bpjs-accent"></i>
+                    <input type="text" name="nomor_rak" id="edit_nomor_rak" 
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Nomor Baris</label>
+                <div class="relative group">
+                    <i class="fas fa-th-list absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-bpjs-accent"></i>
+                    <input type="text" name="nomor_baris" id="edit_nomor_baris" 
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Jumlah Rupiah</label>
+                <div class="relative group">
+                    <i class="fas fa-money-bill-wave absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-bpjs-accent"></i>
+                    <input type="number" name="jumlah_rupiah" id="edit_jumlah_rupiah" 
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white">
+                </div>
             </div>
             <div class="col-span-2">
-                <label class="block text-sm font-medium">Keterangan</label>
-                <textarea name="keterangan" id="edit_keterangan" rows="3" 
-                          class="w-full border rounded-lg p-2 mt-1"></textarea>
+                <label class="block text-sm font-medium text-gray-700">Keterangan</label>
+                <div class="relative group">
+                    <i class="fas fa-comment absolute left-3 top-3.5 text-gray-400 group-focus-within:text-bpjs-accent"></i>
+                    <textarea name="keterangan" id="edit_keterangan" rows="3" 
+                              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white"></textarea>
+                </div>
             </div>
             <div class="col-span-2">
-                <label class="block text-sm font-medium">Dokumen (opsional)</label>
-                <input type="file" name="dokumen" class="w-full border rounded-lg p-2 mt-1">
-                <small class="text-gray-500">Biarkan kosong jika tidak ingin mengganti dokumen.</small>
+                <label class="block text-sm font-medium text-gray-700">Dokumen (opsional)</label>
+                <div class="relative group">
+                    <i class="fas fa-file-upload absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-bpjs-accent"></i>
+                    <input type="file" name="dokumen" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-bpjs-accent/50 text-gray-700 transition bg-gray-50 hover:bg-white">
+                    <small class="text-gray-500 mt-1 block">Biarkan kosong jika tidak ingin mengganti dokumen.</small>
+                </div>
             </div>
         </div>
 
@@ -496,7 +537,7 @@
                 Batal
             </button>
             <button type="submit"
-                    class="px-4 py-2 rounded-lg bg-bpjs-primary text-white hover:bg-bpjs-darkblue transition">
+                    class="px-4 py-2 rounded-lg bg-gradient-to-r from-bpjs-accent to-orange-500 text-white font-semibold hover:opacity-90 shadow-lg transition transform hover:scale-105">
                 Simpan Perubahan
             </button>
         </div>
@@ -522,51 +563,58 @@
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     const modalDetail = document.getElementById("modalDetailBubm");
-    const closeDetail = document.getElementById("closeModalDetail");
-    const closeDetailBtn = document.getElementById("closeDetailBtn");
+    const closeModalDetail = document.getElementById("closeModalDetailBubm");
 
-    document.querySelectorAll(".btn-detail-bubm").forEach(btn => {
-        btn.addEventListener("click", () => {
-            document.getElementById("detail_kode_transaksi").innerText = btn.dataset.kode_transaksi;
-            document.getElementById("detail_voucher").innerText = btn.dataset.voucher;
-            document.getElementById("detail_program").innerText = btn.dataset.program;
-            document.getElementById("detail_jumlah_rupiah").innerText = "Rp " + btn.dataset.jumlah_rupiah;
-            document.getElementById("detail_keterangan").innerText = btn.dataset.keterangan || "-";
-            document.getElementById("detail_tanggal_transaksi").innerText = btn.dataset.tanggal_transaksi;
+    // Fungsi untuk menampilkan detail BUBM
+    function showDetailBubm(data) {
+        document.getElementById("detail_kode_transaksi").textContent = data.kode_transaksi || '-';
+        document.getElementById("detail_voucher").textContent = data.voucher || '-';
+        document.getElementById("detail_program").textContent = data.program || '-';
+        document.getElementById("detail_nomor_rak").textContent = data.nomor_rak || '-';
+        document.getElementById("detail_nomor_baris").textContent = data.nomor_baris || '-';
+        document.getElementById("detail_jumlah_rupiah").textContent = data.jumlah_rupiah ? 'Rp ' + data.jumlah_rupiah : '-';
+        document.getElementById("detail_keterangan").textContent = data.keterangan || '-';
+        document.getElementById("detail_tanggal_transaksi").textContent = data.tanggal_transaksi || '-';
 
-            // Dokumen
-            if (btn.dataset.dokumen) {
-                document.getElementById("detail_dokumen").innerHTML = `
-                    <a href="<?= base_url('uploads/bubm/') ?>${btn.dataset.dokumen}" 
-                       target="_blank" 
-                       class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
-                        <i class="fas fa-file-pdf mr-2"></i> Lihat Dokumen
-                    </a>`;
-            } else {
-                document.getElementById("detail_dokumen").innerHTML = `
-                    <span class="inline-flex items-center px-3 py-2 rounded-lg bg-gray-100 text-gray-600">
-                        <i class="fas fa-times-circle mr-2"></i> Tidak ada dokumen
-                    </span>`;
-            }
+        const dokumenLink = document.getElementById("detail_dokumen");
+        if (data.dokumen) {
+            dokumenLink.innerHTML = `<a href="${data.dokumen}" target="_blank" class="text-blue-600 hover:underline">Lihat Dokumen</a>`;
+        } else {
+            dokumenLink.textContent = '-';
+        }
 
-            modalDetail.classList.remove("hidden");
+        modalDetail.classList.remove("hidden");
+        modalDetail.querySelector(".scale-95").classList.remove("scale-95");
+    }
+
+    // Event listener untuk tombol detail
+    document.querySelectorAll(".btn-detail-bubm").forEach(button => {
+        button.addEventListener("click", function() {
+            const data = {
+                id: this.dataset.id,
+                kode_transaksi: this.dataset.kode_transaksi,
+                voucher: this.dataset.voucher,
+                program: this.dataset.program,
+                nomor_rak: this.dataset.nomor_rak,
+                nomor_baris: this.dataset.nomor_baris,
+                jumlah_rupiah: this.dataset.jumlah_rupiah,
+                keterangan: this.dataset.keterangan,
+                dokumen: this.dataset.dokumen,
+                tanggal_transaksi: this.dataset.tanggal_transaksi
+            };
+            showDetailBubm(data);
         });
     });
 
-    // Tutup modal
-    [closeDetail, closeDetailBtn].forEach(el => {
-        el.addEventListener("click", () => modalDetail.classList.add("hidden"));
+    // Tutup modal detail
+    closeModalDetail.addEventListener("click", () => {
+        modalDetail.classList.add("hidden");
+        modalDetail.querySelector(".transform").classList.add("scale-95");
     });
-});
-</script>
 
-
-
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const modal = document.getElementById("modalEditBubm");
-    const closeModal = document.getElementById("closeModalEdit");
+    // Script untuk modal edit (tetap dipertahankan)
+    const modalEdit = document.getElementById("modalEditBubm");
+    const closeModalEdit = document.getElementById("closeModalEdit");
     const cancelEdit = document.getElementById("cancelEdit");
     const formEdit = document.getElementById("formEditBubm");
 
@@ -578,6 +626,8 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("edit_kode_transaksi").value = btn.dataset.kode_transaksi;
             document.getElementById("edit_voucher").value = btn.dataset.voucher;
             document.getElementById("edit_program").value = btn.dataset.program;
+            document.getElementById("edit_nomor_rak").value = btn.dataset.nomor_rak;
+            document.getElementById("edit_nomor_baris").value = btn.dataset.nomor_baris;
             document.getElementById("edit_jumlah_rupiah").value = btn.dataset.jumlah_rupiah;
             document.getElementById("edit_keterangan").value = btn.dataset.keterangan;
 
@@ -585,90 +635,138 @@ document.addEventListener("DOMContentLoaded", () => {
             formEdit.action = "<?= base_url('admin/bubm/update/') ?>" + btn.dataset.id;
 
             // Tampilkan modal
-            modal.classList.remove("hidden");
+            modalEdit.classList.remove("hidden");
         });
     });
 
-    // Tutup modal
-    [closeModal, cancelEdit].forEach(el => {
-        el.addEventListener("click", () => modal.classList.add("hidden"));
+    // Tutup modal edit
+    [closeModalEdit, cancelEdit].forEach(el => {
+        el.addEventListener("click", () => modalEdit.classList.add("hidden"));
     });
 });
 </script>
 
+
+
 <script>
-        // ambil elemen
-        const modalBubm = document.getElementById('modalDetailBubm');
-        const closeModalBubm = document.getElementById('closeModalDetailBubm');
+    document.addEventListener("DOMContentLoaded", () => {
+        const modal = document.getElementById("modalEditBubm");
+        const closeModal = document.getElementById("closeModalEdit");
+        const cancelEdit = document.getElementById("cancelEdit");
+        const formEdit = document.getElementById("formEditBubm");
 
-        function showDetailBubm(data) {
-            document.getElementById('detailBubmKode').textContent = data.kode_transaksi || '-';
-            document.getElementById('detailBubmVoucher').textContent = data.voucher || '-';
-            document.getElementById('detailBubmTanggal').textContent = data.tanggal_transaksi || '-';
-            document.getElementById('detailBubmProgram').textContent = data.program || '-';
-            document.getElementById('detailBubmJumlah').textContent = data.jumlah_rupiah ? 'Rp ' + data.jumlah_rupiah : '-';
-            document.getElementById('detailBubmKeterangan').textContent = data.keterangan || '-';
+        // Klik tombol Edit
+        document.querySelectorAll(".btn-edit-bubm").forEach(btn => {
+            btn.addEventListener("click", () => {
+                // Isi form dari atribut data-*
+                document.getElementById("edit_id").value = btn.dataset.id;
+                document.getElementById("edit_kode_transaksi").value = btn.dataset.kode_transaksi;
+                document.getElementById("edit_voucher").value = btn.dataset.voucher;
+                document.getElementById("edit_program").value = btn.dataset.program;
+                document.getElementById("edit_nomor_rak").value = btn.dataset.nomor_rak;
+                document.getElementById("edit_nomor_baris").value = btn.dataset.nomor_baris;
+                document.getElementById("edit_jumlah_rupiah").value = btn.dataset.jumlah_rupiah;
+                document.getElementById("edit_keterangan").value = btn.dataset.keterangan;
 
-            const dokumenLink = document.getElementById('detailBubmDokumen');
-            if (data.dokumen) {
-                dokumenLink.href = data.dokumen;
-                dokumenLink.textContent = "Lihat Dokumen";
-            } else {
-                dokumenLink.removeAttribute('href');
-                dokumenLink.textContent = "-";
-            }
+                // Set action form
+                formEdit.action = "<?= base_url('admin/bubm/update/') ?>" + btn.dataset.id;
 
-            document.getElementById('modalDetailBubm').classList.remove('hidden');
-        }
-
-        // Tutup modal
-        document.getElementById('closeModalDetailBubm').addEventListener('click', () => {
-            document.getElementById('modalDetailBubm').classList.add('hidden');
+                // Tampilkan modal
+                modal.classList.remove("hidden");
+            });
         });
 
-
-
-
-            document.addEventListener('DOMContentLoaded', function() {
-                const fileInput = document.getElementById('file_excel');
-                const fileUploadArea = document.querySelector('.file-upload');
-                const fileName = document.getElementById('fileName');
-
-                // klik area untuk buka input file
-                fileUploadArea.addEventListener('click', function() {
-                    fileInput.click();
-                });
-
-                fileInput.addEventListener('change', function() {
-                    if (this.files.length > 0) {
-                        const selectedFile = this.files[0].name;
-                        fileName.textContent = 'File terpilih: ' + selectedFile;
-                        fileName.classList.remove('hidden');
-
-                        // Tambahin style hijau biar keliatan sukses
-                        fileUploadArea.classList.add('border-green-400', 'bg-green-50');
-
-                        // Jangan replace seluruh innerHTML!  
-                        // Cukup update teks/ikon di area fileName
-                        const statusArea = document.getElementById('fileStatus');
-                        if (statusArea) {
-                            statusArea.innerHTML = `
-                                <i class="fas fa-check-circle text-2xl text-green-500 mb-2"></i>
-                                <p class="text-sm text-green-600 mb-1">File berhasil dipilih</p>
-                                <p class="text-xs text-green-500">${selectedFile}</p>
-                            `;
-                        }
-                    }
-                });
-            });
-
-            // Modal detail
-            function openBubmDetail(data) {
-                console.log('BUBM Detail:', data);
-                alert('Detail fitur akan diimplementasikan di sini untuk: ' + data.kode_transaksi);
-            }
+        // Tutup modal
+        [closeModal, cancelEdit].forEach(el => {
+            el.addEventListener("click", () => modal.classList.add("hidden"));
+        });
+    });
 </script>
 
+<script>
+    // Ambil elemen
+    const modalBubm = document.getElementById('modalDetailBubm');
+    const closeModalBubm = document.getElementById('closeModalDetailBubm');
+
+    // Fungsi untuk menampilkan detail BUBM
+    function showDetailBubm(data) {
+        document.getElementById('detail_kode_transaksi').textContent = data.kode_transaksi || '-';
+        document.getElementById('detail_voucher').textContent = data.voucher || '-';
+        document.getElementById('detail_tanggal_transaksi').textContent = data.tanggal_transaksi || '-';
+        document.getElementById('detail_program').textContent = data.program || '-';
+        document.getElementById('detail_nomor_rak').textContent = data.nomor_rak || '-';
+        document.getElementById('detail_nomor_baris').textContent = data.nomor_baris || '-';
+        document.getElementById('detail_jumlah_rupiah').textContent = data.jumlah_rupiah ? 'Rp ' + data.jumlah_rupiah : '-';
+        document.getElementById('detail_keterangan').textContent = data.keterangan || '-';
+
+        const dokumenLink = document.getElementById('detail_dokumen');
+        if (data.dokumen) {
+            dokumenLink.innerHTML = `<a href="${data.dokumen}" target="_blank" class="text-blue-600 hover:underline">Lihat Dokumen</a>`;
+        } else {
+            dokumenLink.textContent = '-';
+        }
+
+        modalBubm.classList.remove('hidden');
+        modalBubm.querySelector('.scale-95').classList.remove('scale-95');
+    }
+
+    // Tutup modal
+    closeModalBubm.addEventListener('click', () => {
+        modalBubm.classList.add('hidden');
+        modalBubm.querySelector('.transform').classList.add('scale-95');
+    });
+
+    // File upload handling
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('file_excel');
+        const fileUploadArea = document.querySelector('.file-upload');
+        const fileName = document.getElementById('fileName');
+
+        // Klik area untuk buka input file
+        fileUploadArea.addEventListener('click', function() {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                const selectedFile = this.files[0].name;
+                fileName.textContent = 'File terpilih: ' + selectedFile;
+                fileName.classList.remove('hidden');
+
+                // Tambahkan style hijau untuk indikasi sukses
+                fileUploadArea.classList.add('border-green-400', 'bg-green-50');
+
+                const statusArea = document.getElementById('fileStatus');
+                if (statusArea) {
+                    statusArea.innerHTML = `
+                        <i class="fas fa-check-circle text-2xl text-green-500 mb-2"></i>
+                        <p class="text-sm text-green-600 mb-1">File berhasil dipilih</p>
+                        <p class="text-xs text-green-500">${selectedFile}</p>
+                    `;
+                }
+            }
+        });
+
+        // Event listener untuk tombol detail
+        document.querySelectorAll('.btn-detail-bubm').forEach(button => {
+            button.addEventListener('click', function() {
+                const data = {
+                    id: this.dataset.id,
+                    kode_transaksi: this.dataset.kode_transaksi,
+                    voucher: this.dataset.voucher,
+                    program: this.dataset.program,
+                    nomor_rak: this.dataset.nomor_rak,
+                    nomor_baris: this.dataset.nomor_baris,
+                    jumlah_rupiah: this.dataset.jumlah_rupiah,
+                    keterangan: this.dataset.keterangan,
+                    dokumen: this.dataset.dokumen,
+                    tanggal_transaksi: this.dataset.tanggal_transaksi
+                };
+                showDetailBubm(data);
+            });
+        });
+    });
+</script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         <?php if (session()->getFlashdata('success')): ?>
