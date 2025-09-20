@@ -104,13 +104,13 @@ class BubmController extends BaseController
     }
 
 
-public function exportExcel()
+    public function exportExcel()
     {
         $search = $this->request->getGet('search');
         $date   = $this->request->getGet('date') ?? 'all';
         $sortBy = $this->request->getGet('sortBy') ?? 'newest';
 
-        // ambil data pake model + filter
+        // Ambil data pake model + filter
         $bubm = $this->bubmModel->getFilteredData($search, $date, $sortBy);
 
         $spreadsheet = new Spreadsheet();
@@ -122,9 +122,11 @@ public function exportExcel()
             'B1' => 'Voucher',
             'C1' => 'Tanggal Transaksi',
             'D1' => 'Program',
-            'E1' => 'Jumlah Rupiah',
-            'F1' => 'Keterangan',
-            'G1' => 'Dokumen',
+            'E1' => 'Nomor Rak',
+            'F1' => 'Nomor Baris',
+            'G1' => 'Jumlah Rupiah',
+            'H1' => 'Keterangan',
+            'I1' => 'Dokumen',
         ];
         foreach ($headers as $col => $text) {
             $sheet->setCellValue($col, $text);
@@ -137,9 +139,11 @@ public function exportExcel()
             $sheet->setCellValue('B' . $row, $item['voucher']);
             $sheet->setCellValue('C' . $row, $item['tanggal_transaksi']);
             $sheet->setCellValue('D' . $row, $item['program']);
-            $sheet->setCellValue('E' . $row, $item['jumlah_rupiah']);
-            $sheet->setCellValue('F' . $row, $item['keterangan']);
-            $sheet->setCellValue('G' . $row, $item['dokumen']);
+            $sheet->setCellValue('E' . $row, $item['nomor_rak']);
+            $sheet->setCellValue('F' . $row, $item['nomor_baris']);
+            $sheet->setCellValue('G' . $row, $item['jumlah_rupiah']);
+            $sheet->setCellValue('H' . $row, $item['keterangan']);
+            $sheet->setCellValue('I' . $row, $item['dokumen']);
             $row++;
         }
 
@@ -156,261 +160,4 @@ public function exportExcel()
 
         exit;
     }
-
-
-    public function store()
-    {
-        $voucher       = $this->request->getPost('voucher');
-        $today         = date('d/m/Y');
-        $kodeTransaksi = $today . ' - ' . $voucher;
-
-        // Ambil jumlah_rupiah dan bersihkan
-        $jumlahRupiah = preg_replace('/[^0-9]/', '', $this->request->getPost('jumlah_rupiah'));
-
-        // Simpan data utama
-        $bubmId = $this->bubmModel->insert([
-            'kode_transaksi' => $kodeTransaksi,
-            'voucher'        => $voucher,
-            'program'        => $this->request->getPost('program') ?? 'BUBM',
-            'jumlah_rupiah'  => $jumlahRupiah,
-            'keterangan'     => $this->request->getPost('keterangan'),
-            'nomor_rak'      => $this->request->getPost('nomor_rak'),
-            'nomor_baris'    => $this->request->getPost('nomor_baris'),
-        ]);
-
-        // Upload multiple dokumen
-        $files = $this->request->getFiles();
-        if ($files && isset($files['dokumen'])) {
-            $uploadPath = FCPATH . 'uploads/bubm/';
-            if (!is_dir($uploadPath)) {
-                mkdir($uploadPath, 0777, true);
-            }
-
-            $dokumenModel = new BubmDokumenModel();
-
-            foreach ($files['dokumen'] as $file) {
-                if ($file->isValid() && !$file->hasMoved()) {
-                    $fileName = $file->getRandomName();
-                    $file->move($uploadPath, $fileName);
-
-                    $dokumenModel->insert([
-                        'bubm_id'   => $bubmId,
-                        'file_name' => $file->getClientName(),
-                        'file_path' => $fileName,
-                    ]);
-                }
-            }
-        }
-
-        return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil disimpan');
-    }
-
-    public function update($id)
-    {
-        $data = $this->bubmModel->find($id);
-
-        if (!$data) {
-            return redirect()->to('/admin/bubm')->with('error', 'Data tidak ditemukan');
-        }
-
-        // Bersihkan jumlah_rupiah
-        $jumlahRupiah = preg_replace('/[^0-9]/', '', $this->request->getPost('jumlah_rupiah'));
-
-        $this->bubmModel->update($id, [
-            'voucher'       => $this->request->getPost('voucher'),
-            'jumlah_rupiah' => $jumlahRupiah,
-            'keterangan'    => $this->request->getPost('keterangan'),
-            'nomor_rak'     => $this->request->getPost('nomor_rak'),
-            'nomor_baris'   => $this->request->getPost('nomor_baris'),
-        ]);
-
-        // 🔄 Upload dokumen tambahan (tidak replace, tapi nambah ke tabel bubm_dokumen)
-        $files = $this->request->getFiles();
-        if ($files && isset($files['dokumen'])) {
-            $uploadPath = FCPATH . 'uploads/bubm/';
-            if (!is_dir($uploadPath)) {
-                mkdir($uploadPath, 0777, true);
-            }
-
-            $dokumenModel = new BubmDokumenModel();
-
-            foreach ($files['dokumen'] as $file) {
-                if ($file->isValid() && !$file->hasMoved()) {
-                    $fileName = $file->getRandomName();
-                    $file->move($uploadPath, $fileName);
-
-                    $dokumenModel->insert([
-                        'bubm_id'   => $id,
-                        'file_name' => $file->getClientName(),
-                        'file_path' => $fileName,
-                    ]);
-                }
-            }
-        }
-
-        return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil diperbarui');
-    }
-
-    public function delete($id)
-    {
-        $data = $this->bubmModel->find($id);
-
-        if (!$data) {
-            return redirect()->to('/admin/bubm')->with('error', 'Data BUBM tidak ditemukan');
-        }
-
-        $uploadPath   = FCPATH . 'uploads/bubm/';
-        $dokumenModel = new BubmDokumenModel();
-
-        // Ambil semua dokumen terkait BUBM ini
-        $dokumens = $dokumenModel->where('bubm_id', $id)->findAll();
-
-        foreach ($dokumens as $doc) {
-            $filePath = $uploadPath . $doc['file_path'];
-            if (is_file($filePath)) {
-                unlink($filePath);
-            }
-            $dokumenModel->delete($doc['id']);
-        }
-
-        // Hapus data utama
-        $this->bubmModel->delete($id);
-
-        return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil dihapus');
-    }
-
-
-    public function filter()
-    {
-        $search = $this->request->getGet('search');
-        $date   = $this->request->getGet('date');
-        $sortBy = $this->request->getGet('sortBy');
-
-        $builder = $this->bubmModel;
-
-        // 🔎 Search
-        if (!empty($search)) {
-            $builder = $builder->groupStart()
-                ->like('kode_transaksi', $search)
-                ->orLike('voucher', $search)
-                ->orLike('program', $search)
-                ->groupEnd();
-        }
-
-        // 📅 Filter tanggal
-        if ($date && $date !== 'all') {
-            $today = date('Y-m-d');
-            if ($date === 'today') {
-                $builder = $builder->where('DATE(tanggal_transaksi)', $today);
-            } elseif ($date === 'week') {
-                $builder = $builder->where('YEARWEEK(tanggal_transaksi, 1)', date('oW'));
-            } elseif ($date === 'month') {
-                $builder = $builder->where('MONTH(tanggal_transaksi)', date('m'))
-                                ->where('YEAR(tanggal_transaksi)', date('Y'));
-            } elseif ($date === 'year') {
-                $builder = $builder->where('YEAR(tanggal_transaksi)', date('Y'));
-            }
-        }
-
-        // ↕️ Sort
-        if ($sortBy === 'oldest') {
-            $builder = $builder->orderBy('tanggal_transaksi', 'ASC');
-        } elseif ($sortBy === 'amount_desc') {
-            $builder = $builder->orderBy('jumlah_rupiah', 'DESC');
-        } elseif ($sortBy === 'amount_asc') {
-            $builder = $builder->orderBy('jumlah_rupiah', 'ASC');
-        } else {
-            $builder = $builder->orderBy('tanggal_transaksi', 'DESC'); // default newest
-        }
-
-        $bubm = $builder->findAll();
-
-        // ✅ Hitung total rupiah biar sama kayak index()
-        $totalRupiah = 0;
-        if (!empty($bubm)) {
-            $totalRupiah = array_sum(array_map(fn($r) => (float)($r['jumlah_rupiah'] ?? 0), $bubm));
-        }
-
-        $data = [
-            'title'       => 'Data BUBM',
-            'active_menu' => 'bubm',
-            'bubm'        => $bubm,
-            'totalData'   => count($bubm),
-            'totalRupiah' => $totalRupiah,
-            'search'      => $search,
-            'date'        => $date,
-            'sortBy'      => $sortBy,
-        ];
-
-        return view('admin/bubm', $data);
-    }
-
-
-    public function import_bubm()
-    {
-        $file = $this->request->getFile('file_excel');
-
-        // Pastikan file ada
-        if (!$file || !$file->isValid()) {
-            return redirect()->back()->with('error', 'File tidak valid atau belum dipilih');
-        }
-
-        $ext = strtolower($file->getClientExtension());
-
-        // Pilih reader sesuai ekstensi
-        if ($ext === 'csv') {
-            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Csv();
-        } elseif ($ext === 'xls') {
-            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xls();
-        } else {
-            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
-        }
-
-        try {
-            $spreadsheet = $reader->load($file->getTempName());
-            $sheetData   = $spreadsheet->getActiveSheet()->toArray();
-
-            $dataInsert = [];
-
-            foreach ($sheetData as $index => $row) {
-                if ($index == 0) continue; // skip header
-
-                // ✅ handle tanggal (kolom ke-6 = index 6)
-                $tanggal = date('Y-m-d H:i:s'); // default
-                if (!empty($row[6])) {
-                    if (is_numeric($row[6])) {
-                        // Kalau Excel nyimpen tanggal sebagai serial number
-                        $tanggal = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row[6])
-                            ->format('Y-m-d H:i:s');
-                    } else {
-                        // Kalau formatnya string (mis: 2025-09-13 atau 13/09/2025)
-                        $tanggal = date('Y-m-d H:i:s', strtotime($row[6]));
-                    }
-                }
-
-                $dataInsert[] = [
-                    'kode_transaksi'    => $row[0] ?? null,
-                    'voucher'           => $row[1] ?? null,
-                    'program'           => !empty($row[2]) ? $row[2] : 'BUBM',
-                    'jumlah_rupiah'     => !empty($row[3]) ? (float) str_replace([',', '.'], '', $row[3]) : 0,
-                    'keterangan'        => $row[4] ?? null,
-                    'dokumen'           => $row[5] ?? null,
-                    'tanggal_transaksi' => $tanggal,
-                    'created_at'        => date('Y-m-d H:i:s'),
-                    'updated_at'        => date('Y-m-d H:i:s'),
-                ];
-            }
-
-            if (!empty($dataInsert)) {
-                $this->bubmModel->insertBatch($dataInsert);
-                return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil diimport!');
-            }
-
-            return redirect()->back()->with('error', 'Tidak ada data yang bisa diimport');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal membaca file: ' . $e->getMessage());
-        }
-    }
-
-
 }

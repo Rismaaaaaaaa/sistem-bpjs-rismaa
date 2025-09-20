@@ -146,8 +146,9 @@ class JaminanController extends BaseController
         $date    = $this->request->getGet('date');
         $sortBy  = $this->request->getGet('sortBy');
 
-        // ambil data sesuai filter
+        // Ambil data sesuai filter
         $jaminan = $this->jaminanModel->getFilteredData($search, $date, $sortBy);
+        $dokumenModel = new \App\Models\JaminanDokumenModel();
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -164,8 +165,9 @@ class JaminanController extends BaseController
             'H1' => 'Jumlah Bayar',
             'I1' => 'No Rekening',
             'J1' => 'Atas Nama',
-            'K1' => 'Nomor Rak',   // ✅ Tambah nomor rak
-            'L1' => 'Dokumen',
+            'K1' => 'Nomor Rak',
+            'L1' => 'Nomor Baris',
+            'M1' => 'Dokumen',
         ];
         foreach ($headers as $col => $text) {
             $sheet->setCellValue($col, $text);
@@ -174,6 +176,10 @@ class JaminanController extends BaseController
         // Data
         $row = 2;
         foreach ($jaminan as $item) {
+            // Ambil dokumen terkait untuk jaminan ini
+            $dokumens = $dokumenModel->where('jaminan_id', $item['id'])->findAll();
+            $dokumenList = implode(', ', array_map(fn($doc) => $doc['file_path'], $dokumens));
+
             $sheet->setCellValue('A' . $row, $item['nomor_penetapan']);
             $sheet->setCellValue('B' . $row, $item['tanggal_transaksi']);
             $sheet->setCellValue('C' . $row, $item['kode_transaksi']);
@@ -184,8 +190,9 @@ class JaminanController extends BaseController
             $sheet->setCellValue('H' . $row, $item['jumlah_bayar']);
             $sheet->setCellValue('I' . $row, $item['no_rekening']);
             $sheet->setCellValue('J' . $row, $item['atas_nama']);
-            $sheet->setCellValue('K' . $row, $item['nomor_rak']);  // ✅ isi nomor rak
-            $sheet->setCellValue('L' . $row, $item['dokumen']);
+            $sheet->setCellValue('K' . $row, $item['nomor_rak']);
+            $sheet->setCellValue('L' . $row, $item['nomor_baris']);
+            $sheet->setCellValue('M' . $row, $dokumenList ?: '-');
             $row++;
         }
 
