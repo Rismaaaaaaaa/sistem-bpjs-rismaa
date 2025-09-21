@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\BubmModel;
+use App\Models\BubmDokumenModel;
 use CodeIgniter\I18n\Time;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
@@ -11,15 +12,16 @@ use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 use App\Controllers\BaseController;
-use App\Models\BubmDokumenModel;
 
 class BubmController extends BaseController
 {
     protected $bubmModel;
+    protected $bubmDokumenModel;
 
     public function __construct()
     {
         $this->bubmModel = new BubmModel();
+        $this->bubmDokumenModel = new BubmDokumenModel();
     }
 
     public function index()
@@ -103,6 +105,150 @@ class BubmController extends BaseController
         return view('/admin/tambah_bubm', $data);
     }
 
+    public function store()
+    {
+        // Validasi input
+        $validationRules = [
+            'voucher' => 'required|min_length[3]|max_length[50]',
+            'program' => 'required|min_length[3]|max_length[100]',
+            'jumlah_rupiah' => 'required|numeric|greater_than[0]',
+            'tanggal_input' => 'required|valid_date',
+            'nomor_rak' => 'required|min_length[1]|max_length[20]',
+            'nomor_baris' => 'required|min_length[1]|max_length[20]',
+            'dokumen.*' => 'uploaded[dokumen]|max_size[dokumen,5120]|ext_in[dokumen,png,jpg,jpeg]',
+        ];
+
+        if (!$this->validate($validationRules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        // Ambil data dari form
+        $voucher = $this->request->getPost('voucher');
+        $program = $this->request->getPost('program') === 'lainnya' 
+            ? $this->request->getPost('program_manual') 
+            : $this->request->getPost('program');
+        $jumlahRupiah = str_replace(',', '', $this->request->getPost('jumlah_rupiah')); // Hilangkan koma dari format currency
+        $tanggalInput = $this->request->getPost('tanggal_input');
+        $nomorRak = $this->request->getPost('nomor_rak');
+        $nomorBaris = $this->request->getPost('nomor_baris');
+        $keterangan = $this->request->getPost('keterangan');
+
+        // Generate kode transaksi
+        $kodeTransaksi = date('d/m/Y') . ' - ' . $voucher;
+
+        // Simpan data BUBM
+        $bubmData = [
+            'kode_transaksi' => $kodeTransaksi,
+            'voucher' => $voucher,
+            'program' => $program,
+            'jumlah_rupiah' => $jumlahRupiah,
+            'tanggal_transaksi' => $tanggalInput,
+            'nomor_rak' => $nomorRak,
+            'nomor_baris' => $nomorBaris,
+            'keterangan' => $keterangan,
+            'created_at' => Time::now(),
+            'updated_at' => Time::now(),
+        ];
+
+        // Simpan ke database dan ambil ID
+        $bubmId = $this->bubmModel->insert($bubmData);
+
+        if ($bubmId) {
+            // Proses upload dokumen
+            $files = $this->request->getFiles();
+            if (!empty($files['dokumen'])) {
+                foreach ($files['dokumen'] as $file) {
+                    if ($file->isValid() && !$file->hasMoved()) {
+                        $newName = $file->getRandomName();
+                        $file->move(ROOTPATH . 'public/uploads/bubm', $newName);
+
+                        // Simpan data dokumen ke database
+                        $dokumenData = [
+                            'bubm_id' => $bubmId,
+                            'file_name' => $newName,
+                            'file_path' => 'uploads/bubm/' . $newName,
+                            'file_type' => $file->getClientMimeType(),
+                            'file_size' => $file->getSizeByUnit('kb'),
+                            'created_at' => Time::now(),
+                        ];
+                        $this->bubmDokumenModel->insert($dokumenData);
+                    }
+                }
+            }
+
+            return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil disimpan.');
+        }
+
+        return redirect()->back()->with('error', 'Gagal menyimpan data BUBM.');
+    }
+
+    public function update($id)
+    {
+        // Validasi input
+        $validationRules = [
+            'voucher' => 'required|min_length[3]|max_length[50]',
+            'jumlah_rupiah' => 'required|numeric|greater_than[0]',
+            'nomor_rak' => 'required|min_length[1]|max_length[20]',
+            'nomor_baris' => 'required|min_length[1]|max_length[20]',
+            'dokumen.*' => 'max_size[dokumen,5120]|ext_in[dokumen,png,jpg,jpeg]', // Ubah ke dokumen.* untuk multiple
+        ];
+
+        if (!$this->validate($validationRules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        // Ambil data dari form
+        $voucher = $this->request->getPost('voucher');
+        $jumlahRupiah = str_replace(',', '', $this->request->getPost('jumlah_rupiah'));
+        $nomorRak = $this->request->getPost('nomor_rak');
+        $nomorBaris = $this->request->getPost('nomor_baris');
+        $keterangan = $this->request->getPost('keterangan');
+
+        // Update kode transaksi berdasarkan voucher
+        $kodeTransaksi = date('d/m/Y', strtotime($this->bubmModel->find($id)['tanggal_transaksi'])) . ' - ' . $voucher;
+
+        // Data untuk update
+        $bubmData = [
+            'kode_transaksi' => $kodeTransaksi,
+            'voucher' => $voucher,
+            'jumlah_rupiah' => $jumlahRupiah,
+            'nomor_rak' => $nomorRak,
+            'nomor_baris' => $nomorBaris,
+            'keterangan' => $keterangan,
+            'updated_at' => Time::now(),
+        ];
+
+        // Update data BUBM
+        $updated = $this->bubmModel->update($id, $bubmData);
+
+        if ($updated) {
+            // Proses upload dokumen jika ada
+            $files = $this->request->getFiles();
+            if (!empty($files['dokumen'])) {
+                foreach ($files['dokumen'] as $file) {
+                    if ($file->isValid() && !$file->hasMoved()) {
+                        $newName = $file->getRandomName();
+                        $file->move(ROOTPATH . 'public/uploads/bubm', $newName);
+
+                        // Simpan data dokumen ke database
+                        $dokumenData = [
+                            'bubm_id' => $id,
+                            'file_name' => $newName,
+                            'file_path' => 'uploads/bubm/' . $newName,
+                            'file_type' => $file->getClientMimeType(),
+                            'file_size' => $file->getSizeByUnit('kb'),
+                            'created_at' => Time::now(),
+                        ];
+                        $this->bubmDokumenModel->insert($dokumenData);
+                    }
+                }
+            }
+
+            return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil diperbarui.');
+        }
+
+        return redirect()->back()->with('error', 'Gagal memperbarui data BUBM.');
+    }
 
     public function exportExcel()
     {
