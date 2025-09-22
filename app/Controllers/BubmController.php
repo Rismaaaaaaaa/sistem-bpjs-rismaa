@@ -109,13 +109,14 @@ class BubmController extends BaseController
     {
         // Validasi input
         $validationRules = [
-            'voucher' => 'required|min_length[3]|max_length[50]',
-            'program' => 'required|min_length[3]|max_length[100]',
+            'voucher'       => 'required|min_length[3]|max_length[50]',
+            'program'       => 'required|min_length[3]|max_length[100]',
             'jumlah_rupiah' => 'required|numeric|greater_than[0]',
             'tanggal_input' => 'required|valid_date',
-            'nomor_rak' => 'required|min_length[1]|max_length[20]',
-            'nomor_baris' => 'required|min_length[1]|max_length[20]',
-            'dokumen.*' => 'uploaded[dokumen]|max_size[dokumen,5120]|ext_in[dokumen,png,jpg,jpeg]',
+            'nomor_rak'     => 'required|min_length[1]|max_length[20]',
+            'nomor_baris'   => 'required|min_length[1]|max_length[20]',
+            // dokumen tidak wajib, hanya validasi ukuran & ekstensi kalau ada
+            'dokumen.*'     => 'if_exist|max_size[dokumen,5120]|ext_in[dokumen,png,jpg,jpeg]',
         ];
 
         if (!$this->validate($validationRules)) {
@@ -123,38 +124,37 @@ class BubmController extends BaseController
         }
 
         // Ambil data dari form
-        $voucher = $this->request->getPost('voucher');
-        $program = $this->request->getPost('program') === 'lainnya' 
-            ? $this->request->getPost('program_manual') 
+        $voucher       = $this->request->getPost('voucher');
+        $program       = $this->request->getPost('program') === 'lainnya'
+            ? $this->request->getPost('program_manual')
             : $this->request->getPost('program');
-        $jumlahRupiah = str_replace(',', '', $this->request->getPost('jumlah_rupiah')); // Hilangkan koma dari format currency
-        $tanggalInput = $this->request->getPost('tanggal_input');
-        $nomorRak = $this->request->getPost('nomor_rak');
-        $nomorBaris = $this->request->getPost('nomor_baris');
-        $keterangan = $this->request->getPost('keterangan');
+        $jumlahRupiah  = str_replace(',', '', $this->request->getPost('jumlah_rupiah'));
+        $tanggalInput  = $this->request->getPost('tanggal_input');
+        $nomorRak      = $this->request->getPost('nomor_rak');
+        $nomorBaris    = $this->request->getPost('nomor_baris');
+        $keterangan    = $this->request->getPost('keterangan');
 
         // Generate kode transaksi
         $kodeTransaksi = date('d/m/Y') . ' - ' . $voucher;
 
         // Simpan data BUBM
         $bubmData = [
-            'kode_transaksi' => $kodeTransaksi,
-            'voucher' => $voucher,
-            'program' => $program,
-            'jumlah_rupiah' => $jumlahRupiah,
+            'kode_transaksi'    => $kodeTransaksi,
+            'voucher'           => $voucher,
+            'program'           => $program,
+            'jumlah_rupiah'     => $jumlahRupiah,
             'tanggal_transaksi' => $tanggalInput,
-            'nomor_rak' => $nomorRak,
-            'nomor_baris' => $nomorBaris,
-            'keterangan' => $keterangan,
-            'created_at' => Time::now(),
-            'updated_at' => Time::now(),
+            'nomor_rak'         => $nomorRak,
+            'nomor_baris'       => $nomorBaris,
+            'keterangan'        => $keterangan,
+            'created_at'        => Time::now(),
+            'updated_at'        => Time::now(),
         ];
 
-        // Simpan ke database dan ambil ID
         $bubmId = $this->bubmModel->insert($bubmData);
 
         if ($bubmId) {
-            // Proses upload dokumen
+            // Proses upload dokumen (jika ada)
             $files = $this->request->getFiles();
             if (!empty($files['dokumen'])) {
                 foreach ($files['dokumen'] as $file) {
@@ -162,14 +162,13 @@ class BubmController extends BaseController
                         $newName = $file->getRandomName();
                         $file->move(ROOTPATH . 'public/uploads/bubm', $newName);
 
-                        // Simpan data dokumen ke database
                         $dokumenData = [
-                            'bubm_id' => $bubmId,
+                            'bubm_id'   => $bubmId,
                             'file_name' => $newName,
                             'file_path' => 'uploads/bubm/' . $newName,
                             'file_type' => $file->getClientMimeType(),
                             'file_size' => $file->getSizeByUnit('kb'),
-                            'created_at' => Time::now(),
+                            'created_at'=> Time::now(),
                         ];
                         $this->bubmDokumenModel->insert($dokumenData);
                     }
@@ -182,67 +181,77 @@ class BubmController extends BaseController
         return redirect()->back()->with('error', 'Gagal menyimpan data BUBM.');
     }
 
-public function import()
-{
-    $file = $this->request->getFile('file_excel');
 
-    if (!$file || !$file->isValid()) {
-        return redirect()->back()->with('error', 'File tidak valid atau tidak ditemukan');
-    }
+    public function import()
+    {
+        $file = $this->request->getFile('file_excel');
 
-    $ext = strtolower($file->getClientExtension());
-    if (!in_array($ext, ['csv', 'xlsx'])) {
-        return redirect()->back()->with('error', 'Format file tidak didukung. Gunakan CSV atau XLSX.');
-    }
-
-    try {
-        $reader = $ext === 'csv'
-            ? new \PhpOffice\PhpSpreadsheet\Reader\Csv()
-            : new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
-
-        $spreadsheet = $reader->load($file->getTempName());
-        $sheetData   = $spreadsheet->getActiveSheet()->toArray();
-
-        if (empty($sheetData)) {
-            return redirect()->back()->with('error', 'File kosong atau tidak terbaca');
+        if (!$file || !$file->isValid()) {
+            return redirect()->back()->with('error', 'File tidak valid atau tidak ditemukan');
         }
 
-        // Ambil header
-        $headers = array_map('strtolower', $sheetData[0]);
+        $ext = strtolower($file->getClientExtension());
+        if (!in_array($ext, ['csv', 'xlsx'])) {
+            return redirect()->back()->with('error', 'Format file tidak didukung. Gunakan CSV atau XLSX.');
+        }
 
-        $dataInsert = [];
-        foreach ($sheetData as $index => $row) {
-            if ($index == 0) continue; // skip header
+        try {
+            $reader = $ext === 'csv'
+                ? new \PhpOffice\PhpSpreadsheet\Reader\Csv()
+                : new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
 
-            $rowData = array_combine($headers, $row);
+            $spreadsheet = $reader->load($file->getTempName());
+            $sheetData   = $spreadsheet->getActiveSheet()->toArray();
 
-            $dataBubm = [
-                'kode_transaksi'   => trim($rowData['kode_transaksi'] ?? ''),
-                'voucher'          => trim($rowData['voucher'] ?? ''),
-                'jumlah_rupiah'    => isset($rowData['jumlah_rupiah']) ? (float) preg_replace('/[^0-9.]/', '', $rowData['jumlah_rupiah']) : 0,
-                'keterangan'       => trim($rowData['keterangan'] ?? ''),
-                'nomor_rak'        => trim($rowData['nomor_rak'] ?? ''),
-                'nomor_baris'      => trim($rowData['nomor_baris'] ?? ''),
-                'program'          => 'BUBM',
-                'tanggal_transaksi'=> date('Y-m-d'),
-                'created_at'       => date('Y-m-d H:i:s'),
-                'updated_at'       => date('Y-m-d H:i:s'),
-            ];
-
-            if (!empty($dataBubm['kode_transaksi']) && !empty($dataBubm['voucher'])) {
-                $dataInsert[] = $dataBubm;
+            if (empty($sheetData)) {
+                return redirect()->back()->with('error', 'File kosong atau tidak terbaca');
             }
-        }
 
-        if (!empty($dataInsert)) {
-            $this->bubmModel->insertBatch($dataInsert);
-        }
+            // Ambil header
+            $headers = array_map('strtolower', $sheetData[0]);
 
-        return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil diimport!');
-    } catch (\Exception $e) {
-        return redirect()->back()->with('error', 'Gagal import: ' . $e->getMessage());
+            $dataInsert = [];
+            foreach ($sheetData as $index => $row) {
+                if ($index == 0) continue; // skip header
+
+                $rowData = array_combine($headers, $row);
+
+                // ambil tanggal dari Excel kalau ada, fallback ke today()
+                $tanggalInput = !empty($rowData['tanggal_transaksi'])
+                    ? date('Y-m-d', strtotime($rowData['tanggal_transaksi']))
+                    : date('Y-m-d');
+
+                // generate kode transaksi (format: dd/mm/YYYY - VOUCHER)
+                $kodeTransaksi = date('d/m/Y', strtotime($tanggalInput)) . ' - ' . trim($rowData['voucher'] ?? '');
+
+                $dataBubm = [
+                    'kode_transaksi'    => $kodeTransaksi,
+                    'voucher'           => trim($rowData['voucher'] ?? ''),
+                    'jumlah_rupiah'     => isset($rowData['jumlah_rupiah']) ? (float) preg_replace('/[^0-9.]/', '', $rowData['jumlah_rupiah']) : 0,
+                    'keterangan'        => trim($rowData['keterangan'] ?? ''),
+                    'nomor_rak'         => trim($rowData['nomor_rak'] ?? ''),
+                    'nomor_baris'       => trim($rowData['nomor_baris'] ?? ''),
+                    'program'           => 'BUBM',
+                    'tanggal_transaksi' => $tanggalInput,
+                    'created_at'        => date('Y-m-d H:i:s'),
+                    'updated_at'        => date('Y-m-d H:i:s'),
+                ];
+
+                if (!empty($dataBubm['voucher'])) {
+                    $dataInsert[] = $dataBubm;
+                }
+            }
+
+            if (!empty($dataInsert)) {
+                $this->bubmModel->insertBatch($dataInsert);
+            }
+
+            return redirect()->to('/admin/bubm')->with('success', 'Data BUBM berhasil diimport!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal import: ' . $e->getMessage());
+        }
     }
-}
+
 
     public function update($id)
     {
